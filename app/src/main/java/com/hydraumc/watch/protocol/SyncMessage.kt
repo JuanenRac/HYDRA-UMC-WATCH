@@ -17,7 +17,7 @@ import kotlinx.serialization.json.jsonPrimitive
  * Wearable Sync Flow diagram, between HYDRA-UMC-SERVER and this watch app.
  * Defining and (de)serializing them correctly is real, testable work
  * independent of actually opening the socket - that transport wiring is
- * still future work, tracked in SONNET/HYDRA-UMC-WATCH/mejoras_futuras.txt.
+ * still future work and intentionally outside this protocol-only component.
  */
 @Serializable
 sealed class SyncMessage {
