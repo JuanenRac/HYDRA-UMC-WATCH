@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">HYDRA-UMC WATCH</string>
+    <string name="tagline">可穿戴安全仪表盘</string>
+    <string name="status_placeholder">尚未与 HYDRA-UMC-SERVER 配对</string>
+</resources>

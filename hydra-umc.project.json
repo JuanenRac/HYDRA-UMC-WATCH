@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "ecosystem": "HYDRA-UMC",
+  "name": "HYDRA-UMC-WATCH",
+  "version": "0.0.5",
+  "role": "ui",
+  "stack": "android",
+  "technologies": [
+    "Kotlin",
+    "Wear OS"
+  ],
+  "deployment_target": "wearable",
+  "maturity": "scaffolding",
+  "family": "Complementary Tools",
+  "parent": null,
+  "build": "./gradlew assembleDebug. Wear OS 3+ target.",
+  "notes": "Scaffolding stage: real entry point + i18n resources only so far - the real haptic emergency-alert dashboard is future work.",
+  "native_version": {
+    "file": "app/version.properties",
+    "pattern": {
+      "major": "^versionMajor\\s*=\\s*(\\d+)",
+      "minor": "^versionMinor\\s*=\\s*(\\d+)",
+      "patch": "^versionPatch\\s*=\\s*(\\d+)"
+    }
+  }
+}

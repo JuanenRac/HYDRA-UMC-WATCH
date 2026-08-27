@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">HYDRA-UMC WATCH</string>
+    <string name="tagline">Wearable Safety Dashboard</string>
+    <string name="status_placeholder">Not paired to a HYDRA-UMC-SERVER yet</string>
+</resources>
