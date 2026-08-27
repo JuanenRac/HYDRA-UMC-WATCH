@@ -28,10 +28,11 @@ HYDRA-UMC-ANDROID-CONTROL と同じ Gradle/Kotlin ツールチェーンを再利
 しています。
 
 ### 主な機能：
-* 🛑 **ワイヤレス E-STOP** — 産業用 Wi-Fi 経由でサブ 50ms の遅延を実現する専用の緊急ボタン。*（計画中——HYDRA-UMC-SERVER とのペアリングが必要）*
-* 📳 **ハプティックアラート** — さまざまなアラートタイプ（重大、警告、情報）向けの差別化された振動パターン。*（計画中）*
-* ⌚ **一目でわかるステータス：** スウォームの活動状況とミッションの進行状況のリアルタイムサマリー。*（計画中）*
-* 🔐 **セキュアな認証：** HYDRA-UMC-SERVER との JWT ベースのペアリング。*（計画中）*
+* ✅ **実装済み v0 —— ハプティックパターンと同期プロトコル：** `haptics/HapticPatterns.kt` はアラートの重大度（重大/警告/情報）ごとに実際の、区別された振動パターンを定義します。`protocol/SyncMessage.kt` は下記の SERVER<->WATCH 同期フローにおける `EStopCommand`/`Alert` メッセージの実際の形を定義し、（デ）シリアライズします。どちらも純粋な Kotlin でテスト可能です——実行にもテストにも、ウォッチのハードウェア、エミュレーター、開かれた WebSocket は一切不要です。
+* 🛑 **ワイヤレス E-STOP** — 産業用 Wi-Fi 経由でサブ 50ms の遅延を実現する専用の緊急ボタン。*（送信することになる `EStopCommand` メッセージは実装済みでテスト済みです。WebSocket トランスポートと物理ボタンの配線はまだ計画中です——HYDRA-UMC-SERVER とのペアリングが必要。）*
+* 📳 **ハプティックアラート** — さまざまなアラートタイプ（重大、警告、情報）向けの差別化された振動パターン。*（パターン自体は実装済みです——上記参照。実際の `Vibrator` サービス呼び出しへの接続はまだ計画中です。）*
+* ⌚ **一目でわかるステータス：** スウォームの活動状況とミッションの進行状況のリアルタイムサマリー。*（計画中——実際の WebSocket 接続が必要です。）*
+* 🔐 **セキュアな認証：** HYDRA-UMC-SERVER との JWT ベースのペアリング。*（計画中。）*
 * ✅ **独立した Wear OS ツールチェーン** — 動作するデバッグ APK をビルドする実際の Gradle/Kotlin/Compose-for-Wear アプリ。*（実装済み——下記の「ビルドと実行」を参照）*
 
 ---
@@ -53,7 +54,7 @@ flowchart LR
 
 * **スマートフォンアプリの一機能ではなく、独立した Wear OS アプリである理由。** ウォッチは独自の OS 上で独自の独立したプロセスを実行します——それは HYDRA-UMC-ANDROID-CONTROL の UI モードにはなり得ず、独自のマニフェスト、独自のビルド、そして一目でわかるステータス表示/クイック E-STOP のための独自の（はるかに制約の多い）UI を必要とします。
 * **`minSdk 30`（Wear OS 3）がスマートフォンアプリ自身の minSdk よりも低い理由。** これは意図的に現在の Wear OS 3+ ハードウェア世代を対象としており、古い Wear OS 2 デバイスは対象外です——古いスマートフォンをサポートする HYDRA-UMC-ANDROID-CONTROL とは異なり、コンパニオンウォッチアプリがサポートすべき現実的なハードウェア基盤ははるかに狭いものです。
-* **エントリポイントが今日は身元/バージョン/役割のみを表示する理由。** 足場（アンダミアヘ、スキャフォールディング）段階にあります：`./gradlew assembleDebug` が成功することを証明することが、スマートフォンとの実際のコンパニオンアプリ同期ロジックに先立ちます。
+* **ハプティックパターンと同期プロトコルが WebSocket 接続より先に実装される理由。** 双方が合意すべき振動波形とメッセージの形を定義することは、実際の純粋な Kotlin の作業です——記述にもテストにも、開かれたソケット、ペアリングされたサーバー、物理的なウォッチは一切不要です。その接続を実際に開くことが次のステップです。
 * **エコシステムの他の部分との関係。** HYDRA-UMC-ANDROID-CONTROL および HYDRA-UMC-IOS-CONTROL とペアリングされる、一目でわかる手首上のコンパニオンデバイスです——どちらの代替でもなく、クイックステータス確認/クイック E-STOP のためのインターフェースです。
 
 ---
@@ -62,18 +63,21 @@ flowchart LR
 
 独立した Wear OS アプリ——独自のハードウェア/ファームウェア/OS を持たず
 （現成の腕時計ハードウェア上で動作します）、テンプレートから省略されて
-います（エコシステム全体の省略ルールは
-`SONNET/5.PLAN_EJECUCION_32_PROYECTOS_NUEVOS.txt` を参照）。
+います。これらのディレクトリはリポジトリ構造ポリシーに従って省略されています。
 
 ```text
 HYDRA-UMC-WATCH/
 ├── app/
-│   ├── build.gradle.kts       # アプリモジュール設定、オドメーター式バージョンインクリメント
-│   ├── version.properties     # versionMajor/Minor/Patch/Code（ビルドごとに自動増加）
-│   └── src/main/
-│       ├── AndroidManifest.xml
-│       ├── java/com/hydraumc/watch/MainActivity.kt   # Compose-for-Wear エントリポイント
-│       └── res/                                        # 文字列、テーマ、ランチャーアイコン
+│   ├── build.gradle.kts       # アプリモジュール設定（version.properties を読むだけで書き込まない）
+│   ├── version.properties     # versionMajor/Minor/Patch/Code（build.sh/.bat のみが増加させる）
+│   └── src/
+│       ├── main/
+│       │   ├── AndroidManifest.xml
+│       │   └── java/com/hydraumc/watch/
+│       │       ├── MainActivity.kt         # Compose-for-Wear エントリポイント
+│       │       ├── haptics/                # 重大度別の振動パターン
+│       │       └── protocol/               # SERVER<->WATCH 同期メッセージコーデック
+│       └── test/java/com/hydraumc/watch/   # 実際の JUnit テスト（haptics、protocol）
 ├── gradle/
 │   ├── libs.versions.toml     # 依存関係バージョンカタログ
 │   └── wrapper/                # Gradle wrapper（9.7.0 に固定）
@@ -84,7 +88,9 @@ HYDRA-UMC-WATCH/
 ├── build/                     # 予約済み（Gradle 自身の app/build/ は gitignore 対象）
 ├── images/                    # メディアと図表
 ├── scripts/                   # ユーティリティスクリプト
-├── build.sh / build.bat       # 実際のビルド：gradlew assembleDebug
+├── bump_manifest_version.py   # major/minor/patch とマニフェストを同時に増加させる
+├── bump_version_code.py       # Android 独自の versionCode カウンターを増加させる
+├── build.sh / build.bat       # 実際のビルド：バージョンを増加させ、テストを実行し、assembleDebug
 ├── run.sh / run.bat           # 実際の実行：gradlew installDebug + adb launch
 └── src/                       # 予約済み（本プロジェクトのコードは app/src/ 下に存在します）
 ```
@@ -108,13 +114,43 @@ build.bat
 run.bat
 ```
 
-`build` は、デバッグ版 APK を
-`app/build/outputs/apk/debug/app-debug.apk` にコンパイルします。
-バージョンインクリメント（`app/version.properties`）は
-`app/build.gradle.kts` 自身の内部で、Gradle の構成時に発生するため、
-実際のビルドのたびに自動的に実行されます——個別のインクリメント手順は
-不要です。`run` は `gradlew installDebug` 経由でこの APK をインストール
-し、`adb` を使用して `MainActivity` を起動します。
+`build` はバージョンを増加させ（`bump_manifest_version.py` が
+`hydra-umc.project.json` と歩調を合わせて major/minor/patch を、
+`bump_version_code.py` が Android 独自の `versionCode` を増加させます）、
+実際の JUnit テストスイート（`haptics`、`protocol`）を実行し、デバッグ版
+APK を `app/build/outputs/apk/debug/app-debug.apk` にコンパイルします
+——これらすべてが、`-PhydraUmcReadOnly=true` を付けた 1 回の Gradle
+呼び出しの中で行われます。これにより、バージョンを読み取るだけの
+`app/build.gradle.kts` のコードが*同時に*それを増加させることは決してあり
+ません（同じフラグは `build-test.sh`/`.bat` の、変更を一切加えない
+コンパイルのみの CI チェックでも使われています）。`run` は
+`gradlew installDebug` 経由でこの APK をインストールし、`adb` を使用して
+`MainActivity` を起動します。
+
+実際の例 —— この 2 つのバージョン増加スクリプトは単独でも実行でき、
+Gradle を起動せずにビルドが何をするかを確認するのに便利です：
+
+```bash
+python3 bump_manifest_version.py   # 例："HYDRA-UMC version: v0.1.2 -> v0.1.3"
+python3 bump_version_code.py       # 例："versionCode: 12 -> 13"
+```
+
+---
+
+## ✅ 現在の状況と次のステップ
+
+**現在実装済み：** アラートの重大度ごとに区別されたハプティック振動パターン
+（`haptics/`）、そして実装済みでテスト済みの `EStopCommand`/`Alert`
+同期メッセージコーデック（`protocol/`）——将来 HYDRA-UMC-SERVER への
+WebSocket 接続が運ぶことになるメッセージの形——に加えて、独立した
+Gradle/Kotlin/Compose-for-Wear ツールチェーンと 12 個の JUnit テスト。
+
+**まだ先にあるもの：** 実際の WebSocket トランスポート自体（接続の確立、
+ペアリング/認証）、上記のハプティックパターンを実際の `Vibrator`
+サービス呼び出しに接続すること、そして一目でわかるステータス/E-STOP
+画面——これらはすべて、実際に稼働している HYDRA-UMC-SERVER
+および/または実際のウォッチ/エミュレーターがなければエンドツーエンドで
+検証できません。
 
 ---
 
@@ -201,3 +237,14 @@ run.bat
 
 ## 📜 ライセンス
 GPL-3.0 —— 詳細は LICENSE を参照してください。
+
+## 🛠️ BUILD & RUN
+
+リリースビルドの前に、バージョンを変更しないビルドチェックを使用してください。
+
+| 操作 | Windows | Linux / macOS |
+|---|---|---|
+| ビルドチェック（バージョンと CHANGELOG を変更しない） | `build-test.bat` | `./build-test.sh` |
+| 実行 / 開発（提供されている場合） | `run*.bat` または `dev*.bat` | `./run*.sh` または `./dev*.sh` |
+
+`build-test.bat` と `build-test.sh` は、`hydra-umc.project.json` をインクリメントせず、`CHANGELOG.md` も変更せずにプロジェクトのスタックをコンパイルまたは検証します。通常のコンパイラ出力だけが作成される場合があります。既存の `build*.bat`、`build*.sh`、`run*`、`dev*` は、各プロジェクト固有のバージョン化または実行時の動作を維持します。その動作が必要な場合はそれらを使用してください。

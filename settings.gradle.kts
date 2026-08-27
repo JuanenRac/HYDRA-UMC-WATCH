@@ -3,8 +3,7 @@
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 // GPL-3.0 - see LICENSE
 // =============================================================================
-// Same repository/module wiring as sibling repo HYDRA-UMC-ANDROID-CONTROL
-// (see SONNET/5.PLAN_EJECUCION_32_PROYECTOS_NUEVOS.txt) - reused rather
+// Same repository/module wiring as sibling repo HYDRA-UMC-ANDROID-CONTROL - reused rather
 // than reinvented, since it's the same Gradle/Kotlin/Android toolchain.
 pluginManagement {
     repositories {

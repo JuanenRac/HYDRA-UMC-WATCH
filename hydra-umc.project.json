@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "ecosystem": "HYDRA-UMC",
   "name": "HYDRA-UMC-WATCH",
-  "version": "0.0.5",
+  "version": "0.1.2",
   "role": "ui",
   "stack": "android",
   "technologies": [
@@ -10,11 +10,11 @@
     "Wear OS"
   ],
   "deployment_target": "wearable",
-  "maturity": "scaffolding",
+  "maturity": "functional",
   "family": "Complementary Tools",
   "parent": null,
-  "build": "./gradlew assembleDebug. Wear OS 3+ target.",
-  "notes": "Scaffolding stage: real entry point + i18n resources only so far - the real haptic emergency-alert dashboard is future work.",
+  "build": "./build.sh or build.bat (bumps version, runs JUnit tests, assembleDebug). Wear OS 3+ target.",
+  "notes": "Functional v0: real differentiated haptic vibration patterns per alert severity, and a real kotlinx.serialization-backed SERVER<->WATCH sync-message protocol (parse/serialize, not the WebSocket transport itself). 12 JUnit tests. The real WebSocket connection, wireless E-STOP, and glanceable status dashboard remain future work.",
   "native_version": {
     "file": "app/version.properties",
     "pattern": {

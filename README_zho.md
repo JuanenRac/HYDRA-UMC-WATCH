@@ -27,10 +27,11 @@
 另起炉灶。
 
 ### 关键特性：
-* 🛑 **无线 E-STOP** —— 通过工业 Wi-Fi 实现亚 50ms 延迟的专用紧急按钮。*（计划中——需要与 HYDRA-UMC-SERVER 配对）*
-* 📳 **触觉告警** —— 针对不同告警类型（严重、警告、信息）的差异化振动模式。*（计划中）*
-* ⌚ **一目了然的状态：** 集群活动和任务进度的实时摘要。*（计划中）*
-* 🔐 **安全认证：** 与 HYDRA-UMC-SERVER 基于 JWT 的配对。*（计划中）*
+* ✅ **真实 v0 —— 触觉模式与同步协议：** `haptics/HapticPatterns.kt` 为每种告警严重程度（严重/警告/信息）定义了一个真实且各不相同的振动模式；`protocol/SyncMessage.kt` 定义并（反）序列化了下方 SERVER<->WATCH 同步流程中 `EStopCommand`/`Alert` 消息的真实结构。两者都是纯 Kotlin 代码，可测试——运行或测试都不需要手表硬件、模拟器，或者打开的 WebSocket。
+* 🛑 **无线 E-STOP** —— 通过工业 Wi-Fi 实现亚 50ms 延迟的专用紧急按钮。*（它会发送的 `EStopCommand` 消息是真实的并且已测试；WebSocket 传输和物理按钮的接线仍是计划中——需要与 HYDRA-UMC-SERVER 配对。）*
+* 📳 **触觉告警** —— 针对不同告警类型（严重、警告、信息）的差异化振动模式。*（模式本身是真实的——见上文；将其接入真实的 `Vibrator` 服务调用仍是计划中。）*
+* ⌚ **一目了然的状态：** 集群活动和任务进度的实时摘要。*（计划中——需要真实的 WebSocket 连接。）*
+* 🔐 **安全认证：** 与 HYDRA-UMC-SERVER 基于 JWT 的配对。*（计划中。）*
 * ✅ **独立的 Wear OS 工具链** —— 一个真实的 Gradle/Kotlin/Compose-for-Wear 应用，能够构建出可用的调试 APK。*（已实现——见下方"构建与运行"）*
 
 ---
@@ -52,7 +53,7 @@ flowchart LR
 
 * **为何这是一款独立的 Wear OS 应用，而非手机应用的一项功能。** 手表运行在自己独立的操作系统进程上——它不能只是 HYDRA-UMC-ANDROID-CONTROL 的一种 UI 模式，它需要自己的清单文件、自己的构建，以及自己的（约束条件严格得多的）UI，用于一目了然的状态显示/快速 E-STOP。
 * **为何 `minSdk 30`（Wear OS 3）低于手机应用自身的 minSdk。** 这是刻意针对当前 Wear OS 3+ 硬件世代，而非旧款 Wear OS 2 设备——与支持较旧手机的 HYDRA-UMC-ANDROID-CONTROL 不同，一款配套手表应用需要支持的现实硬件基础要窄得多。
-* **为何入口点今天只打印身份/版本/角色。** 处于脚手架（scaffolding）阶段：证明 `./gradlew assembleDebug` 成功，先于真正的与手机端的配套应用同步逻辑。
+* **为何触觉模式与同步协议先于 WebSocket 连接落地。** 定义双方必须一致的振动波形和消息结构，是真正的纯 Kotlin 工作——编写和测试都不需要打开的套接字、已配对的服务器，或者物理手表。真正打开那条连接是下一步。
 * **这如何融入生态系统的其余部分。** 与 HYDRA-UMC-ANDROID-CONTROL 和 HYDRA-UMC-IOS-CONTROL 配对，作为一目了然的手腕端配套设备——它不是取代二者中的任何一个，而是一个快速状态查看/快速 E-STOP 的界面。
 
 ---
@@ -60,18 +61,21 @@ flowchart LR
 ## 📂 目录结构
 
 独立的 Wear OS 应用——没有自己的硬件/固件/操作系统（它运行在现成的手表
-硬件上），已从模板中省略（生态系统统一的省略规则参见
-`SONNET/5.PLAN_EJECUCION_32_PROYECTOS_NUEVOS.txt`）。
+硬件上）；这些目录按照仓库结构策略予以省略。
 
 ```text
 HYDRA-UMC-WATCH/
 ├── app/
-│   ├── build.gradle.kts       # 应用模块配置，里程表式版本递增
-│   ├── version.properties     # versionMajor/Minor/Patch/Code（每次构建自动递增）
-│   └── src/main/
-│       ├── AndroidManifest.xml
-│       ├── java/com/hydraumc/watch/MainActivity.kt   # Compose-for-Wear 入口点
-│       └── res/                                        # 字符串、主题、启动器图标
+│   ├── build.gradle.kts       # 应用模块配置（只读取 version.properties，从不写入）
+│   ├── version.properties     # versionMajor/Minor/Patch/Code（仅由 build.sh/.bat 递增）
+│   └── src/
+│       ├── main/
+│       │   ├── AndroidManifest.xml
+│       │   └── java/com/hydraumc/watch/
+│       │       ├── MainActivity.kt         # Compose-for-Wear 入口点
+│       │       ├── haptics/                # 按严重程度划分的振动模式
+│       │       └── protocol/               # SERVER<->WATCH 同步消息编解码器
+│       └── test/java/com/hydraumc/watch/   # 真实 JUnit 测试（haptics、protocol）
 ├── gradle/
 │   ├── libs.versions.toml     # 依赖版本目录
 │   └── wrapper/                # Gradle wrapper（锁定在 9.7.0）
@@ -82,7 +86,9 @@ HYDRA-UMC-WATCH/
 ├── build/                     # 预留（Gradle 自身的 app/build/ 已被 gitignore）
 ├── images/                    # 媒体与图表
 ├── scripts/                   # 实用脚本
-├── build.sh / build.bat       # 真实构建：gradlew assembleDebug
+├── bump_manifest_version.py   # 同时递增 major/minor/patch 和清单文件
+├── bump_version_code.py       # 递增 Android 自身的 versionCode 计数器
+├── build.sh / build.bat       # 真实构建：递增版本、运行测试、assembleDebug
 ├── run.sh / run.bat           # 真实运行：gradlew installDebug + adb launch
 └── src/                       # 预留（本项目的代码位于 app/src/ 下）
 ```
@@ -106,11 +112,37 @@ build.bat
 run.bat
 ```
 
-`build` 将调试版 APK 编译到 `app/build/outputs/apk/debug/app-debug.apk`。
-版本递增（`app/version.properties`）发生在 `app/build.gradle.kts` 自身
-内部的 Gradle 配置阶段，因此它会在每次真实构建时自动运行——无需单独的
-递增步骤。`run` 通过 `gradlew installDebug` 安装该 APK，并使用 `adb`
+`build` 会递增版本号（`bump_manifest_version.py` 同步递增 major/minor/patch
+与 `hydra-umc.project.json`，`bump_version_code.py` 递增 Android 自身的
+`versionCode`），运行真实的 JUnit 测试套件（`haptics`、`protocol`），并将
+调试版 APK 编译到 `app/build/outputs/apk/debug/app-debug.apk`——全部在
+一次以 `-PhydraUmcReadOnly=true` 执行的 Gradle 调用中完成，这样
+`app/build.gradle.kts` 中读取版本号的代码就永远不会*也*去递增它（
+`build-test.sh`/`.bat` 的仅编译、不产生变更的 CI 检查也使用同一个标志）。
+`run` 通过 `gradlew installDebug` 安装该 APK，并使用 `adb`
 启动 `MainActivity`。
+
+真实示例——这两个版本递增脚本也可以独立运行，便于在不触发 Gradle 的情况下检查一次构建会做什么：
+
+```bash
+python3 bump_manifest_version.py   # 例如 "HYDRA-UMC version: v0.1.2 -> v0.1.3"
+python3 bump_version_code.py       # 例如 "versionCode: 12 -> 13"
+```
+
+---
+
+## ✅ 当前状态与后续步骤
+
+**今天的真实进展：** 按告警严重程度区分的触觉振动模式（`haptics/`），以及
+一个真实且经过测试的 `EStopCommand`/`Alert` 同步消息编解码器
+（`protocol/`）——未来通往 HYDRA-UMC-SERVER 的 WebSocket 连接将要传输的
+消息结构——加上独立的 Gradle/Kotlin/Compose-for-Wear 工具链和 12 个
+JUnit 测试。
+
+**仍待完成：** 真正的 WebSocket 传输本身（建立连接、配对/认证）、将上述
+触觉模式接入真实的 `Vibrator` 服务调用，以及一目了然的状态/E-STOP
+界面——这些都需要一个真实运行中的 HYDRA-UMC-SERVER 和/或一台真实的
+手表/模拟器才能端到端验证。
 
 ---
 
@@ -195,3 +227,14 @@ run.bat
 
 ## 📜 许可证
 GPL-3.0 —— 详见 LICENSE。
+
+## 🛠️ BUILD & RUN
+
+请在发布构建前使用不改动版本的构建检查：
+
+| 操作 | Windows | Linux / macOS |
+|---|---|---|
+| 构建检查（不修改版本或 CHANGELOG） | `build-test.bat` | `./build-test.sh` |
+| 运行 / 开发（如提供） | `run*.bat` 或 `dev*.bat` | `./run*.sh` 或 `./dev*.sh` |
+
+`build-test.bat` 和 `build-test.sh` 会编译或验证项目技术栈，但不会递增 `hydra-umc.project.json`，也不会修改 `CHANGELOG.md`。它们仅可能生成正常的编译器输出。现有的 `build*.bat`、`build*.sh`、`run*` 和 `dev*` 脚本保留各自的版本化或运行时行为；需要该行为时请使用它们。

@@ -23,10 +23,11 @@
 Construit comme une application Wear OS autonome (Kotlin + Jetpack Compose pour Wear), réutilisant la même chaîne d'outils Gradle/Kotlin que le dépôt frère HYDRA-UMC-ANDROID-CONTROL plutôt que d'en introduire une nouvelle.
 
 ### Fonctionnalités Clés :
-* 🛑 **E-STOP Sans Fil** — bouton d'urgence dédié avec une latence inférieure à 50 ms sur Wi-Fi industriel. *(prévu — nécessite l'appairage avec HYDRA-UMC-SERVER)*
-* 📳 **Alertes Haptiques** — motifs de vibration différenciés selon le type d'alerte (Critique, Avertissement, Info). *(prévu)*
-* ⌚ **Statut en un Coup d'Œil** — résumé en temps réel de l'activité de la flotte et de l'avancement des missions. *(prévu)*
-* 🔐 **Authentification Sécurisée** — appairage basé sur JWT avec HYDRA-UMC-SERVER. *(prévu)*
+* ✅ **Réel v0 - motifs haptiques et protocole de synchronisation :** `haptics/HapticPatterns.kt` définit un motif de vibration réel et distinct par sévérité d'alerte (Critique/Avertissement/Info) ; `protocol/SyncMessage.kt` définit et (dé)sérialise les formes réelles des messages `EStopCommand`/`Alert` du flux de synchronisation SERVER<->WATCH ci-dessous. Les deux sont du Kotlin pur, testable - aucun matériel de montre, émulateur, ou WebSocket ouvert nécessaire pour les exécuter ou les tester.
+* 🛑 **E-STOP Sans Fil** — bouton d'urgence dédié avec une latence inférieure à 50 ms sur Wi-Fi industriel. *(le message `EStopCommand` qu'il enverrait est réel et testé ; le transport WebSocket et le câblage du bouton physique restent prévus — nécessite l'appairage avec HYDRA-UMC-SERVER.)*
+* 📳 **Alertes Haptiques** — motifs de vibration différenciés selon le type d'alerte (Critique, Avertissement, Info). *(les motifs eux-mêmes sont réels - voir ci-dessus ; les relier à l'appel réel du service `Vibrator` reste prévu.)*
+* ⌚ **Statut en un Coup d'Œil** — résumé en temps réel de l'activité de la flotte et de l'avancement des missions. *(prévu - nécessite la vraie connexion WebSocket.)*
+* 🔐 **Authentification Sécurisée** — appairage basé sur JWT avec HYDRA-UMC-SERVER. *(prévu.)*
 * ✅ **Chaîne d'outils Wear OS autonome** — une véritable application Gradle/Kotlin/Compose pour Wear qui compile un APK de débogage fonctionnel. *(implémenté — voir COMPILATION ET EXÉCUTION ci-dessous)*
 
 ---
@@ -48,24 +49,28 @@ flowchart LR
 
 * **Pourquoi c'est une application Wear OS autonome, pas une fonctionnalité de l'application téléphone.** Une montre exécute son propre processus indépendant sur son propre système d'exploitation - elle ne peut pas être simplement un mode d'interface de HYDRA-UMC-ANDROID-CONTROL, elle a besoin de son propre manifeste, sa propre compilation, et sa propre interface (bien plus contrainte) pour un statut en un coup d'œil/un E-STOP rapide.
 * **Pourquoi `minSdk 30` (Wear OS 3), inférieur au propre minSdk de l'application téléphone.** Cela cible délibérément la génération matérielle Wear OS 3+ actuelle, pas les anciens appareils Wear OS 2 - contrairement à HYDRA-UMC-ANDROID-CONTROL, qui supporte les téléphones plus anciens, une application montre compagnon a une base matérielle réaliste à supporter bien plus étroite.
-* **Pourquoi le point d'entrée ne fait qu'imprimer identité/version/rôle aujourd'hui.** Étape d'andamiaje : prouver que `./gradlew assembleDebug` réussit précède la vraie logique de synchronisation avec l'application téléphone compagnon.
+* **Pourquoi les motifs haptiques et le protocole de synchronisation arrivent avant la connexion WebSocket.** Définir les formes d'onde de vibration et les formes des messages que les deux côtés doivent s'accorder est du vrai travail Kotlin pur - inutile d'avoir un socket ouvert, un serveur appairé ou une montre physique pour l'écrire ou le tester. Ouvrir réellement cette connexion est la prochaine étape.
 * **Comment cela s'intègre dans le reste de l'écosystème.** Fait paire avec HYDRA-UMC-ANDROID-CONTROL et HYDRA-UMC-IOS-CONTROL comme compagnon au poignet, en un coup d'œil - pas un remplacement de l'un ou l'autre, une surface de statut rapide/E-STOP rapide.
 
 ---
 
 ## 📂 STRUCTURE DES DOSSIERS
 
-Application Wear OS autonome — sans hardware/firmware/os propres (elle tourne sur du matériel de montre du commerce), élagués du modèle (voir `SONNET/5.PLAN_EJECUCION_32_PROYECTOS_NUEVOS.txt` pour la règle d'élagage de tout l'écosystème).
+Application Wear OS autonome — sans matériel, micrologiciel ou système d'exploitation propres (elle tourne sur du matériel de montre du commerce) ; ces dossiers sont omis conformément à la politique de structure du dépôt.
 
 ```text
 HYDRA-UMC-WATCH/
 ├── app/
-│   ├── build.gradle.kts       # Config du module app, incrémentation de version façon compteur kilométrique
-│   ├── version.properties     # versionMajor/Minor/Patch/Code (incrémenté à chaque build)
-│   └── src/main/
-│       ├── AndroidManifest.xml
-│       ├── java/com/hydraumc/watch/MainActivity.kt   # Point d'entrée Compose pour Wear
-│       └── res/                                        # Chaînes, thème, icône de lancement
+│   ├── build.gradle.kts       # Config du module app (lit version.properties, ne l'écrit jamais)
+│   ├── version.properties     # versionMajor/Minor/Patch/Code (incrémenté uniquement par build.sh/.bat)
+│   └── src/
+│       ├── main/
+│       │   ├── AndroidManifest.xml
+│       │   └── java/com/hydraumc/watch/
+│       │       ├── MainActivity.kt         # Point d'entrée Compose pour Wear
+│       │       ├── haptics/                # Motifs de vibration par sévérité
+│       │       └── protocol/               # Codec des messages de synchronisation SERVER<->WATCH
+│       └── test/java/com/hydraumc/watch/   # Tests JUnit réels (haptics, protocol)
 ├── gradle/
 │   ├── libs.versions.toml     # Catalogue des versions de dépendances
 │   └── wrapper/                # Gradle wrapper (épinglé à 9.7.0)
@@ -76,7 +81,9 @@ HYDRA-UMC-WATCH/
 ├── build/                     # Réservé (app/build/ de Gradle lui-même est ignoré par git)
 ├── images/                    # Médias et diagrammes
 ├── scripts/                   # Scripts utilitaires
-├── build.sh / build.bat       # Build réel : gradlew assembleDebug
+├── bump_manifest_version.py   # Incrémente major/minor/patch + le manifeste, ensemble
+├── bump_version_code.py       # Incrémente le compteur versionCode propre à Android
+├── build.sh / build.bat       # Build réel : incrémente la version, lance les tests, assembleDebug
 ├── run.sh / run.bat           # Exécution réelle : gradlew installDebug + lancement adb
 └── src/                       # Réservé (le code de ce projet vit dans app/src/)
 ```
@@ -98,7 +105,22 @@ build.bat
 run.bat
 ```
 
-`build` compile l'APK de débogage vers `app/build/outputs/apk/debug/app-debug.apk`. L'incrémentation de version (`app/version.properties`) se produit à l'intérieur même de `app/build.gradle.kts` au moment de la configuration Gradle, elle s'exécute donc automatiquement à chaque build réel - pas d'étape d'incrémentation séparée. `run` installe l'APK via `gradlew installDebug` et lance `MainActivity` avec `adb`.
+`build` incrémente la version (`bump_manifest_version.py` pour major/minor/patch en accord avec `hydra-umc.project.json`, `bump_version_code.py` pour le `versionCode` propre à Android), lance la vraie suite de tests JUnit (`haptics`, `protocol`), et compile l'APK de débogage vers `app/build/outputs/apk/debug/app-debug.apk` - le tout en une seule invocation Gradle exécutée avec `-PhydraUmcReadOnly=true` pour que le code de `app/build.gradle.kts` qui lit la version ne l'incrémente jamais *aussi* (le même indicateur utilisé par `build-test.sh`/`.bat` pour leur vérification CI séparée, compilation seule, sans mutation). `run` installe l'APK via `gradlew installDebug` et lance `MainActivity` avec `adb`.
+
+Exemple réel - les deux scripts d'incrémentation de version fonctionnent aussi de manière autonome, utile pour inspecter ce qu'un build fera sans déclencher Gradle :
+
+```bash
+python3 bump_manifest_version.py   # ex. "HYDRA-UMC version: v0.1.2 -> v0.1.3"
+python3 bump_version_code.py       # ex. "versionCode: 12 -> 13"
+```
+
+---
+
+## ✅ État Actuel et Prochaines Étapes
+
+**Réel aujourd'hui :** motifs de vibration haptique différenciés par sévérité d'alerte (`haptics/`), et un codec réel et testé de messages de synchronisation `EStopCommand`/`Alert` (`protocol/`) - les formes de message que la future connexion WebSocket vers HYDRA-UMC-SERVER transportera - plus la chaîne d'outils autonome Gradle/Kotlin/Compose-pour-Wear et 12 tests JUnit.
+
+**Encore à venir :** le vrai transport WebSocket lui-même (ouverture de la connexion, appairage/authentification), le raccordement des motifs haptiques à l'appel réel du service `Vibrator`, et les écrans de statut en un coup d'œil/E-STOP - tout cela nécessite un vrai HYDRA-UMC-SERVER en cours d'exécution et/ou une vraie montre/émulateur pour être exercé de bout en bout.
 
 ---
 
@@ -181,3 +203,14 @@ Ce projet fait partie d'un écosystème robotique plus large du même auteur (Ju
 
 ## 📜 LICENCE
 GPL-3.0 - Voir LICENSE pour plus de détails.
+
+## 🛠️ BUILD & RUN
+
+Utilisez la vérification de compilation sans versionnement avant une compilation de publication :
+
+| Action | Windows | Linux / macOS |
+|---|---|---|
+| Vérification de compilation (sans modifier la version ni le CHANGELOG) | `build-test.bat` | `./build-test.sh` |
+| Exécution / développement (si disponible) | `run*.bat` ou `dev*.bat` | `./run*.sh` ou `./dev*.sh` |
+
+`build-test.bat` et `build-test.sh` compilent ou valident la pile du projet sans incrémenter `hydra-umc.project.json` ni modifier `CHANGELOG.md`. Ils peuvent uniquement créer les sorties normales du compilateur. Les scripts existants `build*.bat`, `build*.sh`, `run*` et `dev*` conservent leur comportement spécifique de versionnement ou d'exécution ; utilisez-les lorsque ce comportement est requis.

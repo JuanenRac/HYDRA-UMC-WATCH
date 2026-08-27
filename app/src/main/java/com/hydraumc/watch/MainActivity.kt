@@ -8,7 +8,7 @@
 // actually builds and renders a real screen on a round/square watch face,
 // not the safety dashboard/haptic E-STOP yet. That real work (WebSocket
 // pairing with HYDRA-UMC-SERVER, wireless E-STOP, differentiated haptic
-// alert patterns) is tracked in SONNET/HYDRA-UMC-WATCH/mejoras_futuras.txt.
+// alert patterns) is planned with the production integration.
 package com.hydraumc.watch
 
 import android.os.Bundle

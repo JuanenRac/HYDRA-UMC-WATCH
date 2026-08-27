@@ -6,6 +6,7 @@
 plugins {
     id("com.android.application")
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 // =============================================================================
@@ -17,7 +18,8 @@ plugins {
 // version.properties is read, bumped and rewritten with the new values
 // BEFORE those values are used for versionCode/versionName below - the APK
 // produced by this exact invocation already carries the bumped number. CI sets
-// HYDRA_UMC_CI=1 so verification tasks do not mutate version.properties.
+// HYDRA_UMC_CI=1 and the local verifier passes -PhydraUmcReadOnly=true, so
+// verification tasks do not mutate version.properties.
 //
 // Rule: versionPatch +1; if it would go above 9 it resets to 0 and
 // versionMinor +1 instead (example: 0.0.9 -> 0.1.0). versionCode is a
@@ -40,7 +42,10 @@ var appVersionMinor = readIntProp(versionPropsText, "versionMinor")
 var appVersionPatch = readIntProp(versionPropsText, "versionPatch")
 var appVersionCode = readIntProp(versionPropsText, "versionCode")
 
-if (System.getenv("HYDRA_UMC_CI") != "1") {
+val readOnlyBuild = providers.gradleProperty("hydraUmcReadOnly").orNull == "true" ||
+    System.getenv("HYDRA_UMC_CI") == "1"
+
+if (!readOnlyBuild) {
     appVersionPatch += 1
     if (appVersionPatch > 9) {
         appVersionPatch = 0
@@ -114,6 +119,11 @@ dependencies {
     // Declares this app as Wear OS-aware to the Play/ADB tooling and
     // brings the AmbientModeSupport helpers used for always-on display.
     implementation(libs.androidx.wear)
+
+    // Real JSON codec for the SERVER<->WATCH sync protocol (see
+    // protocol/SyncMessage.kt) - the actual WebSocket transport is future
+    // work, but the message shapes it will carry are real and tested today.
+    implementation(libs.kotlinx.serialization.json)
 
     // Testing
     testImplementation(libs.junit)
