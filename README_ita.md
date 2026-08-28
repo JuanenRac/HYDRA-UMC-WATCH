@@ -118,11 +118,11 @@ python3 bump_version_code.py       # es. "versionCode: 12 -> 13"
 
 ## ✅ Stato Attuale e Prossimi Passi
 
-**Reale oggi:** riproduzione locale degli avvisi tramite il servizio Android `Vibrator`, autorizzazione esplicita del microfono e riconoscimento vocale di sistema, trascrizione visibile e sintesi vocale locale; inoltre messaggi tipizzati e testati per `voice_turn`, `assistant_reply`, `system_status`, `EStopCommand`, `Alert` e stato versione del companion.
+**Reale oggi:** riproduzione locale degli avvisi tramite il servizio Android `Vibrator`, autorizzazione esplicita del microfono e riconoscimento vocale di sistema, trascrizione visibile e sintesi vocale locale; inoltre messaggi tipizzati e testati per `voice_turn`, `assistant_reply`, `system_status`, `EStopCommand`, `Alert` e stato versione del companion. Il trasporto ufficiale Wear OS Data Layer inoltra turni vocali limitati e richieste di stato tramite HYDRA-UMC-ANDROID-CONTROL al Server autenticato e a Voice UI.
 
-**Limite d'integrazione:** una richiesta vocale riconosciuta resta sull'orologio finché non è collegato un trasporto associato e autenticato. La voce non può mai azionare direttamente un robot; una risposta relativa al movimento deve richiedere conferma e l'E-STOP fisico rimane indipendente.
+**Limite d'integrazione:** l'app Android associata conserva il JWT cifrato del Server; Server conserva il token Voice UI. Data Layer richiede lo stesso nome pacchetto e certificato di firma nelle due APK. La voce non può mai azionare direttamente un robot; una risposta relativa al movimento deve richiedere conferma e l'E-STOP fisico rimane indipendente.
 
-**Da completare:** associazione autenticata WebSocket/Data Layer, consegna al gateway HYDRA-UMC-VOICE-UI, schede di stato in tempo reale e convalida end-to-end su un dispositivo Wear OS reale.
+**Da completare:** convalida di associazione, trasporto radio, microfono/altoparlante e stato end-to-end su un dispositivo Wear OS reale; E-STOP wireless e telemetria CM5 in tempo reale restano lavori separati vincolati all'hardware.
 
 ---
 

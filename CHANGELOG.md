@@ -30,15 +30,22 @@ strictly increase across every build that ever ships.
 
 ## [Unreleased]
 
-- **Server relay alignment** - the public voice contract now identifies the
-  implemented Android -> authenticated Server -> loopback Voice UI path. The
-  physical Wear transport remains a hardware-validation task and voice still
-  cannot actuate a robot.
+- **CI compilation** - imported the existing `SyncMessage.toJson` extension
+  into `WatchRelayTransport`, so the Data Layer voice-turn payload compiles
+  correctly on a clean GitHub Actions runner.
+
+- **Paired phone relay** - `WatchRelayTransport` and
+  `WatchRelayListenerService` now use the official Wear OS Data Layer for
+  bounded voice turns and system-status cards. Android Control owns the
+  encrypted Server session; no Server JWT or Voice UI token reaches Watch.
+- **Release-pairing protection** - Watch and Android Control deliberately use
+  the same application ID and require the same signing certificate, as
+  enforced by Data Layer. Added an ignored release-key configuration template.
 
 - **Voice-ready Watch surface** - explicit microphone permission and system
   speech recognition are available from **Speak to HYDRA-UMC**. Recognised
-  text is shown on-screen and a local TTS confirmation is spoken; no text is
-  treated as an AI action until a paired authenticated gateway exists.
+  text is sent through the paired authenticated gateway; replies/status are
+  displayed and can be spoken locally. Voice still cannot actuate a robot.
 - **AI/status contract** - `voice_turn`, `assistant_reply` and
   `system_status` now carry bounded text, correlation IDs, status levels and
   confirmation metadata. `docs/VOICE_AI_PROTOCOL.md` defines the safe route

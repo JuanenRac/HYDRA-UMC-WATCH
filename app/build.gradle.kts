@@ -9,6 +9,33 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+import java.util.Properties
+
+// Data Layer rejects messages unless the phone and Watch packages have the
+// same signature. Configure the same private release keystore in each repo's
+// ignored keystore.properties (or via CI secrets); debug builds use Android's
+// shared local debug key only for development.
+val releaseSigningProperties = Properties().also { properties ->
+    val localSigningFile = rootProject.file("keystore.properties")
+    if (localSigningFile.isFile) localSigningFile.inputStream().use(properties::load)
+}
+
+fun releaseSigningValue(key: String, environmentKey: String): String? =
+    providers.gradleProperty(key).orNull
+        ?: System.getenv(environmentKey)
+        ?: releaseSigningProperties.getProperty(key)
+
+val releaseStoreFilePath = releaseSigningValue("hydraUmcReleaseStoreFile", "HYDRA_UMC_RELEASE_STORE_FILE")
+val releaseStorePassword = releaseSigningValue("hydraUmcReleaseStorePassword", "HYDRA_UMC_RELEASE_STORE_PASSWORD")
+val releaseKeyAlias = releaseSigningValue("hydraUmcReleaseKeyAlias", "HYDRA_UMC_RELEASE_KEY_ALIAS")
+val releaseKeyPassword = releaseSigningValue("hydraUmcReleaseKeyPassword", "HYDRA_UMC_RELEASE_KEY_PASSWORD")
+val hasPrivateReleaseSigning = listOf(
+    releaseStoreFilePath,
+    releaseStorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword,
+).all { !it.isNullOrBlank() }
+
 // =============================================================================
 // Ecosystem-wide auto version bump ("odometer" rule, base 10) - identical
 // mechanism to sibling repo HYDRA-UMC-ANDROID-CONTROL/app/build.gradle.kts
@@ -103,7 +130,16 @@ android {
             // libraries yet that would need proguard-rules.pro tuning.
             // Revisit once the real safety-dashboard screens land.
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("debug") // Use debug key for now for easy testing
+            signingConfig = if (hasPrivateReleaseSigning) {
+                signingConfigs.maybeCreate("hydraUmcRelease").apply {
+                    storeFile = file(requireNotNull(releaseStoreFilePath))
+                    storePassword = requireNotNull(releaseStorePassword)
+                    keyAlias = requireNotNull(releaseKeyAlias)
+                    keyPassword = requireNotNull(releaseKeyPassword)
+                }
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
     }
 }

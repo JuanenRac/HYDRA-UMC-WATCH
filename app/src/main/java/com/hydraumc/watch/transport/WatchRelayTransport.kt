@@ -11,6 +11,7 @@ package com.hydraumc.watch.transport
 import android.content.Context
 import com.google.android.gms.wearable.Wearable
 import com.hydraumc.watch.protocol.SyncMessage
+import com.hydraumc.watch.protocol.toJson
 
 object WatchRelayPaths {
     const val VOICE_TURN = "/hydra-umc/voice-turn/v1"

@@ -49,7 +49,7 @@ flowchart LR
 
 * **Why this is a standalone Wear OS app, not a feature of the phone app.** A watch runs its own independent process on its own OS - it can't just be a UI mode of HYDRA-UMC-ANDROID-CONTROL, it needs its own manifest, its own build, and its own (much more constrained) UI for glanceable status/quick E-STOP.
 * **Why `minSdk 30` (Wear OS 3), lower than the phone app's own minSdk.** This targets the current Wear OS 3+ hardware generation deliberately, not old Wear OS 2 devices - unlike HYDRA-UMC-ANDROID-CONTROL, which supports older phones, a companion watch app has a narrower realistic hardware base to support.
-* **Why haptic patterns and the sync protocol ship before the WebSocket connection.** Defining the vibration waveforms and the message shapes both sides need to agree on is real, plain-Kotlin work - it needs no open socket, paired server, or physical watch to write or test. Actually opening that connection is next.
+* **Why the paired relay uses Data Layer instead of a custom socket.** The official Wear OS channel enforces the same package name and signing certificate on Watch and phone, then carries only bounded protocol messages. Android Control retains the Server session; this keeps the Watch out of direct Server credential and robot-control paths.
 * **How this fits the rest of the ecosystem.** Pairs with HYDRA-UMC-ANDROID-CONTROL and HYDRA-UMC-IOS-CONTROL as a glanceable, on-wrist companion - not a replacement for either, a quick-status/quick-E-STOP surface.
 
 ---
@@ -118,11 +118,11 @@ python3 bump_version_code.py       # e.g. "versionCode: 12 -> 13"
 
 ## ✅ Current Status & Next Steps
 
-**Real today:** local alert playback through Android's `Vibrator` service, explicit microphone permission and system speech recognition, visible transcript feedback and local text-to-speech, plus tested typed messages for `voice_turn`, `assistant_reply`, `system_status`, `EStopCommand`, `Alert` and companion version status.
+**Real today:** local alert playback through Android's `Vibrator` service, explicit microphone permission and system speech recognition, visible transcript feedback and local text-to-speech, plus tested typed messages for `voice_turn`, `assistant_reply`, `system_status`, `EStopCommand`, `Alert` and companion version status. The official Wear OS Data Layer relays bounded voice turns and status-card requests through HYDRA-UMC-ANDROID-CONTROL to the authenticated Server and Voice UI.
 
-**Integration boundary:** a recognised voice turn remains on the watch until a paired, authenticated transport is connected. Voice can never actuate a robot directly; a movement-related reply must require confirmation, while the physical E-STOP stays independent.
+**Integration boundary:** the paired Android app retains the encrypted Server JWT; Server retains the Voice UI token. Data Layer requires the same package name and signing certificate on both APKs. Voice can never actuate a robot directly; a movement-related reply must require confirmation, while the physical E-STOP stays independent.
 
-**Still ahead:** the authenticated WebSocket/Data Layer pairing, delivery to the HYDRA-UMC-VOICE-UI gateway, live system-status cards and end-to-end validation on a real Wear OS device.
+**Still ahead:** validation of pairing, radio transport, microphone/speaker and end-to-end status on a real Wear OS device; wireless E-STOP and live CM5 telemetry remain separate hardware-gated work.
 
 ---
 

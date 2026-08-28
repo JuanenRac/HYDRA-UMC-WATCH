@@ -14,7 +14,7 @@
   "family": "Complementary Tools",
   "parent": null,
   "build": "./build.sh or build.bat (bumps version, runs JUnit tests, assembleDebug). Wear OS 3+ target.",
-  "notes": "Functional v0: differentiated haptic vibration patterns wired to Wear OS Vibrator, explicit microphone/system-STT capture and local TTS confirmation, plus typed voice_turn/assistant_reply/system_status protocol messages. The authenticated Server-to-Voice UI relay and Android relay contract are implemented; the physical Wear transport, wireless E-STOP and live CM5 telemetry require hardware integration. Voice never directly actuates a robot.",
+  "notes": "Functional v0: differentiated haptic vibration patterns wired to Wear OS Vibrator, explicit microphone/system-STT capture and local TTS confirmation, plus typed voice_turn/assistant_reply/system_status messages. A paired Android Data Layer relay is implemented; it keeps the Server JWT on the phone and Voice UI token on CM5. Physical radio, wireless E-STOP and live CM5 telemetry remain hardware integration gates. Voice never directly actuates a robot.",
   "native_version": {
     "file": "app/version.properties",
     "pattern": {

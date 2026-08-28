@@ -27,10 +27,21 @@ flowchart LR
 ```
 
 The Watch sends recognised text, never continuous raw microphone audio, to
-limit bandwidth and exposure of recordings. The implemented Server relay keeps
-the Voice UI token on the CM5. The physical Wear-to-Android transport is the
-remaining device-specific stage; credentials and AI keys never travel inside
-these messages.
+limit bandwidth and exposure of recordings. `WatchRelayTransport` uses the
+official Wear OS Data Layer to send that bounded text to Android Control;
+`WatchRelayListenerService` receives the reply/status messages. Android
+Control holds the encrypted Server JWT and Server keeps the Voice UI token on
+the CM5. Data Layer messages require matching package name and signing
+certificate on both APKs, so credentials and AI keys never travel to the
+Watch.
+
+## Pairing and signing requirement
+
+Both APKs deliberately use the `com.hydraumc.control` application ID for the
+Data Layer. Build them with the same signing certificate: the local Android
+debug key is sufficient for development, while GitHub-release APKs must use
+the same private release key configured in each ignored `keystore.properties`
+file or CI secret. A changed signing key breaks the secure channel by design.
 
 ## Message shapes
 

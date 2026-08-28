@@ -78,6 +78,7 @@ def main() -> int:
         module_root = ROOT / "src" if (ROOT / "src" / "go.mod").is_file() else ROOT
         run("go", "build", "./...", cwd=module_root)
     elif stack == "android":
+        run(sys.executable, "tools/verify_paired_relay_contract.py")
         wrapper = "gradlew.bat" if os.name == "nt" else "./gradlew"
         wrapper_path = ROOT / wrapper
         if os.name != "nt":

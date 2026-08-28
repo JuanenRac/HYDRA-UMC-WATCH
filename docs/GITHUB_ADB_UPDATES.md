@@ -62,7 +62,10 @@ matches the generated app version, for example `v0.1.3`. The updater refuses
 tags that are not plain stable semantic versions.
 
 Android on the watch remains the authority for package identity and signing
-certificate validation. An APK signed with a different key is rejected.
+certificate validation. An APK signed with a different key is rejected. For
+the paired voice/status relay, use this exact same certificate for
+`HYDRA-UMC-ANDROID-CONTROL`, because Wear OS Data Layer rejects a cross-device
+message when package or signature differs.
 
 ## 2. Manual GitHub installation on the watch
 
@@ -81,7 +84,9 @@ Play, MDM, or on-device user action.
 
 ## Signing before wider distribution
 
-The current Gradle release configuration uses the debug signing key and is
-appropriate only for local development. Before sending APKs beyond your own
-test hardware, configure a protected, backed-up release keystore. All future
-updates must preserve the same signing certificate.
+The Gradle release configuration uses the debug signing key only when no
+private signing configuration is provided. Before sending APKs beyond your
+own test hardware, copy `keystore.properties.example` to the ignored
+`keystore.properties`, configure a protected backed-up release keystore and
+use the same values in `HYDRA-UMC-ANDROID-CONTROL`. All future updates must
+preserve that signing certificate.
