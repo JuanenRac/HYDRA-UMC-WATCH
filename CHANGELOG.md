@@ -28,7 +28,27 @@ strictly increase across every build that ever ships.
 
 ---
 
-## [Unreleased] - Chinese and Japanese added to app resources
+## [Unreleased]
+
+- **Server relay alignment** - the public voice contract now identifies the
+  implemented Android -> authenticated Server -> loopback Voice UI path. The
+  physical Wear transport remains a hardware-validation task and voice still
+  cannot actuate a robot.
+
+- **Voice-ready Watch surface** - explicit microphone permission and system
+  speech recognition are available from **Speak to HYDRA-UMC**. Recognised
+  text is shown on-screen and a local TTS confirmation is spoken; no text is
+  treated as an AI action until a paired authenticated gateway exists.
+- **AI/status contract** - `voice_turn`, `assistant_reply` and
+  `system_status` now carry bounded text, correlation IDs, status levels and
+  confirmation metadata. `docs/VOICE_AI_PROTOCOL.md` defines the safe route
+  through HYDRA-UMC-VOICE-UI and the Cognitive Node.
+- **Real on-watch haptics** - `HapticAlertPlayer.kt` now sends the existing,
+  tested severity waveforms to Wear OS's actual `Vibrator` service. The home
+  screen includes a deliberately informational **Test haptic alert** button
+  for provisioning checks; it has no server connection and cannot issue an
+  E-STOP or any robot command.
+- Added the matching Android resources in English, Japanese and Chinese.
 
 - New `app/src/main/res/values-zh/strings.xml` and
   `app/src/main/res/values-ja/strings.xml` - full translation of all 3

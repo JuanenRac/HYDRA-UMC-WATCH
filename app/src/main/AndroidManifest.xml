@@ -6,6 +6,8 @@
     <uses-feature android:name="android.hardware.type.watch" android:required="true" />
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Requested only after an explicit operator tap on Speak to HYDRA-UMC. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
@@ -34,5 +36,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Private phone relay channel. Google Play services invokes this
+             only for an APK with the same application ID and signature. -->
+        <service
+            android:name=".transport.WatchRelayListenerService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <data android:scheme="wear" android:host="*" android:pathPrefix="/hydra-umc/" />
+            </intent-filter>
+        </service>
     </application>
 </manifest>

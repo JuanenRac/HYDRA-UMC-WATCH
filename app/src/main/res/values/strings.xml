@@ -3,4 +3,17 @@
     <string name="app_name">HYDRA-UMC WATCH</string>
     <string name="tagline">Wearable Safety Dashboard</string>
     <string name="status_placeholder">Not paired to a HYDRA-UMC-SERVER yet</string>
+    <string name="test_haptic_alert">Test haptic alert</string>
+    <string name="voice_start">Speak to HYDRA-UMC</string>
+    <string name="voice_prompt">Speak your request for HYDRA-UMC</string>
+    <string name="voice_listening">Listening…</string>
+    <string name="voice_captured">Voice request captured. Waiting for secure AI connection.</string>
+    <string name="voice_sending">Sending recognised text through the paired phone…</string>
+    <string name="voice_phone_unavailable">Paired phone is unavailable or not signed in to HYDRA-UMC-SERVER.</string>
+    <string name="voice_permission_denied">Microphone permission is required for voice input.</string>
+    <string name="voice_unavailable">Speech recognition is unavailable on this watch.</string>
+    <string name="voice_last_request">Last request: %1$s</string>
+    <string name="status_refresh">Refresh system status</string>
+    <string name="status_loading">Requesting secure system status…</string>
+    <string name="status_phone_unavailable">Paired phone is unavailable or not signed in to HYDRA-UMC-SERVER.</string>
 </resources>

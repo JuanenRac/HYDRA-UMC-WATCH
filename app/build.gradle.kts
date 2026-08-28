@@ -69,7 +69,10 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.hydraumc.watch"
+        // Data Layer accepts messages only between packages with an identical
+        // application ID and signing certificate. Android Control owns the
+        // paired Server session, so both APKs intentionally use this ID.
+        applicationId = "com.hydraumc.control"
         // 30 = Wear OS 3 baseline (the platform androidx.wear.compose
         // targets today) - lower than the phone app's minSdk 24 on purpose,
         // this is a standalone watch app, not a companion that has to
@@ -124,6 +127,7 @@ dependencies {
     // protocol/SyncMessage.kt) - the actual WebSocket transport is future
     // work, but the message shapes it will carry are real and tested today.
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.play.services.wearable)
 
     // Testing
     testImplementation(libs.junit)

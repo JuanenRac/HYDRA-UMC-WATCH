@@ -3,4 +3,12 @@
     <string name="app_name">HYDRA-UMC WATCH</string>
     <string name="tagline">可穿戴安全仪表盘</string>
     <string name="status_placeholder">尚未与 HYDRA-UMC-SERVER 配对</string>
+    <string name="test_haptic_alert">测试触觉提醒</string>
+    <string name="voice_start">与 HYDRA-UMC 对话</string>
+    <string name="voice_prompt">请说出给 HYDRA-UMC 的请求</string>
+    <string name="voice_listening">正在聆听…</string>
+    <string name="voice_captured">已捕获语音请求，正在等待安全的 AI 连接。</string>
+    <string name="voice_permission_denied">语音输入需要麦克风权限。</string>
+    <string name="voice_unavailable">此手表无法使用语音识别。</string>
+    <string name="voice_last_request">上一条请求: %1$s</string>
 </resources>

@@ -14,7 +14,7 @@
   "family": "Complementary Tools",
   "parent": null,
   "build": "./build.sh or build.bat (bumps version, runs JUnit tests, assembleDebug). Wear OS 3+ target.",
-  "notes": "Functional v0: real differentiated haptic vibration patterns per alert severity, and a real kotlinx.serialization-backed SERVER<->WATCH sync-message protocol (parse/serialize, not the WebSocket transport itself). 12 JUnit tests. The real WebSocket connection, wireless E-STOP, and glanceable status dashboard remain future work.",
+  "notes": "Functional v0: differentiated haptic vibration patterns wired to Wear OS Vibrator, explicit microphone/system-STT capture and local TTS confirmation, plus typed voice_turn/assistant_reply/system_status protocol messages. The authenticated Server-to-Voice UI relay and Android relay contract are implemented; the physical Wear transport, wireless E-STOP and live CM5 telemetry require hardware integration. Voice never directly actuates a robot.",
   "native_version": {
     "file": "app/version.properties",
     "pattern": {

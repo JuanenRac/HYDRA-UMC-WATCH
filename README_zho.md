@@ -133,16 +133,16 @@ python3 bump_version_code.py       # 例如 "versionCode: 12 -> 13"
 
 ## ✅ 当前状态与后续步骤
 
-**今天的真实进展：** 按告警严重程度区分的触觉振动模式（`haptics/`），以及
-一个真实且经过测试的 `EStopCommand`/`Alert` 同步消息编解码器
-（`protocol/`）——未来通往 HYDRA-UMC-SERVER 的 WebSocket 连接将要传输的
-消息结构——加上独立的 Gradle/Kotlin/Compose-for-Wear 工具链和 12 个
-JUnit 测试。
+**今天的真实进展：** 已通过 Android `Vibrator` 服务播放本地告警，已实现显式
+麦克风权限与系统语音识别、可见转写和本地文字转语音；还具有经过测试的
+`voice_turn`、`assistant_reply`、`system_status`、`EStopCommand`、`Alert`
+及配套版本状态等类型化消息。
 
-**仍待完成：** 真正的 WebSocket 传输本身（建立连接、配对/认证）、将上述
-触觉模式接入真实的 `Vibrator` 服务调用，以及一目了然的状态/E-STOP
-界面——这些都需要一个真实运行中的 HYDRA-UMC-SERVER 和/或一台真实的
-手表/模拟器才能端到端验证。
+**集成边界：** 在已配对且通过认证的传输连接前，识别到的语音请求只保留在手表上。
+语音绝不能直接驱动机器人；涉及运动的回复必须要求确认，物理 E-STOP 保持独立。
+
+**仍待完成：** 认证后的 WebSocket/Data Layer 配对、交付至 HYDRA-UMC-VOICE-UI
+网关、实时系统状态卡片，以及在真实 Wear OS 设备上的端到端验证。
 
 ---
 

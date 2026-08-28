@@ -3,4 +3,12 @@
     <string name="app_name">HYDRA-UMC WATCH</string>
     <string name="tagline">ウェアラブル安全ダッシュボード</string>
     <string name="status_placeholder">まだ HYDRA-UMC-SERVER とペアリングされていません</string>
+    <string name="test_haptic_alert">触覚アラートをテスト</string>
+    <string name="voice_start">HYDRA-UMC に話しかける</string>
+    <string name="voice_prompt">HYDRA-UMC へのリクエストを話してください</string>
+    <string name="voice_listening">聞き取り中…</string>
+    <string name="voice_captured">音声リクエストを取得しました。安全な AI 接続を待っています。</string>
+    <string name="voice_permission_denied">音声入力にはマイクの許可が必要です。</string>
+    <string name="voice_unavailable">この時計では音声認識を利用できません。</string>
+    <string name="voice_last_request">最後のリクエスト: %1$s</string>
 </resources>

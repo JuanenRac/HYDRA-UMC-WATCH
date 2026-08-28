@@ -118,9 +118,11 @@ python3 bump_version_code.py       # es. "versionCode: 12 -> 13"
 
 ## ✅ Stato Attuale e Prossimi Passi
 
-**Reale oggi:** pattern di vibrazione aptica differenziati per severità di avviso (`haptics/`), e un codec reale e testato di messaggi di sincronizzazione `EStopCommand`/`Alert` (`protocol/`) - le forme di messaggio che la futura connessione WebSocket a HYDRA-UMC-SERVER trasporterà - più la toolchain autonoma Gradle/Kotlin/Compose-per-Wear e 12 test JUnit.
+**Reale oggi:** riproduzione locale degli avvisi tramite il servizio Android `Vibrator`, autorizzazione esplicita del microfono e riconoscimento vocale di sistema, trascrizione visibile e sintesi vocale locale; inoltre messaggi tipizzati e testati per `voice_turn`, `assistant_reply`, `system_status`, `EStopCommand`, `Alert` e stato versione del companion.
 
-**Ancora da fare:** il vero trasporto WebSocket in sé (apertura della connessione, accoppiamento/autenticazione), il collegamento dei pattern aptici alla vera chiamata del servizio `Vibrator`, e le schermate di stato a colpo d'occhio/E-STOP - tutto richiede un vero HYDRA-UMC-SERVER in esecuzione e/o un vero orologio/emulatore per essere testato end-to-end.
+**Limite d'integrazione:** una richiesta vocale riconosciuta resta sull'orologio finché non è collegato un trasporto associato e autenticato. La voce non può mai azionare direttamente un robot; una risposta relativa al movimento deve richiedere conferma e l'E-STOP fisico rimane indipendente.
+
+**Da completare:** associazione autenticata WebSocket/Data Layer, consegna al gateway HYDRA-UMC-VOICE-UI, schede di stato in tempo reale e convalida end-to-end su un dispositivo Wear OS reale.
 
 ---
 
