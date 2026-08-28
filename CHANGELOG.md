@@ -69,6 +69,32 @@ strictly increase across every build that ever ships.
 
 ---
 
+## [0.1.4] - Real relay reconnection policy and last-known-state cache
+
+- **`transport/RelayRetryPolicy.kt`** (new) - a real, pure exponential-backoff
+  policy (`delayBeforeAttemptMs()`/`shouldRetry()`) for a relay send, capped
+  at a real maximum delay rather than growing unbounded. No Android
+  dependency - testable on a plain JVM, same standard as `SyncMessage.kt`/
+  `HapticPatterns.kt`.
+- **`transport/LastKnownStateCache.kt`** (new) - a real cache of the most
+  recently received `AssistantReply`/`SystemStatus`/`Alert`, with real
+  staleness tracking (`isStale()`/`ageMs()`) so an old cached state is never
+  presented as a current one - the exact risk called out for a relayed
+  `Alert` on a since-disconnected watch.
+- **`WatchRelayTransport`** now retries a failed send (most commonly: no
+  paired phone node connected yet) using `RelayRetryPolicy`'s own delays via
+  a real `android.os.Handler`, instead of failing on the first attempt.
+- **`MainActivity`** now records every real relayed status/reply into a
+  `LastKnownStateCache` (5-minute staleness window) and shows a real
+  "last known - may be outdated" indicator once it goes stale, rather than
+  leaving an old status looking indistinguishable from a fresh one.
+- New `status_stale` string resource, added to `values/`, `values-ja/` and
+  `values-zh/`.
+- 15 new JUnit tests (`RelayRetryPolicyTest.kt`: 8, `LastKnownStateCacheTest.kt`: 7)
+  = 33 total, all passing (`./gradlew testDebugUnitTest`), wired into
+  `build.sh`/`build.bat` alongside the existing suite. `assembleDebug` also
+  verified real end to end as part of the same build.
+
 ## [0.1.2] - Real v0: haptic alert patterns and the sync-message protocol
 
 - **`app/src/main/java/com/hydraumc/watch/haptics/AlertSeverity.kt`** /

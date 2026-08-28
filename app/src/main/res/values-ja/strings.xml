@@ -11,4 +11,5 @@
     <string name="voice_permission_denied">音声入力にはマイクの許可が必要です。</string>
     <string name="voice_unavailable">この時計では音声認識を利用できません。</string>
     <string name="voice_last_request">最後のリクエスト: %1$s</string>
+    <string name="status_stale">最終確認情報 - 古い可能性があります</string>
 </resources>

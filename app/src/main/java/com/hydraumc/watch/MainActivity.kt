@@ -45,26 +45,46 @@ import com.hydraumc.watch.protocol.SyncMessage
 import com.hydraumc.watch.protocol.parseSyncMessage
 import com.hydraumc.watch.transport.ACTION_WATCH_RELAY_MESSAGE
 import com.hydraumc.watch.transport.EXTRA_WATCH_RELAY_MESSAGE
+import com.hydraumc.watch.transport.LastKnownStateCache
 import com.hydraumc.watch.transport.WatchRelayTransport
 import java.util.Locale
+
+// A relayed status/reply older than this must not be shown as if it just
+// arrived - real staleness handling (see LastKnownStateCache), the
+// promotion audit's own "no presentar una alerta caducada como orden
+// vigente".
+private const val RELAY_STATE_STALE_AFTER_MS = 5 * 60_000L
 
 class MainActivity : ComponentActivity() {
     private var latestVoiceTranscript by mutableStateOf<String?>(null)
     private var voiceStatus by mutableStateOf<String?>(null)
     private var systemStatus by mutableStateOf<String?>(null)
+    private var systemStatusStale by mutableStateOf(false)
     private var textToSpeech: TextToSpeech? = null
     private var textToSpeechReady = false
     private lateinit var relayTransport: WatchRelayTransport
+    private val lastKnownStateCache = LastKnownStateCache(staleAfterMs = RELAY_STATE_STALE_AFTER_MS)
+    private val staleCheckHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private val staleCheckRunnable = object : Runnable {
+        override fun run() {
+            systemStatusStale = lastKnownStateCache.isStale()
+            staleCheckHandler.postDelayed(this, 30_000L)
+        }
+    }
 
     private val relayReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val raw = intent.getStringExtra(EXTRA_WATCH_RELAY_MESSAGE) ?: return
             when (val message = runCatching { parseSyncMessage(raw) }.getOrNull()) {
                 is SyncMessage.AssistantReply -> {
+                    lastKnownStateCache.update(message)
+                    systemStatusStale = false
                     voiceStatus = message.text
                     if (message.speak) speak(message.text)
                 }
                 is SyncMessage.SystemStatus -> {
+                    lastKnownStateCache.update(message)
+                    systemStatusStale = false
                     systemStatus = "${message.headline}: ${message.detail}"
                     if (message.speak) speak("${message.headline}. ${message.detail}")
                 }
@@ -120,11 +140,13 @@ class MainActivity : ComponentActivity() {
         textToSpeech = TextToSpeech(this) { status ->
             textToSpeechReady = status == TextToSpeech.SUCCESS
         }
+        staleCheckHandler.post(staleCheckRunnable)
         setContent {
             HydraWatchApp(
                 latestVoiceTranscript = latestVoiceTranscript,
                 voiceStatus = voiceStatus,
                 systemStatus = systemStatus,
+                systemStatusStale = systemStatusStale,
                 onStartVoiceRecognition = ::startVoiceRecognition,
                 onRefreshSystemStatus = ::refreshSystemStatus,
             )
@@ -170,6 +192,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         unregisterReceiver(relayReceiver)
+        staleCheckHandler.removeCallbacks(staleCheckRunnable)
         textToSpeech?.stop()
         textToSpeech?.shutdown()
         super.onDestroy()
@@ -187,6 +210,7 @@ fun HydraWatchApp(
     latestVoiceTranscript: String? = null,
     voiceStatus: String? = null,
     systemStatus: String? = null,
+    systemStatusStale: Boolean = false,
     onStartVoiceRecognition: () -> Unit = {},
     onRefreshSystemStatus: () -> Unit = {},
 ) {
@@ -220,6 +244,18 @@ fun HydraWatchApp(
                         style = MaterialTheme.typography.body2,
                         textAlign = TextAlign.Center,
                     )
+                }
+                if (systemStatus != null && systemStatusStale) {
+                    item {
+                        // A real last-known reading old enough that it must
+                        // not be mistaken for a fresh one - see
+                        // LastKnownStateCache.isStale().
+                        Text(
+                            text = stringResource(R.string.status_stale),
+                            style = MaterialTheme.typography.caption2,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
                 }
                 item {
                     Button(onClick = onStartVoiceRecognition) {

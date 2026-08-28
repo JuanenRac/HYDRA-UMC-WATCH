@@ -16,4 +16,5 @@
     <string name="status_refresh">Refresh system status</string>
     <string name="status_loading">Requesting secure system status…</string>
     <string name="status_phone_unavailable">Paired phone is unavailable or not signed in to HYDRA-UMC-SERVER.</string>
+    <string name="status_stale">Last known - may be outdated</string>
 </resources>

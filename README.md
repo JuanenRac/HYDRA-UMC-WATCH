@@ -29,6 +29,8 @@ Built as a standalone Wear OS app (Kotlin + Jetpack Compose for Wear), reusing t
 * ⌚ **Glanceable Status** — real-time summary of swarm activity and mission progress. *(planned - needs the real WebSocket connection.)*
 * 🔐 **Secure Auth** — JWT-based pairing with HYDRA-UMC-SERVER. *(planned.)*
 * ✅ **Standalone Wear OS toolchain** — a real Gradle/Kotlin/Compose-for-Wear app that builds a working debug APK. *(implemented — see BUILD & RUN below)*
+* 🔁 **Relay Reconnection Policy** — `transport/RelayRetryPolicy.kt` is a real, pure exponential-backoff policy for a failed relay send (e.g. no paired phone yet), capped at a bounded max delay. *(implemented)*
+* 🗂️ **Last-Known-State Cache** — `transport/LastKnownStateCache.kt` tracks real staleness on the last relayed status/alert, so an old one is never shown as current. *(implemented)*
 
 ---
 
@@ -50,6 +52,8 @@ flowchart LR
 * **Why this is a standalone Wear OS app, not a feature of the phone app.** A watch runs its own independent process on its own OS - it can't just be a UI mode of HYDRA-UMC-ANDROID-CONTROL, it needs its own manifest, its own build, and its own (much more constrained) UI for glanceable status/quick E-STOP.
 * **Why `minSdk 30` (Wear OS 3), lower than the phone app's own minSdk.** This targets the current Wear OS 3+ hardware generation deliberately, not old Wear OS 2 devices - unlike HYDRA-UMC-ANDROID-CONTROL, which supports older phones, a companion watch app has a narrower realistic hardware base to support.
 * **Why the paired relay uses Data Layer instead of a custom socket.** The official Wear OS channel enforces the same package name and signing certificate on Watch and phone, then carries only bounded protocol messages. Android Control retains the Server session; this keeps the Watch out of direct Server credential and robot-control paths.
+* **Why reconnection policy and last-known-state cache are their own pure modules, not inline in `WatchRelayTransport`.** Both are real, decoupled Kotlin classes (`RelayRetryPolicy`, `LastKnownStateCache`) testable on a plain JVM without a watch, emulator, or paired phone - the same standard `HapticPatterns.kt`/`SyncMessage.kt` already set. `WatchRelayTransport` itself stays the thin, necessarily-Android piece that actually schedules a retry or records a received message, not where the underlying policy math lives.
+* **Why a stale cached state is flagged, not hidden.** Withholding an old status entirely would leave the watch face blank exactly when the phone connection is flaky - the real risk moment. Showing it clearly marked "last known - may be outdated" keeps the operator informed without letting a minutes-old reading pass as a live one.
 * **How this fits the rest of the ecosystem.** Pairs with HYDRA-UMC-ANDROID-CONTROL and HYDRA-UMC-IOS-CONTROL as a glanceable, on-wrist companion - not a replacement for either, a quick-status/quick-E-STOP surface.
 
 ---
@@ -69,8 +73,9 @@ HYDRA-UMC-WATCH/
 │       │   └── java/com/hydraumc/watch/
 │       │       ├── MainActivity.kt         # Compose-for-Wear entry point
 │       │       ├── haptics/                # Per-severity vibration patterns
-│       │       └── protocol/               # SERVER<->WATCH sync message codec
-│       └── test/java/com/hydraumc/watch/   # Real JUnit tests (haptics, protocol)
+│       │       ├── protocol/               # SERVER<->WATCH sync message codec
+│       │       └── transport/              # Data Layer relay, retry policy, last-known-state cache
+│       └── test/java/com/hydraumc/watch/   # Real JUnit tests (haptics, protocol, transport)
 ├── gradle/
 │   ├── libs.versions.toml     # Dependency version catalog
 │   └── wrapper/                # Gradle wrapper (pinned to 9.7.0)

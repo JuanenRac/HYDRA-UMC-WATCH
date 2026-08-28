@@ -33,6 +33,8 @@
 * ⌚ **一目了然的状态：** 集群活动和任务进度的实时摘要。*（计划中——需要真实的 WebSocket 连接。）*
 * 🔐 **安全认证：** 与 HYDRA-UMC-SERVER 基于 JWT 的配对。*（计划中。）*
 * ✅ **独立的 Wear OS 工具链** —— 一个真实的 Gradle/Kotlin/Compose-for-Wear 应用，能够构建出可用的调试 APK。*（已实现——见下方"构建与运行"）*
+* 🔁 **中继重连策略** —— `transport/RelayRetryPolicy.kt` 是一个真实的、纯粹的指数退避策略，用于处理失败的中继发送（例如尚未配对手机的情况），并设有一个有上限的最大延迟。*（已实现）*
+* 🗂️ **最后已知状态缓存** —— `transport/LastKnownStateCache.kt` 会跟踪最后一次中继的状态/告警的真实过时程度，确保旧数据永远不会被当作最新数据显示。*（已实现）*
 
 ---
 
@@ -54,6 +56,8 @@ flowchart LR
 * **为何这是一款独立的 Wear OS 应用，而非手机应用的一项功能。** 手表运行在自己独立的操作系统进程上——它不能只是 HYDRA-UMC-ANDROID-CONTROL 的一种 UI 模式，它需要自己的清单文件、自己的构建，以及自己的（约束条件严格得多的）UI，用于一目了然的状态显示/快速 E-STOP。
 * **为何 `minSdk 30`（Wear OS 3）低于手机应用自身的 minSdk。** 这是刻意针对当前 Wear OS 3+ 硬件世代，而非旧款 Wear OS 2 设备——与支持较旧手机的 HYDRA-UMC-ANDROID-CONTROL 不同，一款配套手表应用需要支持的现实硬件基础要窄得多。
 * **为何触觉模式与同步协议先于 WebSocket 连接落地。** 定义双方必须一致的振动波形和消息结构，是真正的纯 Kotlin 工作——编写和测试都不需要打开的套接字、已配对的服务器，或者物理手表。真正打开那条连接是下一步。
+* **为何重连策略和最后已知状态缓存是各自独立的纯模块，而非内嵌在 `WatchRelayTransport` 中。** 两者都是真实的、解耦的 Kotlin 类（`RelayRetryPolicy`、`LastKnownStateCache`），可以在普通 JVM 上测试，无需手表、模拟器或已配对的手机——这与 `HapticPatterns.kt`/`SyncMessage.kt` 已经确立的标准相同。`WatchRelayTransport` 本身仍然是那个精简的、必然依赖 Android 的部分，实际负责调度重试或记录接收到的消息，而不是底层策略运算逻辑所在之处。
+* **为何过时的缓存状态会被标记，而不是被隐藏。** 完全隐藏旧状态会导致手表表盘在手机连接不稳定——真正的风险时刻——时恰好一片空白。清晰地标记为"最后已知——可能已过时"能让操作员保持知情，同时不会让几分钟前的读数被误当作实时数据。
 * **这如何融入生态系统的其余部分。** 与 HYDRA-UMC-ANDROID-CONTROL 和 HYDRA-UMC-IOS-CONTROL 配对，作为一目了然的手腕端配套设备——它不是取代二者中的任何一个，而是一个快速状态查看/快速 E-STOP 的界面。
 
 ---
@@ -74,8 +78,9 @@ HYDRA-UMC-WATCH/
 │       │   └── java/com/hydraumc/watch/
 │       │       ├── MainActivity.kt         # Compose-for-Wear 入口点
 │       │       ├── haptics/                # 按严重程度划分的振动模式
-│       │       └── protocol/               # SERVER<->WATCH 同步消息编解码器
-│       └── test/java/com/hydraumc/watch/   # 真实 JUnit 测试（haptics、protocol）
+│       │       ├── protocol/               # SERVER<->WATCH 同步消息编解码器
+│       │       └── transport/              # Data Layer 中继、重试策略、最后已知状态缓存
+│       └── test/java/com/hydraumc/watch/   # 真实 JUnit 测试（haptics、protocol、transport）
 ├── gradle/
 │   ├── libs.versions.toml     # 依赖版本目录
 │   └── wrapper/                # Gradle wrapper（锁定在 9.7.0）

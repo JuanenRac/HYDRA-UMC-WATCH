@@ -29,6 +29,8 @@ Costruita come app Wear OS autonoma (Kotlin + Jetpack Compose per Wear), riutili
 * ⌚ **Stato a Colpo d'Occhio** — riepilogo in tempo reale dell'attivita della flotta e dell'avanzamento delle missioni. *(pianificato - richiede la vera connessione WebSocket.)*
 * 🔐 **Autenticazione Sicura** — accoppiamento basato su JWT con HYDRA-UMC-SERVER. *(pianificato.)*
 * ✅ **Toolchain Wear OS autonoma** — una vera app Gradle/Kotlin/Compose per Wear che compila un APK di debug funzionante. *(implementato — vedi COMPILAZIONE ED ESECUZIONE sotto)*
+* 🔁 **Politica di Riconnessione del Relay** — `transport/RelayRetryPolicy.kt` è una politica reale e pura di backoff esponenziale per un invio relay fallito (ad es. nessun telefono ancora accoppiato), limitata a un ritardo massimo definito. *(implementato)*
+* 🗂️ **Cache dell'Ultimo Stato Noto** — `transport/LastKnownStateCache.kt` tiene traccia dell'obsolescenza reale dell'ultimo stato/avviso inoltrato, così uno vecchio non viene mai mostrato come attuale. *(implementato)*
 
 ---
 
@@ -50,6 +52,8 @@ flowchart LR
 * **Perché è un'app Wear OS autonoma, non una funzionalità dell'app telefono.** Un orologio esegue il proprio processo indipendente sul proprio sistema operativo - non può essere semplicemente una modalità UI di HYDRA-UMC-ANDROID-CONTROL, ha bisogno del proprio manifest, della propria build, e della propria UI (molto più limitata) per stato a colpo d'occhio/E-STOP rapido.
 * **Perché `minSdk 30` (Wear OS 3), inferiore al minSdk proprio dell'app telefono.** Questo mira deliberatamente all'attuale generazione hardware Wear OS 3+, non ai vecchi dispositivi Wear OS 2 - a differenza di HYDRA-UMC-ANDROID-CONTROL, che supporta telefoni più vecchi, un'app orologio companion ha una base hardware realistica da supportare molto più ristretta.
 * **Perché i pattern aptici e il protocollo di sincronizzazione arrivano prima della connessione WebSocket.** Definire le forme d'onda di vibrazione e le forme dei messaggi su cui entrambe le parti devono concordare è vero lavoro in Kotlin puro - non serve un socket aperto, un server accoppiato o un orologio fisico per scriverlo o testarlo. Aprire davvero quella connessione è il prossimo passo.
+* **Perché la politica di riconnessione e la cache dell'ultimo stato noto sono moduli puri a sé stanti, non codice inline in `WatchRelayTransport`.** Entrambe sono classi Kotlin reali e disaccoppiate (`RelayRetryPolicy`, `LastKnownStateCache`) testabili su una semplice JVM senza orologio, emulatore o telefono accoppiato - lo stesso standard già stabilito da `HapticPatterns.kt`/`SyncMessage.kt`. `WatchRelayTransport` stesso resta il pezzo sottile, necessariamente Android, che effettivamente pianifica un nuovo tentativo o registra un messaggio ricevuto, non il luogo dove risiede la logica matematica della policy sottostante.
+* **Perché uno stato in cache obsoleto viene segnalato, non nascosto.** Nascondere del tutto uno stato vecchio lascerebbe il quadrante dell'orologio vuoto proprio quando la connessione al telefono è instabile - il vero momento di rischio. Mostrarlo chiaramente contrassegnato come "ultimo noto - potrebbe essere obsoleto" mantiene l'operatore informato senza far passare una lettura vecchia di minuti come se fosse in tempo reale.
 * **Come si inserisce nel resto dell'ecosistema.** Si accoppia con HYDRA-UMC-ANDROID-CONTROL e HYDRA-UMC-IOS-CONTROL come companion al polso, a colpo d'occhio - non un sostituto di nessuno dei due, una superficie di stato rapido/E-STOP rapido.
 
 ---
@@ -69,8 +73,9 @@ HYDRA-UMC-WATCH/
 │       │   └── java/com/hydraumc/watch/
 │       │       ├── MainActivity.kt         # Punto di ingresso Compose per Wear
 │       │       ├── haptics/                # Pattern di vibrazione per severità
-│       │       └── protocol/               # Codec dei messaggi di sincronizzazione SERVER<->WATCH
-│       └── test/java/com/hydraumc/watch/   # Test JUnit reali (haptics, protocol)
+│       │       ├── protocol/               # Codec dei messaggi di sincronizzazione SERVER<->WATCH
+│       │       └── transport/              # Relay Data Layer, policy di retry, cache dell'ultimo stato noto
+│       └── test/java/com/hydraumc/watch/   # Test JUnit reali (haptics, protocol, transport)
 ├── gradle/
 │   ├── libs.versions.toml     # Catalogo delle versioni delle dipendenze
 │   └── wrapper/                # Gradle wrapper (fissato a 9.7.0)

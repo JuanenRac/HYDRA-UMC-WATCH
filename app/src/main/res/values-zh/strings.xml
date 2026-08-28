@@ -11,4 +11,5 @@
     <string name="voice_permission_denied">语音输入需要麦克风权限。</string>
     <string name="voice_unavailable">此手表无法使用语音识别。</string>
     <string name="voice_last_request">上一条请求: %1$s</string>
+    <string name="status_stale">最后已知状态 - 可能已过时</string>
 </resources>
