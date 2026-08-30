@@ -37,21 +37,13 @@ val hasPrivateReleaseSigning = listOf(
 ).all { !it.isNullOrBlank() }
 
 // =============================================================================
-// Ecosystem-wide auto version bump ("odometer" rule, base 10) - identical
-// mechanism to sibling repo HYDRA-UMC-ANDROID-CONTROL/app/build.gradle.kts
-// (copied rather than reinvented - same Gradle/Kotlin toolchain). Runs at
-// Gradle CONFIGURATION time, which happens on every real build
-// (assembleDebug, installDebug, compileDebugKotlin, ...), so
-// version.properties is read, bumped and rewritten with the new values
-// BEFORE those values are used for versionCode/versionName below - the APK
-// produced by this exact invocation already carries the bumped number. CI sets
-// HYDRA_UMC_CI=1 and the local verifier passes -PhydraUmcReadOnly=true, so
-// verification tasks do not mutate version.properties.
-//
-// Rule: versionPatch +1; if it would go above 9 it resets to 0 and
-// versionMinor +1 instead (example: 0.0.9 -> 0.1.0). versionCode is a
-// separate simple monotonic counter, always +1, no carry - Android requires
-// versionCode to strictly increase across every build that ever ships.
+// Version source of truth
+// =============================================================================
+// Gradle always reads version.properties and never writes it. build.bat and
+// build.sh are the sole release flows: they synchronize the native version,
+// hydra-umc.project.json and CHANGELOG.md first, then increment versionCode,
+// before invoking Gradle. This prevents a direct assemble/compile command from
+// creating an APK whose version differs from the project manifest.
 val versionPropsFile = file("version.properties")
 val versionPropsText = versionPropsFile.readText()
 
@@ -61,32 +53,10 @@ fun readIntProp(text: String, key: String): Int {
     return match.groupValues[1].toInt()
 }
 
-fun replaceIntProp(text: String, key: String, value: Int): String =
-    text.replace(Regex("(?m)^$key=\\d+\\s*$"), "$key=$value")
-
-var appVersionMajor = readIntProp(versionPropsText, "versionMajor")
-var appVersionMinor = readIntProp(versionPropsText, "versionMinor")
-var appVersionPatch = readIntProp(versionPropsText, "versionPatch")
-var appVersionCode = readIntProp(versionPropsText, "versionCode")
-
-val readOnlyBuild = providers.gradleProperty("hydraUmcReadOnly").orNull == "true" ||
-    System.getenv("HYDRA_UMC_CI") == "1"
-
-if (!readOnlyBuild) {
-    appVersionPatch += 1
-    if (appVersionPatch > 9) {
-        appVersionPatch = 0
-        appVersionMinor += 1
-    }
-    appVersionCode += 1
-
-    var newVersionPropsText = versionPropsText
-    newVersionPropsText = replaceIntProp(newVersionPropsText, "versionMajor", appVersionMajor)
-    newVersionPropsText = replaceIntProp(newVersionPropsText, "versionMinor", appVersionMinor)
-    newVersionPropsText = replaceIntProp(newVersionPropsText, "versionPatch", appVersionPatch)
-    newVersionPropsText = replaceIntProp(newVersionPropsText, "versionCode", appVersionCode)
-    versionPropsFile.writeText(newVersionPropsText)
-}
+val appVersionMajor = readIntProp(versionPropsText, "versionMajor")
+val appVersionMinor = readIntProp(versionPropsText, "versionMinor")
+val appVersionPatch = readIntProp(versionPropsText, "versionPatch")
+val appVersionCode = readIntProp(versionPropsText, "versionCode")
 
 val appVersionName = "$appVersionMajor.$appVersionMinor.$appVersionPatch"
 
@@ -117,7 +87,7 @@ android {
     }
     buildFeatures {
         compose = true
-        // Needed so BuildConfig.VERSION_NAME reflects the auto-bumped
+        // Needed so BuildConfig.VERSION_NAME reflects the coordinated
         // versionName above at runtime (MainActivity reads it for the
         // on-watch version label) - disabled by default on AGP 8+.
         buildConfig = true

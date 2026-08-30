@@ -29,11 +29,9 @@ printf '\n'
 # source of the real version bump: it increments version.properties AND
 # hydra-umc.project.json together via bump_manifest_version.py, plus
 # versionCode via bump_version_code.py, THEN runs Gradle with
-# -PhydraUmcReadOnly=true so app/build.gradle.kts's own version-bump logic
-# stays inert for this build - that logic still exists and still runs for
-# tools/build_test.py's compile-only CI check (which intentionally must
-# not touch version.properties/the manifest/CHANGELOG.md), but a real
-# build must never bump the version from two places at once.
+# -PhydraUmcReadOnly=true. Gradle is always read-only for version metadata;
+# this wrapper remains the only path that changes version.properties, the
+# manifest and CHANGELOG.md together.
 #
 # Usage:
 #   chmod +x build.sh gradlew   (one-time)

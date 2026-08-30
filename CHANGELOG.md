@@ -69,6 +69,25 @@ strictly increase across every build that ever ships.
 
 ---
 
+## [0.1.5] - Made Gradle read-only for versioning; build.bat/build.sh are the sole release flow
+
+- **`app/build.gradle.kts`** - previously bumped `version.properties` at
+  Gradle CONFIGURATION time on *any* real task (`assembleDebug`,
+  `installDebug`, `compileDebugKotlin`, ...), guarded only by
+  `-PhydraUmcReadOnly=true`/`HYDRA_UMC_CI=1`. A plain dev build run
+  without that flag silently advanced the native version with no
+  matching manifest/CHANGELOG update - the exact version-mirror drift
+  class this ecosystem's convention exists to prevent. Gradle now only
+  *reads* `version.properties`; it never writes it.
+- **`build.bat`/`build.sh`** - now the sole source of a real version
+  bump: `bump_manifest_version.py` (native version + manifest) and the
+  new `bump_version_code.py` (the separate, always-monotonic Android
+  `versionCode`) run first, then Gradle runs with
+  `-PhydraUmcReadOnly=true` - now purely informational, since Gradle
+  itself no longer has bump logic to suppress, but kept so a build
+  invoked with the old flag still behaves as expected.
+- `CI_VALIDATION=PASS`.
+
 ## [0.1.4] - Real relay reconnection policy and last-known-state cache
 
 - **`transport/RelayRetryPolicy.kt`** (new) - a real, pure exponential-backoff
