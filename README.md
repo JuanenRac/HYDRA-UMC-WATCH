@@ -95,7 +95,7 @@ HYDRA-UMC-WATCH/
 
 ---
 
-## 4. ⚙️ BUILD & RUN
+## 4. ⚙️ BUILD & RUN GUIDE
 
 Requires JDK 21, the Android SDK (`local.properties` → `sdk.dir`, gitignored — point it at your own SDK install), and a Wear OS device or emulator for `run`.
 
