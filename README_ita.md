@@ -25,7 +25,8 @@ Costruita come app Wear OS autonoma (Kotlin + Jetpack Compose per Wear), riutili
 ### Caratteristiche Principali:
 * ✅ **Reale v0 - pattern aptici e protocollo di sincronizzazione:** `haptics/HapticPatterns.kt` definisce un pattern di vibrazione reale e distinto per severità di avviso (Critico/Avviso/Info); `protocol/SyncMessage.kt` definisce e (de)serializza le forme reali dei messaggi `EStopCommand`/`Alert` del flusso di sincronizzazione SERVER<->WATCH sotto. Entrambi sono Kotlin puro, testabile - non serve hardware da orologio, emulatore, né un WebSocket aperto per eseguirli o testarli.
 * 🛑 **E-STOP Wireless** — pulsante di emergenza dedicato con latenza inferiore a 50ms su Wi-Fi industriale. *(il messaggio `EStopCommand` che invierebbe è reale e testato; il trasporto WebSocket e il collegamento del pulsante fisico restano pianificati — richiede l'accoppiamento con HYDRA-UMC-SERVER.)*
-* 📳 **Avvisi Aptici** — pattern di vibrazione differenziati per i vari tipi di avviso (Critico, Avviso, Info). *(i pattern stessi sono reali - vedi sopra; collegarli alla vera chiamata del servizio `Vibrator` resta pianificato.)*
+* 📳 **Avvisi Aptici** — pattern di vibrazione differenziati per i vari tipi di avviso (Critico, Avviso, Info), riprodotti tramite il vero servizio Android `Vibrator`/`VibratorManager`. *(implementato - `haptics/HapticAlertPlayer.kt`; ancora non verificato su un vero dispositivo Wear OS, come il resto di questa app.)*
+* 🎙️ **Voce** — tocca per parlare: richiesta esplicita del permesso `RECORD_AUDIO`, l'intent di riconoscimento vocale di sistema (`RecognizerIntent`) per la trascrizione, la trascrizione inoltrata a HYDRA-UMC-ANDROID-CONTROL come messaggio di sync `voice_turn` limitato, e una risposta locale tramite `TextToSpeech` sull'orologio. *(implementato - `MainActivity.kt`; la voce non può mai azionare direttamente un robot, vedi Architettura sotto.)*
 * ⌚ **Stato a Colpo d'Occhio** — riepilogo in tempo reale dell'attività della flotta e dell'avanzamento delle missioni. *(pianificato - richiede la vera connessione WebSocket.)*
 * 🔐 **Autenticazione Sicura** — accoppiamento basato su JWT con HYDRA-UMC-SERVER. *(pianificato.)*
 * ✅ **Toolchain Wear OS autonoma** — una vera app Gradle/Kotlin/Compose per Wear che compila un APK di debug funzionante. *(implementato — vedi COMPILAZIONE ED ESECUZIONE sotto)*
@@ -85,7 +86,6 @@ HYDRA-UMC-WATCH/
 ├── docs/                      # Documentazione e protocolli di sicurezza
 ├── build/                     # Riservato (l'app/build/ di Gradle stesso è ignorato da git)
 ├── images/                    # Media e diagrammi
-├── scripts/                   # Script di utilità
 ├── bump_manifest_version.py   # Incrementa major/minor/patch + il manifest, insieme
 ├── bump_version_code.py       # Incrementa il contatore versionCode proprio di Android
 ├── build.sh / build.bat       # Build reale: incrementa la versione, esegue i test, assembleDebug

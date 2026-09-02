@@ -25,7 +25,8 @@ Built as a standalone Wear OS app (Kotlin + Jetpack Compose for Wear), reusing t
 ### Key Features:
 * ✅ **Real v0 - haptic patterns & sync protocol:** `haptics/HapticPatterns.kt` defines a real, distinct vibration waveform per alert severity (Critical/Warning/Info); `protocol/SyncMessage.kt` defines and (de)serializes the real `EStopCommand`/`Alert` message shapes for the SERVER<->WATCH sync flow below. Both are plain, testable Kotlin - no watch hardware, emulator, or open WebSocket needed to run or test either.
 * 🛑 **Wireless E-STOP** — dedicated emergency button with sub-50ms latency over industrial Wi-Fi. *(the `EStopCommand` message it would send is real and tested; the WebSocket transport and physical button wiring are still planned - needs HYDRA-UMC-SERVER pairing.)*
-* 📳 **Haptic Alerts** — differentiated vibration patterns for various alert types (Critical, Warning, Info). *(the patterns themselves are real - see above; wiring them into the actual `Vibrator` service call is still planned.)*
+* 📳 **Haptic Alerts** — differentiated vibration patterns for various alert types (Critical, Warning, Info), played through Android's real `Vibrator`/`VibratorManager` service. *(implemented - `haptics/HapticAlertPlayer.kt`; still unverified on a real Wear OS device, same as the rest of this app.)*
+* 🎙️ **Voice** — tap-to-talk: explicit `RECORD_AUDIO` permission request, the system speech-recognition intent (`RecognizerIntent`) for transcription, the transcript relayed to HYDRA-UMC-ANDROID-CONTROL as a bounded `voice_turn` sync message, and a local `TextToSpeech` reply on the watch. *(implemented - `MainActivity.kt`; voice can never actuate a robot directly, see Architecture below.)*
 * ⌚ **Glanceable Status** — real-time summary of swarm activity and mission progress. *(planned - needs the real WebSocket connection.)*
 * 🔐 **Secure Auth** — JWT-based pairing with HYDRA-UMC-SERVER. *(planned.)*
 * ✅ **Standalone Wear OS toolchain** — a real Gradle/Kotlin/Compose-for-Wear app that builds a working debug APK. *(implemented — see BUILD & RUN below)*
@@ -85,7 +86,6 @@ HYDRA-UMC-WATCH/
 ├── docs/                      # Documentation and safety protocols
 ├── build/                     # Reserved (Gradle's own app/build/ is gitignored)
 ├── images/                    # Media and diagrams
-├── scripts/                   # Utility scripts
 ├── bump_manifest_version.py   # Bumps major/minor/patch + the manifest, in lockstep
 ├── bump_version_code.py       # Bumps Android's separate versionCode counter
 ├── build.sh / build.bat       # Real build: bump version, run tests, assembleDebug

@@ -29,7 +29,8 @@
 ### 关键特性：
 * ✅ **真实 v0 —— 触觉模式与同步协议：** `haptics/HapticPatterns.kt` 为每种告警严重程度（严重/警告/信息）定义了一个真实且各不相同的振动模式；`protocol/SyncMessage.kt` 定义并（反）序列化了下方 SERVER<->WATCH 同步流程中 `EStopCommand`/`Alert` 消息的真实结构。两者都是纯 Kotlin 代码，可测试——运行或测试都不需要手表硬件、模拟器，或者打开的 WebSocket。
 * 🛑 **无线 E-STOP** —— 通过工业 Wi-Fi 实现亚 50ms 延迟的专用紧急按钮。*（它会发送的 `EStopCommand` 消息是真实的并且已测试；WebSocket 传输和物理按钮的接线仍是计划中——需要与 HYDRA-UMC-SERVER 配对。）*
-* 📳 **触觉告警** —— 针对不同告警类型（严重、警告、信息）的差异化振动模式。*（模式本身是真实的——见上文；将其接入真实的 `Vibrator` 服务调用仍是计划中。）*
+* 📳 **触觉告警** —— 针对不同告警类型（严重、警告、信息）的差异化振动模式，通过 Android 真实的 `Vibrator`/`VibratorManager` 服务播放。*（已实现——`haptics/HapticAlertPlayer.kt`；与本应用其余部分一样，尚未在真实 Wear OS 设备上验证。）*
+* 🎙️ **语音** —— 按住说话：明确请求 `RECORD_AUDIO` 权限、使用系统语音识别 intent（`RecognizerIntent`）进行转录、将转录内容作为受限的 `voice_turn` 同步消息中继给 HYDRA-UMC-ANDROID-CONTROL，并在手表上通过本地 `TextToSpeech` 回复。*（已实现——`MainActivity.kt`；语音绝不能直接操控机器人，见下文架构部分。）*
 * ⌚ **一目了然的状态：** 集群活动和任务进度的实时摘要。*（计划中——需要真实的 WebSocket 连接。）*
 * 🔐 **安全认证：** 与 HYDRA-UMC-SERVER 基于 JWT 的配对。*（计划中。）*
 * ✅ **独立的 Wear OS 工具链** —— 一个真实的 Gradle/Kotlin/Compose-for-Wear 应用，能够构建出可用的调试 APK。*（已实现——见下方"构建与运行"）*
@@ -90,7 +91,6 @@ HYDRA-UMC-WATCH/
 ├── docs/                      # 文档与安全协议
 ├── build/                     # 预留（Gradle 自身的 app/build/ 已被 gitignore）
 ├── images/                    # 媒体与图表
-├── scripts/                   # 实用脚本
 ├── bump_manifest_version.py   # 同时递增 major/minor/patch 和清单文件
 ├── bump_version_code.py       # 递增 Android 自身的 versionCode 计数器
 ├── build.sh / build.bat       # 真实构建：递增版本、运行测试、assembleDebug
