@@ -18,31 +18,31 @@
 
 ## 1. 🛠️ VISIÓN TÉCNICA GENERAL
 
-**HYDRA-UMC-WATCH** es la extension tactica para el operario de planta. Ofrece informacion critica de un vistazo y controles de seguridad directamente en la muneca, garantizando que el operario siempre tenga el control, incluso lejos del HMI principal.
+**HYDRA-UMC-WATCH** es la extensión táctica para el operario de planta. Ofrece información crítica de un vistazo y controles de seguridad directamente en la muñeca, garantizando que el operario siempre tenga el control, incluso lejos del HMI principal.
 
 Construido como una app Wear OS independiente (Kotlin + Jetpack Compose para Wear), reutilizando el mismo toolchain Gradle/Kotlin que el repositorio hermano HYDRA-UMC-ANDROID-CONTROL en vez de introducir uno nuevo.
 
-### Caracteristicas Clave:
+### Características Clave:
 * ✅ **Real v0 - patrones hápticos y protocolo de sincronización:** `haptics/HapticPatterns.kt` define un patrón de vibración real y distinto por severidad de alerta (Crítica/Advertencia/Info); `protocol/SyncMessage.kt` define y (de)serializa las formas reales de los mensajes `EStopCommand`/`Alert` del flujo de sincronización SERVER<->WATCH de abajo. Ambos son Kotlin puro, testeable - no necesitan hardware de reloj, emulador, ni un WebSocket abierto para ejecutarse ni testearse.
-* 🛑 **E-STOP Inalambrico** — boton de emergencia dedicado con latencia inferior a 50ms sobre Wi-Fi industrial. *(el mensaje `EStopCommand` que enviaría es real y está testeado; el transporte WebSocket y el cableado del botón físico siguen siendo planeados — necesita emparejamiento con HYDRA-UMC-SERVER.)*
-* 📳 **Alertas Hapticas** — patrones de vibracion diferenciados para distintos tipos de alerta (Critica, Advertencia, Info). *(los patrones en sí son reales - ver arriba; conectarlos a la llamada real del servicio `Vibrator` sigue siendo planeado.)*
-* ⌚ **Estado de un Vistazo** — resumen en tiempo real de la actividad de la flota y el progreso de la mision. *(planeado - necesita la conexión WebSocket real.)*
-* 🔐 **Autenticacion Segura** — emparejamiento basado en JWT con HYDRA-UMC-SERVER. *(planeado.)*
-* ✅ **Toolchain Wear OS independiente** — una app real de Gradle/Kotlin/Compose para Wear que compila un APK de depuracion funcional. *(implementado — ver COMPILACIÓN Y EJECUCIÓN abajo)*
+* 🛑 **E-STOP Inalámbrico** — botón de emergencia dedicado con latencia inferior a 50ms sobre Wi-Fi industrial. *(el mensaje `EStopCommand` que enviaría es real y está testeado; el transporte WebSocket y el cableado del botón físico siguen siendo planeados — necesita emparejamiento con HYDRA-UMC-SERVER.)*
+* 📳 **Alertas Hápticas** — patrones de vibración diferenciados para distintos tipos de alerta (Crítica, Advertencia, Info). *(los patrones en sí son reales - ver arriba; conectarlos a la llamada real del servicio `Vibrator` sigue siendo planeado.)*
+* ⌚ **Estado de un Vistazo** — resumen en tiempo real de la actividad de la flota y el progreso de la misión. *(planeado - necesita la conexión WebSocket real.)*
+* 🔐 **Autenticación Segura** — emparejamiento basado en JWT con HYDRA-UMC-SERVER. *(planeado.)*
+* ✅ **Toolchain Wear OS independiente** — una app real de Gradle/Kotlin/Compose para Wear que compila un APK de depuración funcional. *(implementado — ver COMPILACIÓN Y EJECUCIÓN abajo)*
 * 🔁 **Política de Reconexión del Relay** — `transport/RelayRetryPolicy.kt` es una política real y pura de backoff exponencial para un envío de relay fallido (p. ej. sin teléfono emparejado todavía), con un límite máximo de retraso acotado. *(implementado)*
 * 🗂️ **Caché de Último Estado Conocido** — `transport/LastKnownStateCache.kt` rastrea la obsolescencia real del último estado/alerta retransmitido, de modo que uno antiguo nunca se muestra como actual. *(implementado)*
 
 ---
 
-## 2. 🔄 FLUJO DE SINCRONIZACION DEL WEARABLE
+## 2. 🔄 FLUJO DE SINCRONIZACIÓN DEL WEARABLE
 
 ```mermaid
 flowchart LR
-    SERVER["HYDRA-UMC-SERVER"] --> WS["Sincronizacion WebSocket"]
+    SERVER["HYDRA-UMC-SERVER"] --> WS["Sincronización WebSocket"]
     WS --> WATCH["HYDRA-UMC-WATCH"]
     WATCH -- Comando E-STOP --> SERVER
-    SERVER -- Alerta Critica --> WATCH
-    WATCH -- Retroalimentacion Haptica --> OPERATOR["Operario de Planta"]
+    SERVER -- Alerta Crítica --> WATCH
+    WATCH -- Retroalimentación Háptica --> OPERATOR["Operario de Planta"]
 ```
 
 ---
@@ -65,7 +65,7 @@ App Wear OS independiente — sin hardware, firmware ni sistema operativo propio
 ```text
 HYDRA-UMC-WATCH/
 ├── app/
-│   ├── build.gradle.kts       # Config del modulo app (lee version.properties, nunca lo escribe)
+│   ├── build.gradle.kts       # Config del módulo app (lee version.properties, nunca lo escribe)
 │   ├── version.properties     # versionMajor/Minor/Patch/Code (solo lo incrementan build.sh/.bat)
 │   └── src/
 │       ├── main/
@@ -77,27 +77,27 @@ HYDRA-UMC-WATCH/
 │       │       └── transport/              # Relay Data Layer, política de reintentos, caché de último estado conocido
 │       └── test/java/com/hydraumc/watch/   # Tests JUnit reales (haptics, protocol, transport)
 ├── gradle/
-│   ├── libs.versions.toml     # Catalogo de versiones de dependencias
+│   ├── libs.versions.toml     # Catálogo de versiones de dependencias
 │   └── wrapper/                # Gradle wrapper (fijado a 9.7.0)
-├── build.gradle.kts           # Build raiz de Gradle
-├── settings.gradle.kts        # Cableado de modulos
+├── build.gradle.kts           # Build raíz de Gradle
+├── settings.gradle.kts        # Cableado de módulos
 ├── gradlew / gradlew.bat      # Lanzador del Gradle wrapper
-├── docs/                      # Documentacion y protocolos de seguridad
-├── build/                     # Reservado (el propio app/build/ de Gradle esta ignorado por git)
+├── docs/                      # Documentación y protocolos de seguridad
+├── build/                     # Reservado (el propio app/build/ de Gradle está ignorado por git)
 ├── images/                    # Medios y diagramas
 ├── scripts/                   # Scripts de utilidad
 ├── bump_manifest_version.py   # Incrementa major/minor/patch + el manifiesto, a la vez
 ├── bump_version_code.py       # Incrementa el contador versionCode propio de Android
 ├── build.sh / build.bat       # Build real: incrementa versión, corre tests, assembleDebug
-├── run.sh / run.bat           # Ejecucion real: gradlew installDebug + lanzamiento adb
-└── src/                       # Reservado (el codigo de este proyecto vive en app/src/)
+├── run.sh / run.bat           # Ejecución real: gradlew installDebug + lanzamiento adb
+└── src/                       # Reservado (el código de este proyecto vive en app/src/)
 ```
 
 ---
 
 ## 4. ⚙️ COMPILACIÓN Y EJECUCIÓN
 
-Requiere JDK 21, el Android SDK (`local.properties` → `sdk.dir`, ignorado por git — apunta a tu propia instalacion del SDK) y un dispositivo o emulador Wear OS para `run`.
+Requiere JDK 21, el Android SDK (`local.properties` → `sdk.dir`, ignorado por git — apunta a tu propia instalación del SDK) y un dispositivo o emulador Wear OS para `run`.
 
 ```bash
 # Linux/macOS
