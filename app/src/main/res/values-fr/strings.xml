@@ -3,18 +3,18 @@
     <string name="app_name">HYDRA-UMC WATCH</string>
     <string name="tagline">Tableau de bord de sécurité portable</string>
     <string name="status_placeholder">Pas encore associé à un HYDRA-UMC-SERVER</string>
-    <string name="test_haptic_alert">Tester l'alerte haptique</string>
+    <string name="test_haptic_alert">Tester l\'alerte haptique</string>
     <string name="voice_start">Parlez à HYDRA-UMC</string>
     <string name="voice_prompt">Énoncez votre demande pour HYDRA-UMC</string>
     <string name="voice_listening">Écoute…</string>
     <string name="voice_captured">Demande vocale capturée. En attente de la connexion IA sécurisée.</string>
     <string name="voice_sending">Envoi du texte reconnu via le téléphone associé…</string>
     <string name="voice_phone_unavailable">Le téléphone associé est indisponible ou non connecté à HYDRA-UMC-SERVER.</string>
-    <string name="voice_permission_denied">L'autorisation du microphone est requise pour la saisie vocale.</string>
-    <string name="voice_unavailable">La reconnaissance vocale n'est pas disponible sur cette montre.</string>
+    <string name="voice_permission_denied">L\'autorisation du microphone est requise pour la saisie vocale.</string>
+    <string name="voice_unavailable">La reconnaissance vocale n\'est pas disponible sur cette montre.</string>
     <string name="voice_last_request">Dernière demande : %1$s</string>
-    <string name="status_refresh">Actualiser l'état du système</string>
-    <string name="status_loading">Demande de l'état sécurisé du système…</string>
+    <string name="status_refresh">Actualiser l\'état du système</string>
+    <string name="status_loading">Demande de l\'état sécurisé du système…</string>
     <string name="status_phone_unavailable">Le téléphone associé est indisponible ou non connecté à HYDRA-UMC-SERVER.</string>
     <string name="status_stale">Dernier état connu - peut être obsolète</string>
 </resources>

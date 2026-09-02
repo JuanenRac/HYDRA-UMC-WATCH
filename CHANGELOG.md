@@ -69,6 +69,18 @@ strictly increase across every build that ever ships.
 
 ---
 
+## [0.1.7]
+
+- **Fixed CI**: the 0.1.6 French/Italian string additions contained
+  unescaped apostrophes from real elisions (`l'alerte`, `L'autorisation`,
+  `n'est`, `l'état`, `l'accesso`, `l'autorizzazione`, `l'input`) - valid
+  well-formed XML (caught nothing in the earlier `xml.dom.minidom` check),
+  but Android's own string-resource format requires an apostrophe inside
+  string content to be escaped as `\'`, and AAPT2 failed
+  `:app:mergeDebugResources` with "Invalid unicode escape sequence" on
+  every one of them. Escaped all 8 occurrences across `values-fr/` and
+  `values-it/`. Verified: `./gradlew test` - BUILD SUCCESSFUL.
+
 ## [0.1.6]
 
 - **UI localization gap closed** - `app/src/main/res/values-ja` and
