@@ -69,6 +69,19 @@ strictly increase across every build that ever ships.
 
 ---
 
+## [0.1.6]
+
+- **UI localization gap closed** - `app/src/main/res/values-ja` and
+  `values-zh` were each missing 5 of the 17 real string keys (`voice_sending`,
+  `voice_phone_unavailable`, `status_refresh`, `status_loading`,
+  `status_phone_unavailable`), added later to the English base without a
+  matching translation pass; both now translate all 17. `values-es`,
+  `values-fr`, `values-de`, and `values-it` did not exist at all - the app
+  silently fell back to English on those locales despite the rest of the
+  HYDRA-UMC ecosystem shipping all 7 languages. Added full real translations
+  for all four, bringing HYDRA-UMC-WATCH to the same 7-language coverage as
+  every other UI in the ecosystem.
+
 ## [0.1.5] - Made Gradle read-only for versioning; build.bat/build.sh are the sole release flow
 
 - **`app/build.gradle.kts`** - previously bumped `version.properties` at

@@ -8,8 +8,13 @@
     <string name="voice_prompt">HYDRA-UMC へのリクエストを話してください</string>
     <string name="voice_listening">聞き取り中…</string>
     <string name="voice_captured">音声リクエストを取得しました。安全な AI 接続を待っています。</string>
+    <string name="voice_sending">ペアリングされたスマートフォン経由で認識したテキストを送信しています…</string>
+    <string name="voice_phone_unavailable">ペアリングされたスマートフォンが利用できないか、HYDRA-UMC-SERVER にサインインしていません。</string>
     <string name="voice_permission_denied">音声入力にはマイクの許可が必要です。</string>
     <string name="voice_unavailable">この時計では音声認識を利用できません。</string>
     <string name="voice_last_request">最後のリクエスト: %1$s</string>
+    <string name="status_refresh">システム状態を更新</string>
+    <string name="status_loading">安全なシステム状態をリクエスト中…</string>
+    <string name="status_phone_unavailable">ペアリングされたスマートフォンが利用できないか、HYDRA-UMC-SERVER にサインインしていません。</string>
     <string name="status_stale">最終確認情報 - 古い可能性があります</string>
 </resources>

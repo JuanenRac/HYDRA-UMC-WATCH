@@ -8,8 +8,13 @@
     <string name="voice_prompt">请说出给 HYDRA-UMC 的请求</string>
     <string name="voice_listening">正在聆听…</string>
     <string name="voice_captured">已捕获语音请求，正在等待安全的 AI 连接。</string>
+    <string name="voice_sending">正在通过已配对的手机发送识别到的文本…</string>
+    <string name="voice_phone_unavailable">已配对的手机不可用，或尚未登录 HYDRA-UMC-SERVER。</string>
     <string name="voice_permission_denied">语音输入需要麦克风权限。</string>
     <string name="voice_unavailable">此手表无法使用语音识别。</string>
     <string name="voice_last_request">上一条请求: %1$s</string>
+    <string name="status_refresh">刷新系统状态</string>
+    <string name="status_loading">正在请求安全系统状态…</string>
+    <string name="status_phone_unavailable">已配对的手机不可用，或尚未登录 HYDRA-UMC-SERVER。</string>
     <string name="status_stale">最后已知状态 - 可能已过时</string>
 </resources>
