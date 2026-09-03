@@ -26,8 +26,8 @@ Built as a standalone Wear OS app (Kotlin + Jetpack Compose for Wear), reusing t
 * ✅ **Real v0 - haptic patterns & sync protocol:** `haptics/HapticPatterns.kt` defines a real, distinct vibration waveform per alert severity (Critical/Warning/Info); `protocol/SyncMessage.kt` defines and (de)serializes the real `EStopCommand`/`Alert` message shapes for the SERVER<->WATCH sync flow below. Both are plain, testable Kotlin - no watch hardware, emulator, or open WebSocket needed to run or test either.
 * 🛑 **Wireless E-STOP** — dedicated emergency button with sub-50ms latency over industrial Wi-Fi. *(the `EStopCommand` message it would send is real and tested; the WebSocket transport and physical button wiring are still planned - needs HYDRA-UMC-SERVER pairing.)*
 * 📳 **Haptic Alerts** — differentiated vibration patterns for various alert types (Critical, Warning, Info), played through Android's real `Vibrator`/`VibratorManager` service. *(implemented - `haptics/HapticAlertPlayer.kt`; still unverified on a real Wear OS device, same as the rest of this app.)*
-* 🎙️ **Voice** — tap-to-talk: explicit `RECORD_AUDIO` permission request, the system speech-recognition intent (`RecognizerIntent`) for transcription, the transcript relayed to HYDRA-UMC-ANDROID-CONTROL as a bounded `voice_turn` sync message, and a local `TextToSpeech` reply on the watch. *(implemented - `MainActivity.kt`; voice can never actuate a robot directly, see Architecture below.)*
-* ⌚ **Glanceable Status** — real-time summary of swarm activity and mission progress. *(planned - needs the real WebSocket connection.)*
+* 🎙️ **Voice** — tap-to-talk: explicit `RECORD_AUDIO` permission request, the system speech-recognition intent (`RecognizerIntent`) for transcription, the transcript relayed to HYDRA-UMC-ANDROID-CONTROL as a bounded `voice_turn` sync message, and a local `TextToSpeech` reply on the watch. *(implemented - `MainActivity.kt`; voice can never actuate a robot directly, see Architecture below and [docs/VOICE_AI_PROTOCOL.md](docs/VOICE_AI_PROTOCOL.md) for the full end-to-end message flow and safety boundary.)*
+* ⌚ **Glanceable Status** — a **Refresh status** button relays a bounded status request to HYDRA-UMC-ANDROID-CONTROL over the paired Data Layer; the returned `system_status` card is shown with a "last known - may be outdated" indicator once it goes stale. *(implemented - `MainActivity.kt`/`WatchRelayTransport.requestSystemStatus()`; pull-based over the phone relay, not a direct watch-to-server push socket, and still unverified on a real Wear OS device.)*
 * 🔐 **Secure Auth** — JWT-based pairing with HYDRA-UMC-SERVER. *(planned.)*
 * ✅ **Standalone Wear OS toolchain** — a real Gradle/Kotlin/Compose-for-Wear app that builds a working debug APK. *(implemented — see BUILD & RUN below)*
 * 🔁 **Relay Reconnection Policy** — `transport/RelayRetryPolicy.kt` is a real, pure exponential-backoff policy for a failed relay send (e.g. no paired phone yet), capped at a bounded max delay. *(implemented)*
@@ -45,6 +45,15 @@ flowchart LR
     SERVER -- Critical Alert --> WATCH
     WATCH -- Haptic Feedback --> OPERATOR["Plant Operator"]
 ```
+
+*Target architecture once a direct Server WebSocket exists. The real, tested
+path today relays through the paired phone instead: Watch -> Data Layer ->
+HYDRA-UMC-ANDROID-CONTROL -> authenticated HYDRA-UMC-SERVER/Voice UI, and
+back - see Architecture below and
+[docs/VOICE_AI_PROTOCOL.md](docs/VOICE_AI_PROTOCOL.md) for that real
+end-to-end flow. The Watch never holds a Server credential itself; a direct
+Watch-to-Server WebSocket and the wireless E-STOP button remain future,
+hardware-gated work.*
 
 ---
 
@@ -80,16 +89,24 @@ HYDRA-UMC-WATCH/
 ├── gradle/
 │   ├── libs.versions.toml     # Dependency version catalog
 │   └── wrapper/                # Gradle wrapper (pinned to 9.7.0)
+├── tools/
+│   ├── build_test.py          # Non-mutating CI check: contract verification + assembleDebug
+│   ├── ci_validate.py         # Manifest/CHANGELOG/docs validation used by CI
+│   └── verify_paired_relay_contract.py # Static Watch<->Android Control Data Layer safety-boundary check
 ├── build.gradle.kts           # Root Gradle build
 ├── settings.gradle.kts        # Module wiring
 ├── gradlew / gradlew.bat      # Gradle wrapper launcher
 ├── docs/                      # Documentation and safety protocols
 ├── build/                     # Reserved (Gradle's own app/build/ is gitignored)
 ├── images/                    # Media and diagrams
+├── hydra-umc.project.json     # Ecosystem manifest (version, build/health metadata)
+├── keystore.properties.example # Template for the ignored release-signing config
 ├── bump_manifest_version.py   # Bumps major/minor/patch + the manifest, in lockstep
 ├── bump_version_code.py       # Bumps Android's separate versionCode counter
 ├── build.sh / build.bat       # Real build: bump version, run tests, assembleDebug
+├── build-test.sh / build-test.bat # Non-mutating wrapper for tools/build_test.py
 ├── run.sh / run.bat           # Real run: gradlew installDebug + adb launch
+├── update-from-github.sh / .bat # Non-Play update channel: GitHub Release APK + `adb install -r`
 └── src/                       # Reserved (this project's code lives under app/src/)
 ```
 
@@ -118,6 +135,34 @@ Real example - the two version-bump scripts run standalone too, useful to inspec
 python3 bump_manifest_version.py   # e.g. "HYDRA-UMC version: v0.1.2 -> v0.1.3"
 python3 bump_version_code.py       # e.g. "versionCode: 12 -> 13"
 ```
+
+---
+
+## 5. 📲 UPDATES WITHOUT GOOGLE PLAY
+
+This project is not distributed through Google Play. The repeatable update
+path is a GitHub Release APK installed over ADB:
+
+```bash
+# from the project root, watch paired and Wireless debugging enabled
+update-from-github.bat    # Windows
+./update-from-github.sh   # Linux / macOS / WSL
+```
+
+The script reads `releases/latest` from GitHub, requires a stable
+`vMAJOR.MINOR.PATCH` tag, checks the version already installed, asks for
+explicit operator confirmation, then downloads and runs `adb install -r`. It
+never touches the repository version, manifest or `CHANGELOG.md`. A manual,
+best-effort install (open the downloaded APK's package installer directly on
+the watch) is also documented for devices without a usable ADB path. See
+[docs/GITHUB_ADB_UPDATES.md](docs/GITHUB_ADB_UPDATES.md) for the full
+procedure, release-APK naming requirement, and release-signing setup.
+
+`HYDRA-UMC-ANDROID-CONTROL` can inform the operator that a newer Watch
+release exists once the paired companion-version status message is wired up
+— it is informational only and can never install anything on the watch
+itself. See [docs/COMPANION_VERSION_PROTOCOL.md](docs/COMPANION_VERSION_PROTOCOL.md)
+for that message shape.
 
 ---
 

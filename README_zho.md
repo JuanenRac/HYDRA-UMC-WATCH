@@ -30,8 +30,8 @@
 * ✅ **真实 v0 —— 触觉模式与同步协议：** `haptics/HapticPatterns.kt` 为每种告警严重程度（严重/警告/信息）定义了一个真实且各不相同的振动模式；`protocol/SyncMessage.kt` 定义并（反）序列化了下方 SERVER<->WATCH 同步流程中 `EStopCommand`/`Alert` 消息的真实结构。两者都是纯 Kotlin 代码，可测试——运行或测试都不需要手表硬件、模拟器，或者打开的 WebSocket。
 * 🛑 **无线 E-STOP** —— 通过工业 Wi-Fi 实现亚 50ms 延迟的专用紧急按钮。*（它会发送的 `EStopCommand` 消息是真实的并且已测试；WebSocket 传输和物理按钮的接线仍是计划中——需要与 HYDRA-UMC-SERVER 配对。）*
 * 📳 **触觉告警** —— 针对不同告警类型（严重、警告、信息）的差异化振动模式，通过 Android 真实的 `Vibrator`/`VibratorManager` 服务播放。*（已实现——`haptics/HapticAlertPlayer.kt`；与本应用其余部分一样，尚未在真实 Wear OS 设备上验证。）*
-* 🎙️ **语音** —— 按住说话：明确请求 `RECORD_AUDIO` 权限、使用系统语音识别 intent（`RecognizerIntent`）进行转录、将转录内容作为受限的 `voice_turn` 同步消息中继给 HYDRA-UMC-ANDROID-CONTROL，并在手表上通过本地 `TextToSpeech` 回复。*（已实现——`MainActivity.kt`；语音绝不能直接操控机器人，见下文架构部分。）*
-* ⌚ **一目了然的状态：** 集群活动和任务进度的实时摘要。*（计划中——需要真实的 WebSocket 连接。）*
+* 🎙️ **语音** —— 按住说话：明确请求 `RECORD_AUDIO` 权限、使用系统语音识别 intent（`RecognizerIntent`）进行转录、将转录内容作为受限的 `voice_turn` 同步消息中继给 HYDRA-UMC-ANDROID-CONTROL，并在手表上通过本地 `TextToSpeech` 回复。*（已实现——`MainActivity.kt`；语音绝不能直接操控机器人，见下文架构部分，完整的端到端消息流程和安全边界见 [docs/VOICE_AI_PROTOCOL.md](docs/VOICE_AI_PROTOCOL.md)。）*
+* ⌚ **一目了然的状态：** **刷新状态**按钮通过已配对的 Data Layer 向 HYDRA-UMC-ANDROID-CONTROL 中继一个受限的状态请求；返回的 `system_status` 卡片在过时后会显示"最后已知——可能已过时"的提示。*（已实现——`MainActivity.kt`/`WatchRelayTransport.requestSystemStatus()`；通过手机中继按需拉取，而非手表到服务器的直接推送套接字，且尚未在真实 Wear OS 设备上验证。）*
 * 🔐 **安全认证：** 与 HYDRA-UMC-SERVER 基于 JWT 的配对。*（计划中。）*
 * ✅ **独立的 Wear OS 工具链** —— 一个真实的 Gradle/Kotlin/Compose-for-Wear 应用，能够构建出可用的调试 APK。*（已实现——见下方"构建与运行"）*
 * 🔁 **中继重连策略** —— `transport/RelayRetryPolicy.kt` 是一个真实的、纯粹的指数退避策略，用于处理失败的中继发送（例如尚未配对手机的情况），并设有一个有上限的最大延迟。*（已实现）*
@@ -49,6 +49,13 @@ flowchart LR
     SERVER -- Critical Alert --> WATCH
     WATCH -- Haptic Feedback --> OPERATOR["Plant Operator"]
 ```
+
+*这是与 Server 建立直接 WebSocket 之后的目标架构。今天真实且经过测试的
+路径是通过已配对的手机中继：Watch -> Data Layer -> HYDRA-UMC-ANDROID-CONTROL
+-> 已认证的 HYDRA-UMC-SERVER/Voice UI，再返回——参见下方架构部分，以及
+该真实端到端流程的 [docs/VOICE_AI_PROTOCOL.md](docs/VOICE_AI_PROTOCOL.md)。
+手表本身从不持有 Server 凭据；手表到服务器的直接 WebSocket 以及无线
+E-STOP 按钮仍是受硬件限制、有待未来完成的工作。*
 
 ---
 
@@ -85,16 +92,24 @@ HYDRA-UMC-WATCH/
 ├── gradle/
 │   ├── libs.versions.toml     # 依赖版本目录
 │   └── wrapper/                # Gradle wrapper（锁定在 9.7.0）
+├── tools/
+│   ├── build_test.py          # 不产生变更的 CI 检查：契约验证 + assembleDebug
+│   ├── ci_validate.py         # CI 使用的清单/CHANGELOG/文档校验
+│   └── verify_paired_relay_contract.py # Watch<->Android Control 之间 Data Layer 安全边界的静态检查
 ├── build.gradle.kts           # 根 Gradle 构建
 ├── settings.gradle.kts        # 模块接入
 ├── gradlew / gradlew.bat      # Gradle wrapper 启动器
 ├── docs/                      # 文档与安全协议
 ├── build/                     # 预留（Gradle 自身的 app/build/ 已被 gitignore）
 ├── images/                    # 媒体与图表
+├── hydra-umc.project.json     # 生态系统清单（版本、构建/健康元数据）
+├── keystore.properties.example # 已被 gitignore 的发布签名配置模板
 ├── bump_manifest_version.py   # 同时递增 major/minor/patch 和清单文件
 ├── bump_version_code.py       # 递增 Android 自身的 versionCode 计数器
 ├── build.sh / build.bat       # 真实构建：递增版本、运行测试、assembleDebug
+├── build-test.sh / build-test.bat # tools/build_test.py 的不产生变更的包装脚本
 ├── run.sh / run.bat           # 真实运行：gradlew installDebug + adb launch
+├── update-from-github.sh / .bat # 不依赖 Play 的更新渠道：GitHub Release APK + `adb install -r`
 └── src/                       # 预留（本项目的代码位于 app/src/ 下）
 ```
 
@@ -133,6 +148,32 @@ run.bat
 python3 bump_manifest_version.py   # 例如 "HYDRA-UMC version: v0.1.2 -> v0.1.3"
 python3 bump_version_code.py       # 例如 "versionCode: 12 -> 13"
 ```
+
+---
+
+## 5. 📲 不依赖 Google Play 的更新方式
+
+本项目不通过 Google Play 分发。可重复的更新路径是通过 ADB 安装 GitHub
+Release 的 APK：
+
+```bash
+# 在项目根目录下，手表已配对且已开启 Wireless debugging
+update-from-github.bat    # Windows
+./update-from-github.sh   # Linux / macOS / WSL
+```
+
+该脚本会读取 GitHub 上的 `releases/latest`，要求使用稳定的
+`vMAJOR.MINOR.PATCH` 标签，检查已安装的版本，请求操作员明确确认，然后
+下载并调用 `adb install -r`。它绝不会触碰仓库版本号、清单文件或
+`CHANGELOG.md`。对于没有可用 ADB 路径的设备，也记录了一种手动的、尽力
+而为的安装方式（直接在手表上用包安装器打开下载的 APK）。完整流程、
+发布 APK 的必需命名，以及发布签名配置，参见
+[docs/GITHUB_ADB_UPDATES.md](docs/GITHUB_ADB_UPDATES.md)。
+
+一旦配套版本状态消息接通，`HYDRA-UMC-ANDROID-CONTROL` 就可以告知操作员
+存在新的手表版本——这仅仅是信息性的，绝不能在手表本身上安装任何东西。
+该消息结构参见
+[docs/COMPANION_VERSION_PROTOCOL.md](docs/COMPANION_VERSION_PROTOCOL.md)。
 
 ---
 

@@ -31,8 +31,8 @@ HYDRA-UMC-ANDROID-CONTROL と同じ Gradle/Kotlin ツールチェーンを再利
 * ✅ **実装済み v0 —— ハプティックパターンと同期プロトコル：** `haptics/HapticPatterns.kt` はアラートの重大度（重大/警告/情報）ごとに実際の、区別された振動パターンを定義します。`protocol/SyncMessage.kt` は下記の SERVER<->WATCH 同期フローにおける `EStopCommand`/`Alert` メッセージの実際の形を定義し、（デ）シリアライズします。どちらも純粋な Kotlin でテスト可能です——実行にもテストにも、ウォッチのハードウェア、エミュレーター、開かれた WebSocket は一切不要です。
 * 🛑 **ワイヤレス E-STOP** — 産業用 Wi-Fi 経由でサブ 50ms の遅延を実現する専用の緊急ボタン。*（送信することになる `EStopCommand` メッセージは実装済みでテスト済みです。WebSocket トランスポートと物理ボタンの配線はまだ計画中です——HYDRA-UMC-SERVER とのペアリングが必要。）*
 * 📳 **ハプティックアラート** — さまざまなアラートタイプ（重大、警告、情報）向けの差別化された振動パターン。Androidの実際の`Vibrator`/`VibratorManager`サービス経由で再生。*（実装済み——`haptics/HapticAlertPlayer.kt`。このアプリの他部分と同様、実際のWear OSデバイスではまだ未検証です。）*
-* 🎙️ **音声** — タップして話す：明示的な`RECORD_AUDIO`権限リクエスト、文字起こしのためのシステム音声認識インテント（`RecognizerIntent`）、文字起こし結果を境界付きの`voice_turn`同期メッセージとしてHYDRA-UMC-ANDROID-CONTROLへ中継、そしてウォッチ上でのローカル`TextToSpeech`応答。*（実装済み——`MainActivity.kt`。音声がロボットを直接作動させることは決してありません。下記アーキテクチャ参照。）*
-* ⌚ **一目でわかるステータス：** スウォームの活動状況とミッションの進行状況のリアルタイムサマリー。*（計画中——実際の WebSocket 接続が必要です。）*
+* 🎙️ **音声** — タップして話す：明示的な`RECORD_AUDIO`権限リクエスト、文字起こしのためのシステム音声認識インテント（`RecognizerIntent`）、文字起こし結果を境界付きの`voice_turn`同期メッセージとしてHYDRA-UMC-ANDROID-CONTROLへ中継、そしてウォッチ上でのローカル`TextToSpeech`応答。*（実装済み——`MainActivity.kt`。音声がロボットを直接作動させることは決してありません。下記アーキテクチャおよび完全なエンドツーエンドのメッセージフローと安全境界については [docs/VOICE_AI_PROTOCOL.md](docs/VOICE_AI_PROTOCOL.md) を参照。）*
+* ⌚ **一目でわかるステータス：** **ステータス更新**ボタンが、ペアリングされた Data Layer 経由で境界付きのステータス要求を HYDRA-UMC-ANDROID-CONTROL に中継します。返された `system_status` カードは、陳腐化すると「最終既知——古い可能性あり」の表示とともに示されます。*（実装済み——`MainActivity.kt`/`WatchRelayTransport.requestSystemStatus()`。電話のリレー経由のプル型であり、ウォッチからサーバーへの直接プッシュソケットではなく、実際の Wear OS デバイスではまだ未検証です。）*
 * 🔐 **セキュアな認証：** HYDRA-UMC-SERVER との JWT ベースのペアリング。*（計画中。）*
 * ✅ **独立した Wear OS ツールチェーン** — 動作するデバッグ APK をビルドする実際の Gradle/Kotlin/Compose-for-Wear アプリ。*（実装済み——下記の「ビルドと実行」を参照）*
 * 🔁 **リレー再接続ポリシー** — `transport/RelayRetryPolicy.kt` は、リレー送信が失敗した場合（例えばまだペアリングされたスマートフォンがない場合）のための、実装済みの純粋な指数バックオフポリシーであり、上限付きの最大遅延に制限されています。*（実装済み）*
@@ -50,6 +50,16 @@ flowchart LR
     SERVER -- Critical Alert --> WATCH
     WATCH -- Haptic Feedback --> OPERATOR["Plant Operator"]
 ```
+
+*Server との直接 WebSocket が実現した場合の目標アーキテクチャです。今日
+実際にテスト済みの経路はペアリングされたスマートフォン経由です：
+Watch -> Data Layer -> HYDRA-UMC-ANDROID-CONTROL -> 認証済みの
+HYDRA-UMC-SERVER/Voice UI、そして折り返し——下記アーキテクチャおよび
+その実際のエンドツーエンドフローについては
+[docs/VOICE_AI_PROTOCOL.md](docs/VOICE_AI_PROTOCOL.md) を参照。ウォッチ
+自体が Server の認証情報を保持することは決してありません。ウォッチから
+サーバーへの直接 WebSocket とワイヤレス E-STOP ボタンは、ハードウェアに
+依存する今後の課題のままです。*
 
 ---
 
@@ -87,16 +97,24 @@ HYDRA-UMC-WATCH/
 ├── gradle/
 │   ├── libs.versions.toml     # 依存関係バージョンカタログ
 │   └── wrapper/                # Gradle wrapper（9.7.0 に固定）
+├── tools/
+│   ├── build_test.py          # 変更を加えない CI チェック：契約検証 + assembleDebug
+│   ├── ci_validate.py         # CI が使用するマニフェスト/CHANGELOG/ドキュメント検証
+│   └── verify_paired_relay_contract.py # Watch<->Android Control 間の Data Layer 安全境界の静的検証
 ├── build.gradle.kts           # ルート Gradle ビルド
 ├── settings.gradle.kts        # モジュール接続
 ├── gradlew / gradlew.bat      # Gradle wrapper ランチャー
 ├── docs/                      # ドキュメントと安全プロトコル
 ├── build/                     # 予約済み（Gradle 自身の app/build/ は gitignore 対象）
 ├── images/                    # メディアと図表
+├── hydra-umc.project.json     # エコシステムマニフェスト（バージョン、ビルド/健全性メタデータ）
+├── keystore.properties.example # gitignore 対象のリリース署名設定のテンプレート
 ├── bump_manifest_version.py   # major/minor/patch とマニフェストを同時に増加させる
 ├── bump_version_code.py       # Android 独自の versionCode カウンターを増加させる
 ├── build.sh / build.bat       # 実際のビルド：バージョンを増加させ、テストを実行し、assembleDebug
+├── build-test.sh / build-test.bat # tools/build_test.py 用の、変更を加えないラッパー
 ├── run.sh / run.bat           # 実際の実行：gradlew installDebug + adb launch
+├── update-from-github.sh / .bat # Google Play を使わない更新チャネル：GitHub Release APK + `adb install -r`
 └── src/                       # 予約済み（本プロジェクトのコードは app/src/ 下に存在します）
 ```
 
@@ -139,6 +157,36 @@ Gradle を起動せずにビルドが何をするかを確認するのに便利�
 python3 bump_manifest_version.py   # 例："HYDRA-UMC version: v0.1.2 -> v0.1.3"
 python3 bump_version_code.py       # 例："versionCode: 12 -> 13"
 ```
+
+---
+
+## 5. 📲 GOOGLE PLAY を使わない更新方法
+
+本プロジェクトは Google Play では配布されていません。反復可能な更新経路は、
+ADB でインストールする GitHub Release の APK です：
+
+```bash
+# プロジェクトルートから、ウォッチをペアリングし Wireless debugging を有効にした状態で
+update-from-github.bat    # Windows
+./update-from-github.sh   # Linux / macOS / WSL
+```
+
+このスクリプトは GitHub の `releases/latest` を読み取り、安定した
+`vMAJOR.MINOR.PATCH` タグを要求し、既にインストール済みのバージョンを
+確認し、オペレーターの明示的な確認を求めた上で、APK をダウンロードして
+`adb install -r` を実行します。リポジトリのバージョン、マニフェスト、
+`CHANGELOG.md` には一切触れません。使える ADB 経路がないデバイス向けに、
+ダウンロードした APK をウォッチ上のパッケージインストーラーで直接開く
+手動でのベストエフォートなインストール手順も文書化されています。完全な
+手順、リリース APK の必須命名規則、リリース署名の設定については
+[docs/GITHUB_ADB_UPDATES.md](docs/GITHUB_ADB_UPDATES.md) を参照してください。
+
+`HYDRA-UMC-ANDROID-CONTROL` は、コンパニオンバージョンステータスメッセージが
+接続された時点で、新しいウォッチのリリースが存在することをオペレーターに
+通知できます——これは情報提供のみであり、ウォッチ自体に何かをインストール
+することは決してありません。そのメッセージ形式については
+[docs/COMPANION_VERSION_PROTOCOL.md](docs/COMPANION_VERSION_PROTOCOL.md)
+を参照してください。
 
 ---
 

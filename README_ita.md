@@ -26,8 +26,8 @@ Costruita come app Wear OS autonoma (Kotlin + Jetpack Compose per Wear), riutili
 * ✅ **Reale v0 - pattern aptici e protocollo di sincronizzazione:** `haptics/HapticPatterns.kt` definisce un pattern di vibrazione reale e distinto per severità di avviso (Critico/Avviso/Info); `protocol/SyncMessage.kt` definisce e (de)serializza le forme reali dei messaggi `EStopCommand`/`Alert` del flusso di sincronizzazione SERVER<->WATCH sotto. Entrambi sono Kotlin puro, testabile - non serve hardware da orologio, emulatore, né un WebSocket aperto per eseguirli o testarli.
 * 🛑 **E-STOP Wireless** — pulsante di emergenza dedicato con latenza inferiore a 50ms su Wi-Fi industriale. *(il messaggio `EStopCommand` che invierebbe è reale e testato; il trasporto WebSocket e il collegamento del pulsante fisico restano pianificati — richiede l'accoppiamento con HYDRA-UMC-SERVER.)*
 * 📳 **Avvisi Aptici** — pattern di vibrazione differenziati per i vari tipi di avviso (Critico, Avviso, Info), riprodotti tramite il vero servizio Android `Vibrator`/`VibratorManager`. *(implementato - `haptics/HapticAlertPlayer.kt`; ancora non verificato su un vero dispositivo Wear OS, come il resto di questa app.)*
-* 🎙️ **Voce** — tocca per parlare: richiesta esplicita del permesso `RECORD_AUDIO`, l'intent di riconoscimento vocale di sistema (`RecognizerIntent`) per la trascrizione, la trascrizione inoltrata a HYDRA-UMC-ANDROID-CONTROL come messaggio di sync `voice_turn` limitato, e una risposta locale tramite `TextToSpeech` sull'orologio. *(implementato - `MainActivity.kt`; la voce non può mai azionare direttamente un robot, vedi Architettura sotto.)*
-* ⌚ **Stato a Colpo d'Occhio** — riepilogo in tempo reale dell'attività della flotta e dell'avanzamento delle missioni. *(pianificato - richiede la vera connessione WebSocket.)*
+* 🎙️ **Voce** — tocca per parlare: richiesta esplicita del permesso `RECORD_AUDIO`, l'intent di riconoscimento vocale di sistema (`RecognizerIntent`) per la trascrizione, la trascrizione inoltrata a HYDRA-UMC-ANDROID-CONTROL come messaggio di sync `voice_turn` limitato, e una risposta locale tramite `TextToSpeech` sull'orologio. *(implementato - `MainActivity.kt`; la voce non può mai azionare direttamente un robot, vedi Architettura sotto e [docs/VOICE_AI_PROTOCOL.md](docs/VOICE_AI_PROTOCOL.md) per il flusso completo end-to-end e il limite di sicurezza.)*
+* ⌚ **Stato a Colpo d'Occhio** — un pulsante **Aggiorna stato** inoltra una richiesta di stato limitata a HYDRA-UMC-ANDROID-CONTROL tramite il Data Layer accoppiato; la card `system_status` ricevuta viene mostrata con un indicatore "ultimo noto - potrebbe essere obsoleto" non appena diventa obsoleta. *(implementato - `MainActivity.kt`/`WatchRelayTransport.requestSystemStatus()`; su richiesta tramite il relay del telefono, non un socket diretto orologio-server, e ancora non verificato su un vero dispositivo Wear OS.)*
 * 🔐 **Autenticazione Sicura** — accoppiamento basato su JWT con HYDRA-UMC-SERVER. *(pianificato.)*
 * ✅ **Toolchain Wear OS autonoma** — una vera app Gradle/Kotlin/Compose per Wear che compila un APK di debug funzionante. *(implementato — vedi COMPILAZIONE ED ESECUZIONE sotto)*
 * 🔁 **Politica di Riconnessione del Relay** — `transport/RelayRetryPolicy.kt` è una politica reale e pura di backoff esponenziale per un invio relay fallito (ad es. nessun telefono ancora accoppiato), limitata a un ritardo massimo definito. *(implementato)*
@@ -45,6 +45,15 @@ flowchart LR
     SERVER -- Avviso Critico --> WATCH
     WATCH -- Feedback Aptico --> OPERATOR["Operatore di Impianto"]
 ```
+
+*Architettura obiettivo una volta che esisterà un WebSocket diretto con il
+Server. Il percorso reale e testato oggi passa dal telefono accoppiato:
+Watch -> Data Layer -> HYDRA-UMC-ANDROID-CONTROL -> HYDRA-UMC-SERVER/Voice
+UI autenticato, e ritorno - vedi Architettura sotto e
+[docs/VOICE_AI_PROTOCOL.md](docs/VOICE_AI_PROTOCOL.md) per quel flusso
+reale end-to-end. L'orologio non detiene mai da sé una credenziale del
+Server; un WebSocket diretto Watch-Server e il pulsante E-STOP wireless
+restano lavoro futuro condizionato all'hardware.*
 
 ---
 
@@ -80,16 +89,24 @@ HYDRA-UMC-WATCH/
 ├── gradle/
 │   ├── libs.versions.toml     # Catalogo delle versioni delle dipendenze
 │   └── wrapper/                # Gradle wrapper (fissato a 9.7.0)
+├── tools/
+│   ├── build_test.py          # Verifica CI senza mutazioni: verifica del contratto + assembleDebug
+│   ├── ci_validate.py         # Validazione manifest/CHANGELOG/docs usata dalla CI
+│   └── verify_paired_relay_contract.py # Verifica statica del limite di sicurezza Data Layer Watch<->Android Control
 ├── build.gradle.kts           # Build radice di Gradle
 ├── settings.gradle.kts        # Cablaggio dei moduli
 ├── gradlew / gradlew.bat      # Launcher del Gradle wrapper
 ├── docs/                      # Documentazione e protocolli di sicurezza
 ├── build/                     # Riservato (l'app/build/ di Gradle stesso è ignorato da git)
 ├── images/                    # Media e diagrammi
+├── hydra-umc.project.json     # Manifest dell'ecosistema (versione, metadati build/salute)
+├── keystore.properties.example # Modello per la config di firma release ignorata da git
 ├── bump_manifest_version.py   # Incrementa major/minor/patch + il manifest, insieme
 ├── bump_version_code.py       # Incrementa il contatore versionCode proprio di Android
 ├── build.sh / build.bat       # Build reale: incrementa la versione, esegue i test, assembleDebug
+├── build-test.sh / build-test.bat # Wrapper senza mutazioni per tools/build_test.py
 ├── run.sh / run.bat           # Esecuzione reale: gradlew installDebug + avvio adb
+├── update-from-github.sh / .bat # Canale di aggiornamento senza Play: APK GitHub Release + `adb install -r`
 └── src/                       # Riservato (il codice di questo progetto vive in app/src/)
 ```
 
@@ -118,6 +135,37 @@ Esempio reale - i due script di incremento versione funzionano anche in modo aut
 python3 bump_manifest_version.py   # es. "HYDRA-UMC version: v0.1.2 -> v0.1.3"
 python3 bump_version_code.py       # es. "versionCode: 12 -> 13"
 ```
+
+---
+
+## 5. 📲 AGGIORNAMENTI SENZA GOOGLE PLAY
+
+Questo progetto non è distribuito tramite Google Play. Il percorso di
+aggiornamento ripetibile è un APK di GitHub Release installato via ADB:
+
+```bash
+# dalla radice del progetto, con l'orologio accoppiato e Wireless debugging attivo
+update-from-github.bat    # Windows
+./update-from-github.sh   # Linux / macOS / WSL
+```
+
+Lo script legge `releases/latest` da GitHub, richiede un tag stabile
+`vMAJOR.MINOR.PATCH`, controlla la versione già installata, chiede una
+conferma esplicita dell'operatore, quindi scarica ed esegue
+`adb install -r`. Non tocca mai la versione del repository, il manifest o
+`CHANGELOG.md`. È documentata anche un'installazione manuale, a
+miglior sforzo (aprire l'APK scaricato con l'installatore di pacchetti
+direttamente sull'orologio) per i dispositivi senza un percorso ADB
+utilizzabile. Vedi [docs/GITHUB_ADB_UPDATES.md](docs/GITHUB_ADB_UPDATES.md)
+per la procedura completa, il nome richiesto per l'APK di release, e la
+configurazione della firma di release.
+
+`HYDRA-UMC-ANDROID-CONTROL` può informare l'operatore che esiste una nuova
+release dell'orologio una volta collegato il messaggio di stato versione
+companion — è puramente informativo e non può mai installare nulla
+sull'orologio stesso. Vedi
+[docs/COMPANION_VERSION_PROTOCOL.md](docs/COMPANION_VERSION_PROTOCOL.md)
+per quella forma di messaggio.
 
 ---
 

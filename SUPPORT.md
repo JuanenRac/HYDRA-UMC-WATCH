@@ -11,7 +11,7 @@ For industrial licensing, custom wearable features, or specific technical blocke
 Email: `electrohobby3d@gmail.com`
 
 ## 🐛 Bug Reports
-If you found a real error in the WearOS or WatchOS apps, please open a **GitHub Issue** in this repository. 
+If you found a real error in this Wear OS app, please open a **GitHub Issue** in this repository. 
 *Please search existing issues before opening a new one.*
 
 ## ❌ What is NOT support?
