@@ -1,0 +1,30 @@
+# Gradle
+.gradle/
+.kotlin/
+build/
+app/build/
+
+# Local dev machine config - contains the local Android SDK path, never portable between machines
+local.properties
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+.navigation/
+captures/
+
+# Keystores - never commit signing material
+*.jks
+*.keystore
+keystore.properties
+
+# OS / editor
+.DS_Store
+# HYDRA-UMC shared secret protection
+.env
+.env.*
+!.env.example
+
+# Python bytecode (generated locally; never source)
+__pycache__/
+*.py[cod]

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">HYDRA-UMC WATCH</string>
+    <string name="tagline">Sicherheits-Dashboard für Wearables</string>
+    <string name="status_placeholder">Noch nicht mit einem HYDRA-UMC-SERVER gekoppelt</string>
+    <string name="test_haptic_alert">Haptischen Alarm testen</string>
+    <string name="voice_start">Mit HYDRA-UMC sprechen</string>
+    <string name="voice_prompt">Sprich deine Anfrage für HYDRA-UMC</string>
+    <string name="voice_listening">Höre zu…</string>
+    <string name="voice_captured">Sprachanfrage erfasst. Warte auf sichere KI-Verbindung.</string>
+    <string name="voice_sending">Erkannter Text wird über das gekoppelte Smartphone gesendet…</string>
+    <string name="voice_phone_unavailable">Das gekoppelte Smartphone ist nicht verfügbar oder nicht bei HYDRA-UMC-SERVER angemeldet.</string>
+    <string name="voice_permission_denied">Für die Spracheingabe ist eine Mikrofonberechtigung erforderlich.</string>
+    <string name="voice_unavailable">Die Spracherkennung ist auf dieser Uhr nicht verfügbar.</string>
+    <string name="voice_last_request">Letzte Anfrage: %1$s</string>
+    <string name="status_refresh">Systemstatus aktualisieren</string>
+    <string name="status_loading">Sicherer Systemstatus wird angefordert…</string>
+    <string name="status_phone_unavailable">Das gekoppelte Smartphone ist nicht verfügbar oder nicht bei HYDRA-UMC-SERVER angemeldet.</string>
+    <string name="status_stale">Letzter bekannter Stand - möglicherweise veraltet</string>
+</resources>

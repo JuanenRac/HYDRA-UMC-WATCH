@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "ecosystem": "HYDRA-UMC",
+  "name": "HYDRA-UMC-WATCH",
+  "version": "0.1.8",
+  "role": "ui",
+  "stack": "android",
+  "technologies": [
+    "Kotlin",
+    "Wear OS"
+  ],
+  "deployment_target": "wearable",
+  "maturity": "established",
+  "family": "Complementary Tools",
+  "parent": null,
+  "build": "./build.sh or build.bat (bumps version, runs JUnit tests, assembleDebug). Wear OS 3+ target.",
+  "notes": "Functional v0: differentiated haptic vibration patterns wired to Wear OS Vibrator, explicit microphone/system-STT capture and local TTS confirmation, plus typed voice_turn/assistant_reply/system_status messages. A paired Android Data Layer relay is implemented; it keeps the Server JWT on the phone and Voice UI token on CM5. Physical radio, wireless E-STOP and live CM5 telemetry remain hardware integration gates. Voice never directly actuates a robot. The relay now has a real, testable reconnection policy (RelayRetryPolicy) and a last-known-state cache with staleness tracking (LastKnownStateCache) so a stale relayed status/alert is never shown as current. The relay now only ever sends to a real CapabilityClient-verified companion node (hydra_umc_phone_companion, not any connectedNodes.firstOrNull()), preferring a nearby node over a cloud-relayed one, and cancels a pending retry outright once the screen closes instead of only bounding it by attempt count.",
+  "native_version": {
+    "file": "app/version.properties",
+    "pattern": {
+      "major": "^versionMajor\\s*=\\s*(\\d+)",
+      "minor": "^versionMinor\\s*=\\s*(\\d+)",
+      "patch": "^versionPatch\\s*=\\s*(\\d+)"
+    }
+  }
+}
