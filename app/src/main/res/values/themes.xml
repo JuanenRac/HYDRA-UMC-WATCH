@@ -1,0 +1,8 @@
+<resources>
+    <!-- Base application theme - dark by default, standard for Wear OS
+         watch faces/apps to save AMOLED power and match the safety/E-STOP
+         color language (see ic_launcher_foreground.xml). -->
+    <style name="Theme.HydraUmcWatch" parent="android:Theme.DeviceDefault">
+        <item name="android:colorBackground">#0B0F19</item>
+    </style>
+</resources>
