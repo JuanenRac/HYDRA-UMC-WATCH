@@ -9,8 +9,8 @@ import com.hydraumc.watch.protocol.SyncMessage
 import com.hydraumc.watch.protocol.parseSyncMessage
 
 /**
- * Real, pure routing decision for one incoming relay message - found in an
- * ecosystem-wide software-improvements audit: [WatchRelayListenerService]
+ * Real, pure routing decision for one incoming relay message - found
+ * while auditing the code: [WatchRelayListenerService]
  * (the one Android-framework-coupled class under `transport/`) used to
  * inline this decision (path filter -> parse -> message-type filter)
  * directly, unlike [RelayRetryPolicy]/[LastKnownStateCache], which this

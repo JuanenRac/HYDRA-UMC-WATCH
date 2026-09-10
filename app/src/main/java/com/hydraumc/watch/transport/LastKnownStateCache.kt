@@ -16,7 +16,7 @@ data class CachedRelayState(
 /**
  * Real cache of the most recently received [SyncMessage.AssistantReply] /
  * [SyncMessage.SystemStatus] / [SyncMessage.Alert], with real staleness
- * tracking - the promotion audit's own "no presentar una alerta caducada
+ * tracking - the diagnosis notes' "no presentar una alerta caducada
  * como orden vigente". Pure Kotlin, no Android dependency, so it is
  * unit-testable on a plain JVM without a watch, like [SyncMessage.kt]'s own
  * protocol logic.

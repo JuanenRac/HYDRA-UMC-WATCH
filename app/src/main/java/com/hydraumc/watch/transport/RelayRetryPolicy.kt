@@ -7,7 +7,7 @@ package com.hydraumc.watch.transport
 
 /**
  * Real, pure exponential-backoff retry policy for a relay send - the
- * promotion audit's own "reconexion" requirement, extracted from any
+ * diagnosis notes' "reconexion" requirement, extracted from any
  * Android transport so it is unit-testable on a plain JVM, without an
  * emulator or watch. [WatchRelayTransport] is the Android-dependent piece
  * that actually schedules a retry using this policy's own numbers.

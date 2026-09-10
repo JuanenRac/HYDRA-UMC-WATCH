@@ -51,7 +51,7 @@ import java.util.Locale
 
 // A relayed status/reply older than this must not be shown as if it just
 // arrived - real staleness handling (see LastKnownStateCache), the
-// promotion audit's own "no presentar una alerta caducada como orden
+// diagnosis notes' "no presentar una alerta caducada como orden
 // vigente".
 private const val RELAY_STATE_STALE_AFTER_MS = 5 * 60_000L
 
