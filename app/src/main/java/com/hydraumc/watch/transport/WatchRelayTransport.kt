@@ -24,7 +24,7 @@ object WatchRelayPaths {
     const val SYSTEM_STATUS = "/hydra-umc/system-status-reply/v1"
 }
 
-// WATCH-01 (found in an ecosystem-wide software-improvements audit, P2):
+// WATCH-01 (P2):
 // the real, Google-documented Wear OS capability name HYDRA-UMC-ANDROID-
 // CONTROL declares in its own res/values/wear.xml
 // (android_wear_capabilities) - the one real signal that a connected
@@ -57,8 +57,7 @@ class WatchRelayTransport(
     }
 
     /**
-     * WATCH-01 (found in an ecosystem-wide software-improvements audit,
-     * P2): a retry scheduled via [handler] used to have no way to be
+     * WATCH-01 (P2): a retry scheduled via [handler] used to have no way to be
      * cancelled at all - only a max-attempt COUNTER bounded it, so a
      * pending retry from before the screen closed still fired later
      * regardless, invoking [onResult] against a caller (MainActivity)
@@ -74,7 +73,7 @@ class WatchRelayTransport(
     }
 
     /**
-     * Real reconnection policy - the promotion audit's own requirement. A
+     * Real reconnection policy - the diagnosis notes' own requirement. A
      * send that fails because no phone node is connected yet (a real,
      * common transient state right after the watch reboots, or while
      * Bluetooth is momentarily out of range) is retried on the delay

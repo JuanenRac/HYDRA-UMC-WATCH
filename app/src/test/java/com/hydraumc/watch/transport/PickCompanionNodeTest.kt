@@ -3,7 +3,7 @@
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 // GPL-3.0 - see LICENSE
 // =============================================================================
-// WATCH-01 (found in an ecosystem-wide software-improvements audit, P2):
+// WATCH-01 (P2):
 // pickCompanionNode() is the real fix for connectedNodes.firstOrNull()
 // picking any connected node with no proof it actually runs the companion
 // app - WatchRelayTransport.send() now only ever calls this with nodes
