@@ -31,7 +31,7 @@ strictly increase across every build that ever ships.
 ## [Unreleased]
 
 - **New `WatchRelayRouting.decide()`** (`transport/WatchRelayRouting.kt`) -
-  found in an ecosystem-wide software-improvements audit:
+  found while auditing the code:
   `WatchRelayListenerService.onMessageReceived()` inlined its own routing
   decision (path filter -> parse -> message-type filter) directly in the
   one Android-framework-coupled class under `transport/`, unlike
@@ -86,7 +86,7 @@ strictly increase across every build that ever ships.
 
 ## [0.1.8] - Relay only ever sends to a verified companion node, and cancels retries on close (WATCH-01)
 
-Found in an ecosystem-wide software-improvements audit, P2:
+Found while auditing the code, P2:
 
 - **Companion-verified node selection.** `WatchRelayTransport.send()`
   picked `connectedNodes.firstOrNull()` - ANY connected node, with no
