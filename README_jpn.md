@@ -14,6 +14,8 @@
   <img src="https://img.shields.io/badge/Feature-Wireless%20E--STOP-red.svg" alt="E-STOP">
 </p>
 
+**正直な現状確認 - 実際に今動くもの:** 触覚振動パターン（`haptics/HapticPatterns.kt`、`HapticAlertPlayer.kt`）、SERVER<->WATCH 同期メッセージコーデック（`protocol/SyncMessage.kt`）、コンパニオン検証済みノード選択・指数バックオフ再試行・メッセージルーティング・最終既知状態の陳腐化追跡を備えたペアリング済みスマートフォン経由のリレー転送（`transport/WatchRelayTransport.kt`、`RelayRetryPolicy.kt`、`WatchRelayRouting.kt`、`LastKnownStateCache.kt`）、そしてタップ・トゥ・トークの音声フロー（`MainActivity.kt`）は本物の Kotlin であり、43件の通過している JUnit テスト（`./gradlew test`）に裏付けられている。これらは腕時計やエミュレータ、ペアリングされたスマートフォンを一切必要とせず、普通の JVM 上で動く。このテストカバレッジはメッセージ/ポリシー/ルーティングのロジックが正しいことを証明するものであり、アプリが実機の腕時計上で動くことを証明するものではない — `HapticAlertPlayer` の本物の `Vibrator` 呼び出しも、Data Layer リレーも、音声フローも、実機の Wear OS ハードウェア上では検証されておらず、この開発マシン上の `assembleDebug`/単体テストのみで確認されている。ワイヤレス E-STOP ボタン、Watch<->Server の直接 WebSocket、そして JWT ベースのサーバーペアリングは、依然として計画段階のままだ — それらが使うことになる `EStopCommand` メッセージの形だけは今日すでに本物でテスト済みだが、トランスポートやハードウェア配線はそうではない。これまでに実際に出荷されたものの詳細は `CHANGELOG.md` を、機能ごとの実装済み/将来の内訳は下記セクション1の機能リスト自体を参照。
+
 ---
 
 ## 1. 🛠️ 技術概要
