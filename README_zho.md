@@ -14,6 +14,8 @@
   <img src="https://img.shields.io/badge/Feature-Wireless%20E--STOP-red.svg" alt="E-STOP">
 </p>
 
+**诚实核查 - 今天真正能运行的部分：** 触觉振动模式（`haptics/HapticPatterns.kt`、`HapticAlertPlayer.kt`）、SERVER<->WATCH 同步消息编解码器（`protocol/SyncMessage.kt`）、带有 companion 验证节点选择、指数退避重试、消息路由与最后已知状态过期跟踪的配对手机中继传输（`transport/WatchRelayTransport.kt`、`RelayRetryPolicy.kt`、`WatchRelayRouting.kt`、`LastKnownStateCache.kt`），以及点按通话语音流程（`MainActivity.kt`）都是真实的 Kotlin 代码，由 43 个通过的 JUnit 测试（`./gradlew test`）支撑，这些测试在普通 JVM 上运行，不需要手表、模拟器或配对手机。这套测试覆盖证明了消息/策略/路由逻辑是正确的；但它并不能证明这个应用在真实手表上能正常运行——`HapticAlertPlayer` 真实的 `Vibrator` 调用、Data Layer 中继，以及语音流程都还没有在真实的 Wear OS 硬件上验证过，只在这台开发机器上通过了 `assembleDebug`/单元测试。无线 E-STOP 按钮、直接的 Watch<->Server WebSocket，以及基于 JWT 的服务器配对仍然只是计划——它们将使用的 `EStopCommand` 消息格式本身今天是真实且经过测试的，但传输和硬件接线并非如此。具体已经交付了什么，请参见 `CHANGELOG.md`，以及下文第 1 节自己的功能列表中按功能划分的真实/未来对照。
+
 ---
 
 ## 1. 🛠️ 技术概述

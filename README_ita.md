@@ -14,6 +14,8 @@
   <img src="https://img.shields.io/badge/Feature-Wireless%20E--STOP-red.svg" alt="E-STOP">
 </p>
 
+**Verifica di onestà - cosa funziona davvero oggi:** i pattern di vibrazione aptici (`haptics/HapticPatterns.kt`, `HapticAlertPlayer.kt`), il codec dei messaggi di sincronizzazione SERVER<->WATCH (`protocol/SyncMessage.kt`), il trasporto relay tramite telefono associato con selezione del nodo verificata dal companion, retry a backoff esponenziale, instradamento dei messaggi e tracciamento dell'obsolescenza dell'ultimo stato noto (`transport/WatchRelayTransport.kt`, `RelayRetryPolicy.kt`, `WatchRelayRouting.kt`, `LastKnownStateCache.kt`), e il flusso vocale tap-to-talk (`MainActivity.kt`) sono vero Kotlin, supportato da 43 test JUnit superati (`./gradlew test`) che girano su una normale JVM senza bisogno di orologio, emulatore o telefono associato. Questa copertura di test dimostra che la logica di messaggi/policy/instradamento è corretta; non dimostra che l'app funzioni su un orologio reale - né le vere chiamate `Vibrator` di `HapticAlertPlayer`, né il relay Data Layer, né il flusso vocale sono stati verificati su hardware Wear OS fisico, solo tramite `assembleDebug`/test unitari su questa macchina di sviluppo. Il pulsante E-STOP wireless, un WebSocket diretto Watch<->Server, e l'associazione col Server basata su JWT restano pianificati - solo la forma del messaggio `EStopCommand` che userebbero è reale e testata oggi, non il trasporto né il cablaggio hardware. Vedi `CHANGELOG.md` per sapere esattamente cosa è stato consegnato finora, e l'elenco delle funzionalità della sezione 1 più sotto per il dettaglio reale/futuro per funzionalità.
+
 ---
 
 ## 1. 🛠️ PANORAMICA TECNICA
