@@ -17,4 +17,7 @@
     <string name="status_loading">Demande de l\'état sécurisé du système…</string>
     <string name="status_phone_unavailable">Le téléphone associé est indisponible ou non connecté à HYDRA-UMC-SERVER.</string>
     <string name="status_stale">Dernier état connu - peut être obsolète</string>
+    <string name="voice_error_connection_unavailable">Connexion HYDRA-UMC indisponible. Vérifiez la session du téléphone associé.</string>
+    <string name="status_error_offline_headline">HYDRA-UMC hors ligne</string>
+    <string name="status_error_offline_detail">Vérifiez la connexion au téléphone associé et la session du serveur.</string>
 </resources>

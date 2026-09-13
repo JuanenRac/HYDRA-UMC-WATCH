@@ -42,6 +42,8 @@ import androidx.wear.compose.material.TimeText
 import com.hydraumc.watch.haptics.AlertSeverity
 import com.hydraumc.watch.haptics.HapticAlertPlayer
 import com.hydraumc.watch.protocol.SyncMessage
+import com.hydraumc.watch.protocol.errorCodeToDetailStringRes
+import com.hydraumc.watch.protocol.errorCodeToStringRes
 import com.hydraumc.watch.protocol.parseSyncMessage
 import com.hydraumc.watch.transport.ACTION_WATCH_RELAY_MESSAGE
 import com.hydraumc.watch.transport.EXTRA_WATCH_RELAY_MESSAGE
@@ -79,14 +81,29 @@ class MainActivity : ComponentActivity() {
                 is SyncMessage.AssistantReply -> {
                     lastKnownStateCache.update(message)
                     systemStatusStale = false
-                    voiceStatus = message.text
-                    if (message.speak) speak(message.text)
+                    // H062: a real, known errorCode means this is this
+                    // watch's OWN system-error text (never translated
+                    // upstream, since the phone that generated it has no
+                    // access to this watch's own locale) - resolved to a
+                    // real localized string from this app's own 7-language
+                    // strings.xml instead of message.text's own untranslated
+                    // English fallback. A real AI reply (errorCode == null,
+                    // or an unrecognized code from a newer phone build)
+                    // keeps using message.text exactly as before - it is
+                    // already correctly localized upstream.
+                    val resolvedText = errorCodeToStringRes(message.errorCode)?.let { getString(it) } ?: message.text
+                    voiceStatus = resolvedText
+                    if (message.speak) speak(resolvedText)
                 }
                 is SyncMessage.SystemStatus -> {
                     lastKnownStateCache.update(message)
                     systemStatusStale = false
-                    systemStatus = "${message.headline}: ${message.detail}"
-                    if (message.speak) speak("${message.headline}. ${message.detail}")
+                    // H062: same mechanism as AssistantReply above, applied
+                    // to this message's own headline+detail pair.
+                    val headline = errorCodeToStringRes(message.errorCode)?.let { getString(it) } ?: message.headline
+                    val detail = errorCodeToDetailStringRes(message.errorCode)?.let { getString(it) } ?: message.detail
+                    systemStatus = "$headline: $detail"
+                    if (message.speak) speak("$headline. $detail")
                 }
                 else -> Unit
             }
