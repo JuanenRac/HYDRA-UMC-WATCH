@@ -17,4 +17,7 @@
     <string name="status_loading">Requesting secure system status…</string>
     <string name="status_phone_unavailable">Paired phone is unavailable or not signed in to HYDRA-UMC-SERVER.</string>
     <string name="status_stale">Last known - may be outdated</string>
+    <string name="voice_error_connection_unavailable">HYDRA-UMC connection unavailable. Check the paired phone session.</string>
+    <string name="status_error_offline_headline">HYDRA-UMC offline</string>
+    <string name="status_error_offline_detail">Check the paired phone connection and Server session.</string>
 </resources>

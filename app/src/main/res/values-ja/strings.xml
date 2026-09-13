@@ -17,4 +17,7 @@
     <string name="status_loading">安全なシステム状態をリクエスト中…</string>
     <string name="status_phone_unavailable">ペアリングされたスマートフォンが利用できないか、HYDRA-UMC-SERVER にサインインしていません。</string>
     <string name="status_stale">最終確認情報 - 古い可能性があります</string>
+    <string name="voice_error_connection_unavailable">HYDRA-UMC への接続が利用できません。ペアリングされたスマートフォンのセッションを確認してください。</string>
+    <string name="status_error_offline_headline">HYDRA-UMC はオフラインです</string>
+    <string name="status_error_offline_detail">ペアリングされたスマートフォンの接続とサーバーのセッションを確認してください。</string>
 </resources>

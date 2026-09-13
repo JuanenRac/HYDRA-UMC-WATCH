@@ -44,6 +44,45 @@ class SyncMessageTest {
         assertEquals(reply, parseSyncMessage(reply.toJson()))
     }
 
+    // H062: an AssistantReply's own errorCode is optional and defaults to
+    // null (a real AI reply, already correctly localized upstream) - a
+    // message that never mentions it at all must parse exactly as it did
+    // before this field existed, not fail or silently gain a value.
+    @Test
+    fun `assistant reply with no errorCode field parses with errorCode null - backward compatible`() {
+        val parsed = parseSyncMessage(
+            """{"type":"assistant_reply","requestId":"r1","text":"Robot 3 is online.","level":"NOMINAL","speak":true,"requiresConfirmation":false}""",
+        )
+        assertTrue(parsed is SyncMessage.AssistantReply)
+        assertEquals(null, (parsed as SyncMessage.AssistantReply).errorCode)
+    }
+
+    @Test
+    fun `assistant reply with a real errorCode round-trips it`() {
+        val reply = SyncMessage.AssistantReply(
+            requestId = "r2",
+            text = "HYDRA-UMC connection unavailable. Check the paired phone session.",
+            level = WatchStatusLevel.ATTENTION,
+            speak = true,
+            errorCode = "connection_unavailable",
+        )
+        val parsed = parseSyncMessage(reply.toJson())
+        assertEquals(reply, parsed)
+        assertEquals("connection_unavailable", (parsed as SyncMessage.AssistantReply).errorCode)
+    }
+
+    // A phone build newer than this watch build could send an errorCode
+    // this watch doesn't recognize yet - parsing must still succeed
+    // (errorCodeToStringRes() is what falls back to `text`, not the parser
+    // itself refusing the whole message).
+    @Test
+    fun `assistant reply with an unrecognized future errorCode still parses`() {
+        val parsed = parseSyncMessage(
+            """{"type":"assistant_reply","requestId":"r3","text":"fallback text","level":"ATTENTION","speak":true,"requiresConfirmation":false,"errorCode":"some_future_code"}""",
+        )
+        assertEquals("some_future_code", (parsed as SyncMessage.AssistantReply).errorCode)
+    }
+
     @Test
     fun `critical system status keeps its visual and speech metadata`() {
         val status = SyncMessage.SystemStatus(
@@ -54,6 +93,20 @@ class SyncMessageTest {
         )
 
         assertEquals(status, parseSyncMessage(status.toJson()))
+    }
+
+    @Test
+    fun `system status with a real errorCode round-trips it`() {
+        val status = SyncMessage.SystemStatus(
+            headline = "HYDRA-UMC offline",
+            detail = "Check the paired phone connection and Server session.",
+            level = WatchStatusLevel.OFFLINE,
+            speak = false,
+            errorCode = "offline",
+        )
+        val parsed = parseSyncMessage(status.toJson())
+        assertEquals(status, parsed)
+        assertEquals("offline", (parsed as SyncMessage.SystemStatus).errorCode)
     }
 
     @Test

@@ -45,6 +45,12 @@ class WatchRelayTransport(
 ) {
     private val appContext = context.applicationContext
 
+    // H041: real, JVM-testable-on-its-own cancellation token (see
+    // CancellationGate.kt) - bumped by every cancelPendingRetries() call.
+    // Same "pull the real decision logic out into a pure class" convention
+    // as [retryPolicy] and pickCompanionNode() in this same file.
+    private val cancellationGate = CancellationGate()
+
     fun sendVoiceTurn(turn: SyncMessage.VoiceTurn, onResult: (Result<Unit>) -> Unit) {
         sendWithRetry(WatchRelayPaths.VOICE_TURN, turn.toJson(), attempt = 1, onResult)
     }
@@ -67,8 +73,25 @@ class WatchRelayTransport(
      * [Handler.removeCallbacksAndMessages] only ever removes messages
      * this exact Handler instance itself posted, so it can never cancel
      * a different transport/screen's own pending work.
+     *
+     * H041: that alone is still not the whole story - see
+     * [CancellationGate]'s own comment. [Handler.removeCallbacksAndMessages]
+     * only ever cancels a [Runnable] already sitting in this Handler's own
+     * queue; it cannot touch a Play Services `getCapability()`/
+     * `sendMessage()` call already dispatched and awaiting its own
+     * network/IPC round trip. That listener's own success/failure callback
+     * used to run regardless, completely bypassing this cancellation - and
+     * on a retryable failure, [sendWithRetry] would then call
+     * [Handler.postDelayed] AGAIN, scheduling a brand-new retry AFTER this
+     * method already ran, exactly as if cancellation had never happened.
+     * Cancelling [cancellationGate] here means every in-flight listener's
+     * own captured generation (see [send]) is now stale by the time it
+     * fires, so it refuses to invoke [onResult] or schedule anything
+     * further - real cancellation, not just "no NEW retries after this
+     * point".
      */
     fun cancelPendingRetries() {
+        cancellationGate.cancel()
         handler.removeCallbacksAndMessages(null)
     }
 
@@ -94,6 +117,12 @@ class WatchRelayTransport(
     }
 
     private fun send(path: String, payload: String, onResult: (Result<Unit>) -> Unit) {
+        // H041: captured BEFORE the async call starts, so every listener
+        // below - each one a real callback that can fire well after
+        // cancelPendingRetries() runs, completely outside [handler]'s own
+        // control - checks the generation IT started with, not whatever
+        // generation happens to be current when it finally fires.
+        val startGeneration = cancellationGate.current
         // WATCH-01: connectedNodes (any Bluetooth/Wear-companion node at
         // all, including one with no HYDRA-UMC app whatsoever) replaced
         // with a real capability query - FILTER_REACHABLE only returns
@@ -103,6 +132,7 @@ class WatchRelayTransport(
         Wearable.getCapabilityClient(appContext)
             .getCapability(PHONE_COMPANION_CAPABILITY, CapabilityClient.FILTER_REACHABLE)
             .addOnSuccessListener { capabilityInfo ->
+                if (!cancellationGate.isCurrent(startGeneration)) return@addOnSuccessListener
                 val phone = pickCompanionNode(capabilityInfo.nodes)
                 if (phone == null) {
                     onResult(Result.failure(IllegalStateException("No paired HYDRA-UMC phone companion is reachable")))
@@ -110,10 +140,10 @@ class WatchRelayTransport(
                 }
                 Wearable.getMessageClient(appContext)
                     .sendMessage(phone.id, path, payload.encodeToByteArray())
-                    .addOnSuccessListener { onResult(Result.success(Unit)) }
-                    .addOnFailureListener { error -> onResult(Result.failure(error)) }
+                    .addOnSuccessListener { if (cancellationGate.isCurrent(startGeneration)) onResult(Result.success(Unit)) }
+                    .addOnFailureListener { error -> if (cancellationGate.isCurrent(startGeneration)) onResult(Result.failure(error)) }
             }
-            .addOnFailureListener { error -> onResult(Result.failure(error)) }
+            .addOnFailureListener { error -> if (cancellationGate.isCurrent(startGeneration)) onResult(Result.failure(error)) }
     }
 }
 

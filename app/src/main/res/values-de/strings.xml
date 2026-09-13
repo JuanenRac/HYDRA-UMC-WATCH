@@ -17,4 +17,7 @@
     <string name="status_loading">Sicherer Systemstatus wird angefordert…</string>
     <string name="status_phone_unavailable">Das gekoppelte Smartphone ist nicht verfügbar oder nicht bei HYDRA-UMC-SERVER angemeldet.</string>
     <string name="status_stale">Letzter bekannter Stand - möglicherweise veraltet</string>
+    <string name="voice_error_connection_unavailable">HYDRA-UMC-Verbindung nicht verfügbar. Bitte die Sitzung des gekoppelten Smartphones prüfen.</string>
+    <string name="status_error_offline_headline">HYDRA-UMC offline</string>
+    <string name="status_error_offline_detail">Bitte die Verbindung zum gekoppelten Smartphone und die Server-Sitzung prüfen.</string>
 </resources>

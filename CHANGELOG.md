@@ -84,6 +84,41 @@ strictly increase across every build that ever ships.
 
 ---
 
+## [0.1.9] - H041/H062: a real cancellation gate, and error text no longer stuck in English
+
+- H041: `cancelPendingRetries()` only ever called
+  `Handler.removeCallbacksAndMessages(null)`, which cancels a `Runnable`
+  already queued on that Handler but can never touch a Play Services
+  `getCapability()`/`sendMessage()` call already in flight - that
+  listener's own callback fired regardless, and on a retryable failure
+  would schedule a brand-new retry via `Handler.postDelayed` AFTER
+  cancellation already ran, exactly as if it had never happened. Add
+  `CancellationGate` (new, real, JVM-testable-on-its-own class, same
+  convention as `RelayRetryPolicy`/`pickCompanionNode`): every in-flight
+  Play Services listener now captures its own generation before starting
+  and refuses to invoke its result or schedule anything further once
+  that generation is stale.
+- H062: `AssistantReply`/`SystemStatus` gained an optional `errorCode`
+  field - a stable, never-translated protocol identifier for
+  HYDRA-UMC-ANDROID-CONTROL's own WatchVoiceRelayService system-error
+  fallback text (a connection timeout, no paired Server session, ...),
+  which that phone generates locally, in English, with no access to
+  this watch's own locale - as opposed to a real AI reply's own `text`,
+  which is already correctly localized upstream and needs no
+  translation here. A known `errorCode` is now resolved to a real
+  localized string from this app's own 7-language `strings.xml`
+  (`errorCodeToStringRes()`/`errorCodeToDetailStringRes()`) instead of
+  ever speaking/showing the phone's own English fallback text. `null`
+  (every real AI reply, and any code an older/newer build doesn't
+  recognize) keeps using the message's own `text`/`headline`/`detail`
+  exactly as before.
+- Add real regression coverage: `CancellationGateTest` (the exact
+  before/after-resolve cancellation scenario H041's own acceptance
+  criteria describes) and `ErrorCodesTest`, plus new `SyncMessageTest`
+  cases covering `errorCode`'s backward/forward compatibility (a message
+  with no `errorCode` at all, a real known one, and an unrecognized
+  future one all parse correctly).
+
 ## [0.1.8] - Relay only ever sends to a verified companion node, and cancels retries on close (WATCH-01)
 
 Found while auditing the code, P2:

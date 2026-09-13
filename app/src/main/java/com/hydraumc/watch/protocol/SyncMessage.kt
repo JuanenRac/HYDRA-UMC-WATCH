@@ -56,6 +56,27 @@ sealed class SyncMessage {
     /**
      * Cognitive gateway -> watch: an AI/system answer that can be rendered
      * as text and spoken by the local Wear OS TTS engine.
+     *
+     * H062: [errorCode] is the fix for this class's own real localization
+     * gap. This class's own [text] field is free-form: for a real AI reply
+     * it is already correctly localized upstream (Voice UI/the LLM answers
+     * in the request's own [VoiceTurn.locale]) - but WatchVoiceRelayService
+     * (HYDRA-UMC-ANDROID-CONTROL, the phone-side sender of this exact
+     * message) also uses this SAME field for its own SYSTEM fallback text
+     * (a connection timeout, no paired Server session, ...), which it
+     * generates itself, in English, with no access to the watch's own
+     * locale. [errorCode] separates those two real cases instead of
+     * conflating them: a stable, NEVER-translated protocol identifier
+     * (`errorCodeToStringRes()`'s own known set) that this watch, not the
+     * phone, resolves to a real localized string using its own strings.xml
+     * (already real 7-language resources - see `getString(R.string...)`
+     * calls throughout MainActivity.kt). `null` (the default, and every
+     * real AI reply) means "trust [text] as already-correct localized
+     * content", matching this field's original, unchanged behavior. A
+     * sender-known code this watch build doesn't yet recognize falls back
+     * to [text] as well, rather than failing the whole message - a real
+     * forward-compatibility concern given the phone and watch app are
+     * updated independently.
      */
     @Serializable
     @SerialName("assistant_reply")
@@ -65,9 +86,14 @@ sealed class SyncMessage {
         val level: WatchStatusLevel = WatchStatusLevel.ATTENTION,
         val speak: Boolean = true,
         val requiresConfirmation: Boolean = false,
+        val errorCode: String? = null,
     ) : SyncMessage()
 
-    /** Server -> watch: compact, glanceable state card independent of chat. */
+    /**
+     * Server -> watch: compact, glanceable state card independent of chat.
+     * [errorCode] is the same H062 mechanism as [AssistantReply]'s own -
+     * see that field's header comment.
+     */
     @Serializable
     @SerialName("system_status")
     data class SystemStatus(
@@ -75,6 +101,7 @@ sealed class SyncMessage {
         val detail: String,
         val level: WatchStatusLevel,
         val speak: Boolean = false,
+        val errorCode: String? = null,
     ) : SyncMessage()
 
     /**
