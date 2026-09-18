@@ -28,6 +28,20 @@ strictly increase across every build that ever ships.
 
 ---
 
+## [0.2.1] - Real haptics wired to actual relay events
+
+- `HapticAlertPlayer` was only ever reachable from a manual "test" button -
+  no real event actually triggered a vibration pattern. `MainActivity` now
+  plays a real pattern on every real outcome it already surfaces: an
+  `AssistantReply`/`SystemStatus` arriving with a known `errorCode` (e.g.
+  `connection_unavailable`/`offline`) plays the WARNING pattern, one
+  arriving clean plays INFO, and a relay send failing locally because no
+  paired phone is currently reachable (voice turn or status request) plays
+  WARNING too - the same real "connection lost" condition, just detected on
+  the watch instead of reported by the phone. No new patterns invented;
+  this only wires the existing CRITICAL/WARNING/INFO waveforms to real,
+  already-implemented events.
+
 ## [0.2.0] - Pure WatchRelayRouting.decide() extracted, paired-phone relay, voice-ready surface and real haptics
 
 - **New `WatchRelayRouting.decide()`** (`transport/WatchRelayRouting.kt`) -
