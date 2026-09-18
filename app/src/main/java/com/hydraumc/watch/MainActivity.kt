@@ -65,6 +65,16 @@ class MainActivity : ComponentActivity() {
     private var textToSpeech: TextToSpeech? = null
     private var textToSpeechReady = false
     private lateinit var relayTransport: WatchRelayTransport
+    // Real Vibrator-backed player (see HapticAlertPlayer's own header) -
+    // created here, not inside the composable below, so the non-Compose
+    // relayReceiver/onResult callbacks can play a pattern directly on every
+    // real event this app already surfaces: an AssistantReply/SystemStatus
+    // actually arriving (INFO, or WARNING when it carries a real errorCode
+    // such as "connection_unavailable"/"offline"), and a relay send that
+    // fails because no paired phone is currently reachable (WARNING - the
+    // same "connection lost" condition, just detected locally instead of
+    // reported by the phone).
+    private val hapticAlertPlayer by lazy { HapticAlertPlayer(applicationContext) }
     private val lastKnownStateCache = LastKnownStateCache(staleAfterMs = RELAY_STATE_STALE_AFTER_MS)
     private val staleCheckHandler = android.os.Handler(android.os.Looper.getMainLooper())
     private val staleCheckRunnable = object : Runnable {
@@ -94,6 +104,11 @@ class MainActivity : ComponentActivity() {
                     val resolvedText = errorCodeToStringRes(message.errorCode)?.let { getString(it) } ?: message.text
                     voiceStatus = resolvedText
                     if (message.speak) speak(resolvedText)
+                    // A real, distinct haptic per outcome: an errorCode
+                    // (e.g. "connection_unavailable") is a real degraded
+                    // condition, not an ordinary reply - WARNING's two-pulse
+                    // pattern instead of INFO's single glanceable one.
+                    hapticAlertPlayer.play(if (message.errorCode != null) AlertSeverity.WARNING else AlertSeverity.INFO)
                 }
                 is SyncMessage.SystemStatus -> {
                     lastKnownStateCache.update(message)
@@ -104,6 +119,7 @@ class MainActivity : ComponentActivity() {
                     val detail = errorCodeToDetailStringRes(message.errorCode)?.let { getString(it) } ?: message.detail
                     systemStatus = "$headline: $detail"
                     if (message.speak) speak("$headline. $detail")
+                    hapticAlertPlayer.play(if (message.errorCode != null) AlertSeverity.WARNING else AlertSeverity.INFO)
                 }
                 else -> Unit
             }
@@ -130,6 +146,10 @@ class MainActivity : ComponentActivity() {
             relayTransport.sendVoiceTurn(turn) { result ->
                 if (result.isFailure) runOnUiThread {
                     voiceStatus = getString(R.string.voice_phone_unavailable)
+                    // Connection lost, detected locally (no reachable
+                    // paired-phone node) rather than reported by the phone -
+                    // same real WARNING pattern as an errorCode'd reply above.
+                    hapticAlertPlayer.play(AlertSeverity.WARNING)
                 }
             }
         }
@@ -197,6 +217,7 @@ class MainActivity : ComponentActivity() {
         relayTransport.requestSystemStatus { result ->
             if (result.isFailure) runOnUiThread {
                 systemStatus = getString(R.string.status_phone_unavailable)
+                hapticAlertPlayer.play(AlertSeverity.WARNING)
             }
         }
     }
