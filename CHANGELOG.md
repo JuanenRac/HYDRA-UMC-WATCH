@@ -98,9 +98,9 @@ strictly increase across every build that ever ships.
 
 ---
 
-## [0.1.9] - H041/H062: a real cancellation gate, and error text no longer stuck in English
+## [0.1.9] - A real cancellation gate, and error text no longer stuck in English
 
-- H041: `cancelPendingRetries()` only ever called
+- `cancelPendingRetries()` only ever called
   `Handler.removeCallbacksAndMessages(null)`, which cancels a `Runnable`
   already queued on that Handler but can never touch a Play Services
   `getCapability()`/`sendMessage()` call already in flight - that
@@ -112,7 +112,7 @@ strictly increase across every build that ever ships.
   Play Services listener now captures its own generation before starting
   and refuses to invoke its result or schedule anything further once
   that generation is stale.
-- H062: `AssistantReply`/`SystemStatus` gained an optional `errorCode`
+- `AssistantReply`/`SystemStatus` gained an optional `errorCode`
   field - a stable, never-translated protocol identifier for
   HYDRA-UMC-ANDROID-CONTROL's own WatchVoiceRelayService system-error
   fallback text (a connection timeout, no paired Server session, ...),
@@ -127,8 +127,7 @@ strictly increase across every build that ever ships.
   recognize) keeps using the message's own `text`/`headline`/`detail`
   exactly as before.
 - Add real regression coverage: `CancellationGateTest` (the exact
-  before/after-resolve cancellation scenario H041's own acceptance
-  criteria describes) and `ErrorCodesTest`, plus new `SyncMessageTest`
+  before/after-resolve cancellation scenario described above) and `ErrorCodesTest`, plus new `SyncMessageTest`
   cases covering `errorCode`'s backward/forward compatibility (a message
   with no `errorCode` at all, a real known one, and an unrecognized
   future one all parse correctly).
