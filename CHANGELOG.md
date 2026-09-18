@@ -28,7 +28,7 @@ strictly increase across every build that ever ships.
 
 ---
 
-## [Unreleased]
+## [0.2.0] - Pure WatchRelayRouting.decide() extracted, paired-phone relay, voice-ready surface and real haptics
 
 - **New `WatchRelayRouting.decide()`** (`transport/WatchRelayRouting.kt`) -
   found while auditing the code:
