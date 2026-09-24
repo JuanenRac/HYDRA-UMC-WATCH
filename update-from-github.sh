@@ -75,7 +75,7 @@ import json, re, sys
 r=json.load(sys.stdin)
 if r.get("draft") or r.get("prerelease"): raise SystemExit(1)
 tag=r.get("tag_name", "")
-if not re.fullmatch(r"v?\d+\.\d+\.\d+", tag): raise SystemExit(1)
+if not re.fullmatch(r"v?\d+\.\d+\.\d+(?:\.\d+)?", tag): raise SystemExit(1)
 asset=next((a for a in r.get("assets", []) if a.get("name") == "HYDRA-UMC-WATCH-release.apk"), None)
 if not asset or not asset.get("browser_download_url", "").startswith("https://"): raise SystemExit(1)
 print(tag)
