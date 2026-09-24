@@ -132,7 +132,7 @@ strictly increase across every build that ever ships.
   with no `errorCode` at all, a real known one, and an unrecognized
   future one all parse correctly).
 
-## [0.1.8] - Relay only ever sends to a verified companion node, and cancels retries on close (WATCH-01)
+## [0.1.8] - Relay only ever sends to a verified companion node, and cancels retries on close
 
 Found while auditing the code, P2:
 

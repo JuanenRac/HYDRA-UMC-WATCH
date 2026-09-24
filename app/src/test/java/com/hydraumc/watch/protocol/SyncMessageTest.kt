@@ -44,7 +44,7 @@ class SyncMessageTest {
         assertEquals(reply, parseSyncMessage(reply.toJson()))
     }
 
-    // H062: an AssistantReply's own errorCode is optional and defaults to
+    // an AssistantReply's own errorCode is optional and defaults to
     // null (a real AI reply, already correctly localized upstream) - a
     // message that never mentions it at all must parse exactly as it did
     // before this field existed, not fail or silently gain a value.

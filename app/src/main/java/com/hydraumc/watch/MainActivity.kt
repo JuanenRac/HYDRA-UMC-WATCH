@@ -91,7 +91,7 @@ class MainActivity : ComponentActivity() {
                 is SyncMessage.AssistantReply -> {
                     lastKnownStateCache.update(message)
                     systemStatusStale = false
-                    // H062: a real, known errorCode means this is this
+                    // a real, known errorCode means this is this
                     // watch's OWN system-error text (never translated
                     // upstream, since the phone that generated it has no
                     // access to this watch's own locale) - resolved to a
@@ -113,7 +113,7 @@ class MainActivity : ComponentActivity() {
                 is SyncMessage.SystemStatus -> {
                     lastKnownStateCache.update(message)
                     systemStatusStale = false
-                    // H062: same mechanism as AssistantReply above, applied
+                    // same mechanism as AssistantReply above, applied
                     // to this message's own headline+detail pair.
                     val headline = errorCodeToStringRes(message.errorCode)?.let { getString(it) } ?: message.headline
                     val detail = errorCodeToDetailStringRes(message.errorCode)?.let { getString(it) } ?: message.detail
@@ -231,7 +231,7 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         unregisterReceiver(relayReceiver)
         staleCheckHandler.removeCallbacks(staleCheckRunnable)
-        // WATCH-01: a deferred retry (sendVoiceTurn/requestSystemStatus
+        // a deferred retry (sendVoiceTurn/requestSystemStatus
         // scheduled itself again on a delay) used to keep firing after
         // this screen was gone, with only an attempt counter - never a
         // real lifecycle - bounding it.

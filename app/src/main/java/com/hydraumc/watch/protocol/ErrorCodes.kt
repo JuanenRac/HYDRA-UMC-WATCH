@@ -3,7 +3,7 @@
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 // GPL-3.0 - see LICENSE
 // =============================================================================
-// H062: the real, stable set of system-error identifiers WatchVoiceRelayService
+// the real, stable set of system-error identifiers WatchVoiceRelayService
 // (HYDRA-UMC-ANDROID-CONTROL, the phone-side sender of AssistantReply/
 // SystemStatus) may send in errorCode - see AssistantReply's own header
 // comment for why this exists at all. These identifiers themselves are
