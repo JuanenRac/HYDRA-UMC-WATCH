@@ -29,7 +29,7 @@ class ErrorCodesTest {
         assertNull(errorCodeToDetailStringRes(null))
     }
 
-    // H062's own forward-compatibility requirement: a code this watch build
+    // this project's own forward-compatibility requirement: a code this watch build
     // doesn't recognize (e.g. sent by a newer phone build) must fall back
     // to the message's own free-form text, never crash or show a raw code.
     @Test

@@ -57,7 +57,7 @@ sealed class SyncMessage {
      * Cognitive gateway -> watch: an AI/system answer that can be rendered
      * as text and spoken by the local Wear OS TTS engine.
      *
-     * H062: [errorCode] is the fix for this class's own real localization
+     * [errorCode] is the fix for this class's own real localization
      * gap. This class's own [text] field is free-form: for a real AI reply
      * it is already correctly localized upstream (Voice UI/the LLM answers
      * in the request's own [VoiceTurn.locale]) - but WatchVoiceRelayService
@@ -91,7 +91,7 @@ sealed class SyncMessage {
 
     /**
      * Server -> watch: compact, glanceable state card independent of chat.
-     * [errorCode] is the same H062 mechanism as [AssistantReply]'s own -
+     * [errorCode] is the same mechanism as [AssistantReply]'s own -
      * see that field's header comment.
      */
     @Serializable

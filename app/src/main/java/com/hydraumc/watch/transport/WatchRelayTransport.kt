@@ -24,7 +24,7 @@ object WatchRelayPaths {
     const val SYSTEM_STATUS = "/hydra-umc/system-status-reply/v1"
 }
 
-// WATCH-01 (P2):
+// (P2):
 // the real, Google-documented Wear OS capability name HYDRA-UMC-ANDROID-
 // CONTROL declares in its own res/values/wear.xml
 // (android_wear_capabilities) - the one real signal that a connected
@@ -45,7 +45,7 @@ class WatchRelayTransport(
 ) {
     private val appContext = context.applicationContext
 
-    // H041: real, JVM-testable-on-its-own cancellation token (see
+    // real, JVM-testable-on-its-own cancellation token (see
     // CancellationGate.kt) - bumped by every cancelPendingRetries() call.
     // Same "pull the real decision logic out into a pure class" convention
     // as [retryPolicy] and pickCompanionNode() in this same file.
@@ -63,7 +63,7 @@ class WatchRelayTransport(
     }
 
     /**
-     * WATCH-01 (P2): a retry scheduled via [handler] used to have no way to be
+     * a retry scheduled via [handler] used to have no way to be
      * cancelled at all - only a max-attempt COUNTER bounded it, so a
      * pending retry from before the screen closed still fired later
      * regardless, invoking [onResult] against a caller (MainActivity)
@@ -74,7 +74,7 @@ class WatchRelayTransport(
      * this exact Handler instance itself posted, so it can never cancel
      * a different transport/screen's own pending work.
      *
-     * H041: that alone is still not the whole story - see
+     * that alone is still not the whole story - see
      * [CancellationGate]'s own comment. [Handler.removeCallbacksAndMessages]
      * only ever cancels a [Runnable] already sitting in this Handler's own
      * queue; it cannot touch a Play Services `getCapability()`/
@@ -117,13 +117,13 @@ class WatchRelayTransport(
     }
 
     private fun send(path: String, payload: String, onResult: (Result<Unit>) -> Unit) {
-        // H041: captured BEFORE the async call starts, so every listener
+        // captured BEFORE the async call starts, so every listener
         // below - each one a real callback that can fire well after
         // cancelPendingRetries() runs, completely outside [handler]'s own
         // control - checks the generation IT started with, not whatever
         // generation happens to be current when it finally fires.
         val startGeneration = cancellationGate.current
-        // WATCH-01: connectedNodes (any Bluetooth/Wear-companion node at
+        // connectedNodes (any Bluetooth/Wear-companion node at
         // all, including one with no HYDRA-UMC app whatsoever) replaced
         // with a real capability query - FILTER_REACHABLE only returns
         // nodes this exact companion app is actually installed AND
@@ -148,7 +148,7 @@ class WatchRelayTransport(
 }
 
 /**
- * WATCH-01: which reachable, capability-verified companion node to send
+ * which reachable, capability-verified companion node to send
  * to when more than one qualifies (a real but rare case - paired to more
  * than one phone with the app installed). Prefers a NEARBY node (Play
  * services' own signal for "directly Bluetooth-connected", not relayed

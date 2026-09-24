@@ -3,7 +3,7 @@
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 // GPL-3.0 - see LICENSE
 // =============================================================================
-// H041: WatchRelayTransport.cancelPendingRetries() used to call only
+// WatchRelayTransport.cancelPendingRetries used to call only
 // Handler.removeCallbacksAndMessages(null), which cancels a Runnable already
 // sitting in that Handler's own queue but can never touch a Play Services
 // getCapability()/sendMessage() call already dispatched and awaiting its own

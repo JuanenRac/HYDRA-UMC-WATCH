@@ -18,7 +18,7 @@ class CancellationGateTest {
         assertTrue(gate.isCurrent(captured))
     }
 
-    // H041's own exact scenario: WatchRelayTransport.send() captures
+    // this project's own exact scenario: WatchRelayTransport.send captures
     // gate.current right before starting a Play Services listener that
     // stays in flight - if cancelPendingRetries() (gate.cancel()) runs
     // while that listener is still pending, the value it captured earlier
