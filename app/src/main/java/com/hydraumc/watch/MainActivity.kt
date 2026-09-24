@@ -47,6 +47,7 @@ import com.hydraumc.watch.protocol.errorCodeToStringRes
 import com.hydraumc.watch.protocol.parseSyncMessage
 import com.hydraumc.watch.transport.ACTION_WATCH_RELAY_MESSAGE
 import com.hydraumc.watch.transport.EXTRA_WATCH_RELAY_MESSAGE
+import com.hydraumc.watch.transport.CriticalActionGate
 import com.hydraumc.watch.transport.LastKnownStateCache
 import com.hydraumc.watch.transport.WatchRelayTransport
 import java.util.Locale
@@ -62,6 +63,7 @@ class MainActivity : ComponentActivity() {
     private var voiceStatus by mutableStateOf<String?>(null)
     private var systemStatus by mutableStateOf<String?>(null)
     private var systemStatusStale by mutableStateOf(false)
+    private var companionAvailable by mutableStateOf(false)
     private var textToSpeech: TextToSpeech? = null
     private var textToSpeechReady = false
     private lateinit var relayTransport: WatchRelayTransport
@@ -80,6 +82,7 @@ class MainActivity : ComponentActivity() {
     private val staleCheckRunnable = object : Runnable {
         override fun run() {
             systemStatusStale = lastKnownStateCache.isStale()
+            companionAvailable = CriticalActionGate.isAvailable(lastKnownStateCache)
             staleCheckHandler.postDelayed(this, 30_000L)
         }
     }
@@ -91,6 +94,7 @@ class MainActivity : ComponentActivity() {
                 is SyncMessage.AssistantReply -> {
                     lastKnownStateCache.update(message)
                     systemStatusStale = false
+                    companionAvailable = true
                     // a real, known errorCode means this is this
                     // watch's OWN system-error text (never translated
                     // upstream, since the phone that generated it has no
@@ -113,6 +117,7 @@ class MainActivity : ComponentActivity() {
                 is SyncMessage.SystemStatus -> {
                     lastKnownStateCache.update(message)
                     systemStatusStale = false
+                    companionAvailable = true
                     // same mechanism as AssistantReply above, applied
                     // to this message's own headline+detail pair.
                     val headline = errorCodeToStringRes(message.errorCode)?.let { getString(it) } ?: message.headline
@@ -184,6 +189,7 @@ class MainActivity : ComponentActivity() {
                 voiceStatus = voiceStatus,
                 systemStatus = systemStatus,
                 systemStatusStale = systemStatusStale,
+                companionAvailable = companionAvailable,
                 onStartVoiceRecognition = ::startVoiceRecognition,
                 onRefreshSystemStatus = ::refreshSystemStatus,
             )
@@ -254,6 +260,7 @@ fun HydraWatchApp(
     voiceStatus: String? = null,
     systemStatus: String? = null,
     systemStatusStale: Boolean = false,
+    companionAvailable: Boolean = true,
     onStartVoiceRecognition: () -> Unit = {},
     onRefreshSystemStatus: () -> Unit = {},
 ) {
@@ -301,8 +308,20 @@ fun HydraWatchApp(
                     }
                 }
                 item {
-                    Button(onClick = onStartVoiceRecognition) {
+                    Button(onClick = onStartVoiceRecognition, enabled = companionAvailable) {
                         Text(text = stringResource(R.string.voice_start))
+                    }
+                }
+                if (!companionAvailable) {
+                    item {
+                        // Voice requests go through the phone companion:
+                        // withheld until it has been heard from (see
+                        // CriticalActionGate). Refresh stays available.
+                        Text(
+                            text = stringResource(R.string.companion_required),
+                            style = MaterialTheme.typography.caption2,
+                            textAlign = TextAlign.Center,
+                        )
                     }
                 }
                 item {
