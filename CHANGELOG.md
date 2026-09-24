@@ -28,6 +28,10 @@ strictly increase across every build that ever ships.
 
 ---
 
+## [0.2.2] - Companion gate
+
+- The voice button is disabled, with a hint in all seven languages, until the phone companion has sent a message, and again once its last message is stale; the status refresh stays available.
+
 ## [0.2.1] - Real haptics wired to actual relay events
 
 - `HapticAlertPlayer` was only ever reachable from a manual "test" button -

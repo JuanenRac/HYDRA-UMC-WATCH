@@ -17,6 +17,7 @@
     <string name="status_loading">正在请求安全系统状态…</string>
     <string name="status_phone_unavailable">已配对的手机不可用，或尚未登录 HYDRA-UMC-SERVER。</string>
     <string name="status_stale">最后已知状态 - 可能已过时</string>
+    <string name="companion_required">请先刷新状态：语音需要配套手机</string>
     <string name="voice_error_connection_unavailable">HYDRA-UMC 连接不可用。请检查已配对手机的会话状态。</string>
     <string name="status_error_offline_headline">HYDRA-UMC 已离线</string>
     <string name="status_error_offline_detail">请检查与已配对手机的连接以及服务器会话状态。</string>
