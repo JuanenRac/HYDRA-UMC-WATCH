@@ -36,15 +36,17 @@ call gradlew.bat installDebug
 if errorlevel 1 goto :error
 
 adb shell am start -n com.hydraumc.watch/.MainActivity
-exit /b 0
-
+set "HYDRA_UMC_SCRIPT_RESULT=0"
+goto :hydra_umc_pause
 :error
 echo.
 echo INSTALL FAILED - is a Wear OS device/emulator connected? Check "adb devices".
-exit /b 1
+set "HYDRA_UMC_SCRIPT_RESULT=1"
+goto :hydra_umc_pause
 
 REM HYDRA_UMC_SCRIPT_STANDARD_SAFE_PAUSE
 set "HYDRA_UMC_SCRIPT_RESULT=%ERRORLEVEL%"
+:hydra_umc_pause
 echo.
 echo [INFO] Script completed. Exit code: %HYDRA_UMC_SCRIPT_RESULT%.
 pause
