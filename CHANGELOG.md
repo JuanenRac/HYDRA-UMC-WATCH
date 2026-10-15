@@ -49,7 +49,7 @@ strictly increase across every build that ever ships.
 ## [0.2.0] - Pure WatchRelayRouting.decide() extracted, paired-phone relay, voice-ready surface and real haptics
 
 - **New `WatchRelayRouting.decide()`** (`transport/WatchRelayRouting.kt`) -
-  found while auditing the code:
+  found on code review:
   `WatchRelayListenerService.onMessageReceived()` inlined its own routing
   decision (path filter -> parse -> message-type filter) directly in the
   one Android-framework-coupled class under `transport/`, unlike
@@ -138,7 +138,7 @@ strictly increase across every build that ever ships.
 
 ## [0.1.8] - Relay only ever sends to a verified companion node, and cancels retries on close
 
-Found while auditing the code, P2:
+Found on code review, P2:
 
 - **Companion-verified node selection.** `WatchRelayTransport.send()`
   picked `connectedNodes.firstOrNull()` - ANY connected node, with no
