@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">HYDRA-UMC WATCH</string>
+    <string name="tagline">Painel de segurança para vestir</string>
+    <string name="status_placeholder">Ainda não emparelhado com um HYDRA-UMC-SERVER</string>
+    <string name="test_haptic_alert">Testar alerta háptico</string>
+    <string name="voice_start">Fale com o HYDRA-UMC</string>
+    <string name="voice_prompt">Diga o seu pedido para o HYDRA-UMC</string>
+    <string name="voice_listening">A ouvir…</string>
+    <string name="voice_captured">Pedido de voz captado. A aguardar a ligação segura à IA.</string>
+    <string name="voice_sending">A enviar o texto reconhecido através do telemóvel emparelhado…</string>
+    <string name="voice_phone_unavailable">O telemóvel emparelhado não está disponível ou não iniciou sessão no HYDRA-UMC-SERVER.</string>
+    <string name="voice_permission_denied">É necessária a permissão do microfone para a entrada de voz.</string>
+    <string name="voice_unavailable">O reconhecimento de voz não está disponível neste relógio.</string>
+    <string name="voice_last_request">Último pedido: %1$s</string>
+    <string name="status_refresh">Atualizar o estado do sistema</string>
+    <string name="status_loading">A pedir o estado seguro do sistema…</string>
+    <string name="status_phone_unavailable">O telemóvel emparelhado não está disponível ou não iniciou sessão no HYDRA-UMC-SERVER.</string>
+    <string name="status_stale">Último dado conhecido - pode estar desatualizado</string>
+    <string name="companion_required">Atualize primeiro o estado: a voz precisa do telemóvel companheiro</string>
+    <string name="voice_error_connection_unavailable">Ligação ao HYDRA-UMC indisponível. Verifique a sessão do telemóvel emparelhado.</string>
+    <string name="status_error_offline_headline">HYDRA-UMC sem ligação</string>
+    <string name="status_error_offline_detail">Verifique a ligação ao telemóvel emparelhado e a sessão do servidor.</string>
+</resources>

@@ -4,7 +4,7 @@
 
 # ⌚ HYDRA-UMC-WATCH
 
-<p align="center">🇺🇸 <b>English</b> | <a href="README_spa.md">🇪🇸 Español</a> | <a href="README_fra.md">🇫🇷 Français</a> | <a href="README_ita.md">🇮🇹 Italiano</a> | <a href="README_deu.md">🇩🇪 Deutsch</a> | <a href="README_zho.md">🇨🇳 简体中文</a> | <a href="README_jpn.md">🇯🇵 日本語</a></p>
+<p align="center">🇺🇸 <b>English</b> | <a href="README_spa.md">🇪🇸 Español</a> | <a href="README_fra.md">🇫🇷 Français</a> | <a href="README_ita.md">🇮🇹 Italiano</a> | <a href="README_deu.md">🇩🇪 Deutsch</a> | <a href="README_zho.md">🇨🇳 简体中文</a> | <a href="README_jpn.md">🇯🇵 日本語</a> | <a href="README_por.md">🇵🇹 Português</a></p>
 
 ### 🛡️ Wearable Safety Dashboard & Haptic Emergency Alert System
 
@@ -14,7 +14,7 @@
   <img src="https://img.shields.io/badge/Feature-Wireless%20E--STOP-red.svg" alt="E-STOP">
 </p>
 
-**Honesty check - what actually runs today:** the haptic vibration patterns (`haptics/HapticPatterns.kt`, `HapticAlertPlayer.kt`), the SERVER<->WATCH sync message codec (`protocol/SyncMessage.kt`), the paired-phone relay transport with companion-verified node selection, exponential-backoff retry, message routing and last-known-state staleness tracking (`transport/WatchRelayTransport.kt`, `RelayRetryPolicy.kt`, `WatchRelayRouting.kt`, `LastKnownStateCache.kt`), and the tap-to-talk voice flow (`MainActivity.kt`) are real Kotlin, backed by 57 passing JUnit tests (`./gradlew test`) that run on a plain JVM with no watch, emulator, or paired phone needed. That test coverage proves the message/policy/routing logic is correct; it does not prove the app on a real watch - none of `HapticAlertPlayer`'s real `Vibrator` calls, the Data Layer relay, or the voice flow have been verified on physical Wear OS hardware, only via `assembleDebug`/unit tests on this development machine. The wireless E-STOP button, a direct Watch<->Server WebSocket, and JWT-based Server pairing remain planned - only the `EStopCommand` message shape they'd use is real and tested today, not the transport or hardware wiring. See `CHANGELOG.md` for exactly what has shipped so far, and section 1's own feature list below for the per-feature real/future breakdown.
+**Honesty check - what actually runs today:** the haptic vibration patterns (`haptics/HapticPatterns.kt`, `HapticAlertPlayer.kt`), the SERVER<->WATCH sync message codec (`protocol/SyncMessage.kt`), the paired-phone relay transport with companion-verified node selection, exponential-backoff retry, message routing and last-known-state staleness tracking (`transport/WatchRelayTransport.kt`, `RelayRetryPolicy.kt`, `WatchRelayRouting.kt`, `LastKnownStateCache.kt`), and the tap-to-talk voice flow (`MainActivity.kt`) are real Kotlin, backed by 64 passing JUnit tests (`./gradlew test`) that run on a plain JVM with no watch, emulator, or paired phone needed. That test coverage proves the message/policy/routing logic is correct; it does not prove the app on a real watch - none of `HapticAlertPlayer`'s real `Vibrator` calls, the Data Layer relay, or the voice flow have been verified on physical Wear OS hardware, only via `assembleDebug`/unit tests on this development machine. The wireless E-STOP button, a direct Watch<->Server WebSocket, and JWT-based Server pairing remain planned - only the `EStopCommand` message shape they'd use is real and tested today, not the transport or hardware wiring. See `CHANGELOG.md` for exactly what has shipped so far, and section 1's own feature list below for the per-feature real/future breakdown.
 
 ---
 
@@ -35,6 +35,7 @@ Built as a standalone Wear OS app (Kotlin + Jetpack Compose for Wear), reusing t
 * 🔁 **Relay Reconnection Policy** — `transport/RelayRetryPolicy.kt` is a real, pure exponential-backoff policy for a failed relay send (e.g. no paired phone yet), capped at a bounded max delay; a pending retry is cancelled outright once the screen closes, never firing against an already-destroyed activity. *(implemented)*
 * 🧭 **Companion-verified node selection** — `WatchRelayTransport` sends over a real `CapabilityClient` query (`hydra_umc_phone_companion`, declared in HYDRA-UMC-ANDROID-CONTROL's own `res/values/wear.xml`), never `connectedNodes.firstOrNull()` - a second connected node with no companion app installed can never be picked by accident; a nearby (directly Bluetooth-reachable) node is preferred over a cloud-relayed one when more than one qualifies. *(implemented - `pickCompanionNode()`)*
 * 🗂️ **Last-Known-State Cache** — `transport/LastKnownStateCache.kt` tracks real staleness on the last relayed status/alert, so an old one is never shown as current. *(implemented)*
+* 🌐 **8-language UI** — `app/src/main/res/values-xx/strings.xml` for English, Spanish, French, German, Italian, Japanese, Chinese and Portuguese, picked automatically from the watch's system language; `LocalizedStringsTest` checks that every language file has exactly the English keys and format specifiers, so a missing string or a broken placeholder fails the build instead of showing up on the wrist. *(implemented)*
 
 ---
 

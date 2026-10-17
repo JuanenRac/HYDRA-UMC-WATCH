@@ -28,6 +28,12 @@ strictly increase across every build that ever ships.
 
 ---
 
+## [0.2.3] - Portuguese interface and README, translation parity tests
+
+- **Portuguese interface:** the watch app is now available in Portuguese (`values-pt/strings.xml`, all 22 strings), picked automatically when the watch language is Portuguese; the interface now covers 8 languages and a README in Portuguese (`README_por.md`) joins the other translations.
+- **Translation tests:** `LocalizedStringsTest` checks that every language file defines exactly the English keys and the same format specifiers, so a missing string or a broken placeholder fails the unit tests instead of showing up on the wrist (64 tests).
+- **Docs:** the test count in the README was out of date and is corrected.
+
 ## [0.2.2] - Companion gate
 
 - The voice button is disabled, with a hint in all seven languages, until the phone companion has sent a message, and again once its last message is stale; the status refresh stays available.

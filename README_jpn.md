@@ -4,7 +4,7 @@
 
 # ⌚ HYDRA-UMC-WATCH
 
-<p align="center"><a href="README.md">🇺🇸 English</a> | <a href="README_spa.md">🇪🇸 Español</a> | <a href="README_fra.md">🇫🇷 Français</a> | <a href="README_ita.md">🇮🇹 Italiano</a> | <a href="README_deu.md">🇩🇪 Deutsch</a> | <a href="README_zho.md">🇨🇳 简体中文</a> | 🇯🇵 <b>日本語</b></p>
+<p align="center"><a href="README.md">🇺🇸 English</a> | <a href="README_spa.md">🇪🇸 Español</a> | <a href="README_fra.md">🇫🇷 Français</a> | <a href="README_ita.md">🇮🇹 Italiano</a> | <a href="README_deu.md">🇩🇪 Deutsch</a> | <a href="README_zho.md">🇨🇳 简体中文</a> | 🇯🇵 <b>日本語</b> | <a href="README_por.md">🇵🇹 Português</a></p>
 
 ### 🛡️ ウェアラブル安全ダッシュボードとハプティック緊急アラートシステム
 
@@ -14,7 +14,7 @@
   <img src="https://img.shields.io/badge/Feature-Wireless%20E--STOP-red.svg" alt="E-STOP">
 </p>
 
-**正直な現状確認 - 実際に今動くもの:** 触覚振動パターン（`haptics/HapticPatterns.kt`、`HapticAlertPlayer.kt`）、SERVER<->WATCH 同期メッセージコーデック（`protocol/SyncMessage.kt`）、コンパニオン検証済みノード選択・指数バックオフ再試行・メッセージルーティング・最終既知状態の陳腐化追跡を備えたペアリング済みスマートフォン経由のリレー転送（`transport/WatchRelayTransport.kt`、`RelayRetryPolicy.kt`、`WatchRelayRouting.kt`、`LastKnownStateCache.kt`）、そしてタップ・トゥ・トークの音声フロー（`MainActivity.kt`）は本物の Kotlin であり、57件の通過している JUnit テスト（`./gradlew test`）に裏付けられている。これらは腕時計やエミュレータ、ペアリングされたスマートフォンを一切必要とせず、普通の JVM 上で動く。このテストカバレッジはメッセージ/ポリシー/ルーティングのロジックが正しいことを証明するものであり、アプリが実機の腕時計上で動くことを証明するものではない — `HapticAlertPlayer` の本物の `Vibrator` 呼び出しも、Data Layer リレーも、音声フローも、実機の Wear OS ハードウェア上では検証されておらず、この開発マシン上の `assembleDebug`/単体テストのみで確認されている。ワイヤレス E-STOP ボタン、Watch<->Server の直接 WebSocket、そして JWT ベースのサーバーペアリングは、依然として計画段階のままだ — それらが使うことになる `EStopCommand` メッセージの形だけは今日すでに本物でテスト済みだが、トランスポートやハードウェア配線はそうではない。これまでに実際に出荷されたものの詳細は `CHANGELOG.md` を、機能ごとの実装済み/将来の内訳は下記セクション1の機能リスト自体を参照。
+**正直な現状確認 - 実際に今動くもの:** 触覚振動パターン（`haptics/HapticPatterns.kt`、`HapticAlertPlayer.kt`）、SERVER<->WATCH 同期メッセージコーデック（`protocol/SyncMessage.kt`）、コンパニオン検証済みノード選択・指数バックオフ再試行・メッセージルーティング・最終既知状態の陳腐化追跡を備えたペアリング済みスマートフォン経由のリレー転送（`transport/WatchRelayTransport.kt`、`RelayRetryPolicy.kt`、`WatchRelayRouting.kt`、`LastKnownStateCache.kt`）、そしてタップ・トゥ・トークの音声フロー（`MainActivity.kt`）は本物の Kotlin であり、64件の通過している JUnit テスト（`./gradlew test`）に裏付けられている。これらは腕時計やエミュレータ、ペアリングされたスマートフォンを一切必要とせず、普通の JVM 上で動く。このテストカバレッジはメッセージ/ポリシー/ルーティングのロジックが正しいことを証明するものであり、アプリが実機の腕時計上で動くことを証明するものではない — `HapticAlertPlayer` の本物の `Vibrator` 呼び出しも、Data Layer リレーも、音声フローも、実機の Wear OS ハードウェア上では検証されておらず、この開発マシン上の `assembleDebug`/単体テストのみで確認されている。ワイヤレス E-STOP ボタン、Watch<->Server の直接 WebSocket、そして JWT ベースのサーバーペアリングは、依然として計画段階のままだ — それらが使うことになる `EStopCommand` メッセージの形だけは今日すでに本物でテスト済みだが、トランスポートやハードウェア配線はそうではない。これまでに実際に出荷されたものの詳細は `CHANGELOG.md` を、機能ごとの実装済み/将来の内訳は下記セクション1の機能リスト自体を参照。
 
 ---
 
@@ -40,6 +40,7 @@ HYDRA-UMC-ANDROID-CONTROL と同じ Gradle/Kotlin ツールチェーンを再利
 * 🔁 **リレー再接続ポリシー** — `transport/RelayRetryPolicy.kt` は、リレー送信が失敗した場合（例えばまだペアリングされたスマートフォンがない場合）のための、実装済みの純粋な指数バックオフポリシーであり、上限付きの最大遅延に制限されています。保留中の再試行は画面が閉じられた時点で確実にキャンセルされ、破棄済みのアクティビティに対して発火することは決してありません。*（実装済み）*
 * 🧭 **コンパニオン検証済みノード選択** — `WatchRelayTransport` は、`connectedNodes.firstOrNull()` ではなく、実際の `CapabilityClient` クエリ（HYDRA-UMC-ANDROID-CONTROL 自身の `res/values/wear.xml` で宣言されている `hydra_umc_phone_companion`）経由で送信します——コンパニオンアプリがインストールされていない2つ目の接続ノードが誤って選ばれることは決してありません。複数の候補が有効な場合、クラウド経由で中継されるノードよりも、近く（Bluetooth で直接到達可能）にあるノードが優先されます。*（実装済み — `pickCompanionNode()`）*
 * 🗂️ **最終既知状態キャッシュ** — `transport/LastKnownStateCache.kt` は、最後に中継されたステータス/アラートの実際の陳腐化を追跡し、古い情報が最新のものとして表示されることを防ぎます。*（実装済み）*
+* 🌐 **8言語対応UI：** `app/src/main/res/values-xx/strings.xml` が英語・スペイン語・フランス語・ドイツ語・イタリア語・日本語・中国語・ポルトガル語に対応し、時計のシステム言語から自動的に選ばれる。`LocalizedStringsTest` が、各言語ファイルに英語とまったく同じキーと書式指定子があることを確認するため、文字列の欠落や壊れたプレースホルダーは手首に表示される前にビルドで失敗する。*（実装済み）*
 
 ---
 
