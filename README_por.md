@@ -6,17 +6,19 @@
 
 <p align="center"><a href="README.md">🇺🇸 English</a> | <a href="README_spa.md">🇪🇸 Español</a> | <a href="README_fra.md">🇫🇷 Français</a> | <a href="README_ita.md">🇮🇹 Italiano</a> | <a href="README_deu.md">🇩🇪 Deutsch</a> | <a href="README_zho.md">🇨🇳 简体中文</a> | <a href="README_jpn.md">🇯🇵 日本語</a> | 🇵🇹 <b>Português</b></p>
 
-### 🛡️ Painel de segurança para vestir e sistema de alerta háptico de emergência
+### ⌚ Companheiro Wear OS: cartões de estado, alertas hápticos e relé de voz (sem E-STOP sem fios)
 
 <p align="center">
   <img src="https://img.shields.io/badge/License-GPL%203.0-blue.svg" alt="GPL 3.0">
   <img src="https://img.shields.io/badge/Platform-Wear%20OS-4285F4.svg" alt="Wear OS">
-  <img src="https://img.shields.io/badge/Feature-Voice%20%26%20haptics-blue.svg" alt="E-STOP">
+  <img src="https://img.shields.io/badge/Feature-Voice%20%26%20haptics-blue.svg" alt="Voice and haptics">
 </p>
 
 **Verificação de honestidade - o que realmente funciona hoje:** os padrões de vibração háptica (`haptics/HapticPatterns.kt`, `HapticAlertPlayer.kt`), o codec de mensagens de sincronização SERVER<->WATCH (`protocol/SyncMessage.kt`), o transporte de relé através do telemóvel emparelhado, com seleção de nó verificado pelo companheiro, repetição com recuo exponencial, encaminhamento de mensagens e acompanhamento da desatualização do último estado conhecido (`transport/WatchRelayTransport.kt`, `RelayRetryPolicy.kt`, `WatchRelayRouting.kt`, `LastKnownStateCache.kt`), e o fluxo de voz de tocar para falar (`MainActivity.kt`) são Kotlin real, apoiado em 70 testes JUnit a passar (`./gradlew test`) que correm numa JVM simples, sem precisar de relógio, emulador nem telemóvel emparelhado. Essa cobertura de testes prova que a lógica de mensagens/políticas/encaminhamento está correta; não prova a aplicação num relógio real - nenhuma das chamadas reais ao `Vibrator` do `HapticAlertPlayer`, o relé da Data Layer nem o fluxo de voz foram verificados em hardware Wear OS físico, apenas através do `assembleDebug` e de testes unitários nesta máquina de desenvolvimento. O botão de E-STOP sem fios, um WebSocket direto Relógio<->Servidor e o emparelhamento com o Servidor baseado em JWT continuam planeados - só a forma da mensagem `EStopCommand` que usariam é real e testada hoje, não o transporte nem a ligação ao hardware. Veja o `CHANGELOG.md` para saber exatamente o que foi entregue até agora e a lista de funcionalidades da secção 1, mais abaixo, para o detalhe real/futuro de cada uma.
 
 ---
+
+> **Estado de segurança (safety e security):** este ecossistema não é um sistema de segurança certificado. Ainda não existe um caminho de E-STOP por hardware, nem limites ou interlocks impostos pelo firmware, nem um comando de movimento verificado; as imagens de firmware são verificadas com CRC32 e um HMAC-SHA256 de chave partilhada, não com uma assinatura assimétrica; TLS e TLS mútuo são opcionais e estão desativados por defeito; nenhuma placa própria foi ainda montada ou testada. Leia a [base de segurança](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/SECURITY_BASELINE.md) e o [modelo de ameaças](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/THREAT_MODEL.md) antes de confiar em qualquer afirmação aqui para a segurança de uma pessoa.
 
 ## 📋 Num relance
 
@@ -30,7 +32,7 @@
 
 ## 1. 🛠️ VISÃO TÉCNICA GERAL
 
-O **HYDRA-UMC-WATCH** é a extensão tática para o operador da fábrica. Fornece informação crítica, legível de relance, e controlos de segurança diretamente no pulso, garantindo que o operador está sempre no controlo, mesmo longe do HMI principal.
+O **HYDRA-UMC-WATCH** é o companheiro de pulso do operador da fábrica. Mostra de relance informação de estado e alertas no pulso e retransmite pequenos turnos de voz através do telemóvel emparelhado. Não é um dispositivo de segurança: não tem E-STOP sem fios e ainda não foi executado num relógio físico.
 
 Construído como uma aplicação Wear OS independente (Kotlin + Jetpack Compose para Wear), reutilizando a mesma cadeia de ferramentas Gradle/Kotlin do repositório irmão HYDRA-UMC-ANDROID-CONTROL em vez de introduzir uma nova.
 
@@ -40,7 +42,7 @@ Construído como uma aplicação Wear OS independente (Kotlin + Jetpack Compose 
 * 📳 **Alertas hápticos** — padrões de vibração diferenciados para vários tipos de alerta (Crítico, Aviso, Informação), reproduzidos através do serviço real `Vibrator`/`VibratorManager` do Android. *(implementado - `haptics/HapticAlertPlayer.kt`; ainda por verificar num dispositivo Wear OS real, tal como o resto desta aplicação.)*
 * 🎙️ **Voz** — tocar para falar: pedido explícito da permissão `RECORD_AUDIO`, a intenção de reconhecimento de voz do sistema (`RecognizerIntent`) para a transcrição, a transcrição reencaminhada para o HYDRA-UMC-ANDROID-CONTROL como uma mensagem de sincronização `voice_turn` limitada e uma resposta local por `TextToSpeech` no relógio. *(implementado - `MainActivity.kt`; a voz nunca pode acionar diretamente um robô, veja a Arquitetura abaixo e o [docs/VOICE_AI_PROTOCOL.md](docs/VOICE_AI_PROTOCOL.md) para o fluxo completo de mensagens de ponta a ponta e a fronteira de segurança.)*
 * ⌚ **Estado de relance** — um botão **Atualizar estado** reencaminha um pedido de estado limitado para o HYDRA-UMC-ANDROID-CONTROL através da Data Layer emparelhada; o cartão `system_status` devolvido é mostrado com um indicador "último conhecido - pode estar desatualizado" quando fica obsoleto. *(implementado - `MainActivity.kt`/`WatchRelayTransport.requestSystemStatus()`; por pedido através do relé do telemóvel, não um socket de envio direto do relógio para o servidor, e ainda por verificar num dispositivo Wear OS real.)*
-* 🔐 **Autenticação segura** — emparelhamento com o HYDRA-UMC-SERVER baseado em JWT. *(planeado.)*
+* 🔐 **JWT Auth** — emparelhamento com o HYDRA-UMC-SERVER baseado em JWT. *(planeado.)*
 * ✅ **Cadeia de ferramentas Wear OS independente** — uma aplicação real Gradle/Kotlin/Compose para Wear que compila um APK de depuração funcional. *(implementado — veja COMPILAR E EXECUTAR abaixo)*
 * 🔁 **Política de religação do relé** — `transport/RelayRetryPolicy.kt` é uma política real e pura de recuo exponencial para um envio falhado pelo relé (por exemplo, ainda sem telemóvel emparelhado), limitada a um atraso máximo; uma repetição pendente é cancelada de imediato quando o ecrã se fecha, nunca disparando contra uma atividade já destruída. *(implementado)*
 * 🧭 **Seleção de nó verificado pelo companheiro** — o `WatchRelayTransport` envia através de uma consulta real ao `CapabilityClient` (`hydra_umc_phone_companion`, declarada no próprio `res/values/wear.xml` do HYDRA-UMC-ANDROID-CONTROL), nunca por `connectedNodes.firstOrNull()` - um segundo nó ligado sem a aplicação companheira instalada nunca pode ser escolhido por acidente; um nó próximo (alcançável diretamente por Bluetooth) é preferido a um retransmitido pela nuvem quando mais de um se qualifica. *(implementado - `pickCompanionNode()`)*
@@ -200,9 +202,9 @@ Este projeto faz parte do ecossistema de robótica HYDRA-UMC do mesmo autor (Jua
 **Também fazem parte do ecossistema**
 
 *Hardware e plataforma centrais*
-- **[HYDRA-UMC](https://github.com/JuanenRac/HYDRA-UMC)** — a placa-mãe física do braço robótico: anfitrião CM5 + STM32H745 de dois núcleos, que orquestra até 8 braços de ferramenta por CAN-OTA/SPI-OTA.
+- **[HYDRA-UMC](https://github.com/JuanenRac/HYDRA-UMC)** — o desenho da placa-mãe do braço robótico: anfitrião CM5 + STM32H745 de dois núcleos, pensado para orquestrar até 8 braços de ferramenta por CAN-OTA/SPI-OTA (firmware numa fase inicial; ainda sem placa montada).
 - **[HYDRA-UMC-OS](https://github.com/JuanenRac/HYDRA-UMC-OS)** — camada de produto reproduzível do Raspberry Pi OS para o CM5: agente só de leitura, configuração/perfis validados, aprovisionamento Wi-Fi de primeiro contacto.
-- **[HYDRA-UMC-SDK](https://github.com/JuanenRac/HYDRA-UMC-SDK)** — o contrato JSON-Schema partilhado e a fronteira de portas de segurança contra a qual cada bridge valida os seus comandos.
+- **[HYDRA-UMC-SDK](https://github.com/JuanenRac/HYDRA-UMC-SDK)** — o contrato JSON-Schema partilhado e a fronteira de software de controlo de trabalhos contra a qual cada bridge valida os seus comandos (não é uma função de segurança certificada).
 - **[HYDRA-UMC-CONNECTOR-HUB](https://github.com/JuanenRac/HYDRA-UMC-CONNECTOR-HUB)** — registo declarativo de manifestos de adaptador e validador para conectores de máquinas externas; estende a ideia de contrato do SDK a máquinas externas sem substituir os projetos de gateway industrial.
 
 *Backend central e clientes*
@@ -212,14 +214,14 @@ Este projeto faz parte do ecossistema de robótica HYDRA-UMC do mesmo autor (Jua
 - **[HYDRA-UMC-DSI](https://github.com/JuanenRac/HYDRA-UMC-DSI)** — interface tátil nativa para o ecrã tátil DSI de 7" integrado, executada no próprio CM5.
 - **[HYDRA-UMC-EDITOR-URDF](https://github.com/JuanenRac/HYDRA-UMC-EDITOR-URDF)** — criador/editor gráfico de URDF para desktop que envia os modelos concluídos para o catálogo do STUDIO.
 - **[HYDRA-UMC-EDITOR-STL](https://github.com/JuanenRac/HYDRA-UMC-EDITOR-STL)** — editor de modelos STL para desktop que transforma/substitui/remove/adiciona peças reais no mesmo catálogo de modelos que o HYDRA-UMC-EDITOR-URDF também edita.
-- **[HYDRA-UMC-BRIDGE-AMR](https://github.com/JuanenRac/HYDRA-UMC-BRIDGE-AMR)** — fronteira de coordenação para frotas AGV/AMR através de um publicador MQTT VDA 5050 real.
-- **[HYDRA-UMC-BRIDGE-CNC](https://github.com/JuanenRac/HYDRA-UMC-BRIDGE-CNC)** — coordenador de células CNC de alto nível com acesso real ao estado GRBL e aos bytes de controlo.
-- **[HYDRA-UMC-BRIDGE-DROIDS](https://github.com/JuanenRac/HYDRA-UMC-BRIDGE-DROIDS)** — fronteira de coordenação para droides com patas/humanoides, com um emissor real de comandos para o Boston Dynamics Spot.
-- **[HYDRA-UMC-BRIDGE-LASER](https://github.com/JuanenRac/HYDRA-UMC-BRIDGE-LASER)** — coordenador de segurança de células laser que lê 3 proteções reais por GPIO (chave, caixa e interlock).
+- **[HYDRA-UMC-BRIDGE-AMR](https://github.com/JuanenRac/HYDRA-UMC-BRIDGE-AMR)** — fronteira de coordenação para frotas AGV/AMR através de um publicador MQTT VDA 5050 (testado apenas contra uma frota emulada).
+- **[HYDRA-UMC-BRIDGE-CNC](https://github.com/JuanenRac/HYDRA-UMC-BRIDGE-CNC)** — coordenador de células CNC de alto nível com acesso ao estado GRBL e aos bytes de controlo (testado apenas contra um emulador).
+- **[HYDRA-UMC-BRIDGE-DROIDS](https://github.com/JuanenRac/HYDRA-UMC-BRIDGE-DROIDS)** — fronteira de coordenação para droides com patas/humanoides, com um emissor de comandos para o Boston Dynamics Spot (testado apenas contra um emulador).
+- **[HYDRA-UMC-BRIDGE-LASER](https://github.com/JuanenRac/HYDRA-UMC-BRIDGE-LASER)** — coordenador de células laser que lê 3 sinais GPIO (chave, caixa e interlock) (testado apenas contra um chip simulado; não pode armar nem disparar um laser).
 - **[HYDRA-UMC-BRIDGE-OPENPNP](https://github.com/JuanenRac/HYDRA-UMC-BRIDGE-OPENPNP)** — coordenador seguro de fluxo de placa de alto nível para pick-and-place com OpenPnP.
 - **[HYDRA-UMC-BRIDGE-PRINTER3D](https://github.com/JuanenRac/HYDRA-UMC-BRIDGE-PRINTER3D)** — fronteira de coordenação segura para impressoras 3D Moonraker/Klipper, com comandos de trabalho reais protegidos por portas.
-- **[HYDRA-UMC-BRIDGE-ROS2](https://github.com/JuanenRac/HYDRA-UMC-BRIDGE-ROS2)** — coordenador de segurança com um transporte ROS 2 real baseado em rclpy importado sob demanda.
-- **[HYDRA-UMC-BRIDGE-UAV](https://github.com/JuanenRac/HYDRA-UMC-BRIDGE-UAV)** — fronteira de coordenação para UAV com câmara, com um emissor real de comandos MAVLink.
+- **[HYDRA-UMC-BRIDGE-ROS2](https://github.com/JuanenRac/HYDRA-UMC-BRIDGE-ROS2)** — coordenador com um transporte ROS 2 baseado em rclpy importado sob demanda (ainda não executado contra uma instalação ROS 2).
+- **[HYDRA-UMC-BRIDGE-UAV](https://github.com/JuanenRac/HYDRA-UMC-BRIDGE-UAV)** — fronteira de coordenação para UAV com câmara, com um emissor de comandos MAVLink (testado apenas contra um emulador).
 
 *Plataforma de ferramentas URTC*
 - **[URTC](https://github.com/JuanenRac/URTC)** — firmware da placa física Universal Robot Tool Controller, mais de 25 perfis de ferramenta por barramento CAN.
@@ -231,8 +233,8 @@ Este projeto faz parte do ecossistema de robótica HYDRA-UMC do mesmo autor (Jua
 - **[HYDRA-UMC-VISION-NODE](https://github.com/JuanenRac/HYDRA-UMC-VISION-NODE)** — centro de integração do pipeline de visão Hailo-8, com uma verificação real de prontidão de hardware por fase.
 - **[HYDRA-UMC-DETECTION-HEF](https://github.com/JuanenRac/HYDRA-UMC-DETECTION-HEF)** — registo real de modelos compilados com verificação segura de carga por arquitetura Hailo e soma de verificação.
 - **[HYDRA-UMC-VISION-STREAMER](https://github.com/JuanenRac/HYDRA-UMC-VISION-STREAMER)** — pipeline GStreamer real e gerador de configuração MediaMTX com uma fronteira de integração HailoRT real.
-- **[HYDRA-UMC-VISUAL-SERVOING-API](https://github.com/JuanenRac/HYDRA-UMC-VISUAL-SERVOING-API)** — lei de correção real de servovisão baseada em posição, protegida pelo estado da zona a montante.
-- **[HYDRA-UMC-SAFETY-ZONES](https://github.com/JuanenRac/HYDRA-UMC-SAFETY-ZONES)** — verificação real de violação de zonas e pedido de E-STOP, com exigência de calibração recente.
+- **[HYDRA-UMC-VISUAL-SERVOING-API](https://github.com/JuanenRac/HYDRA-UMC-VISUAL-SERVOING-API)** — lei de correção de servovisão baseada em posição com autorização condicionada ao estado da zona; ainda sem estimativa de pose por câmara.
+- **[HYDRA-UMC-SAFETY-ZONES](https://github.com/JuanenRac/HYDRA-UMC-SAFETY-ZONES)** — lógica v0 de violação de zonas, atualidade da calibração e pedido de E-STOP que lê as posições dos objetos de um ficheiro; nenhum detetor a alimenta e ainda não há E-STOP físico ligado.
 
 *Nó de IA cognitiva (Hailo-10)*
 - **[HYDRA-UMC-COGNITIVE-NODE](https://github.com/JuanenRac/HYDRA-UMC-COGNITIVE-NODE)** — centro de integração do pipeline cognitivo do Hailo-10 (orquestração de LLM/VLA/voz).
@@ -250,7 +252,7 @@ Este projeto faz parte do ecossistema de robótica HYDRA-UMC do mesmo autor (Jua
 
 *Gémeo digital e simulação*
 - **[HYDRA-UMC-TWIN](https://github.com/JuanenRac/HYDRA-UMC-TWIN)** — centro de integração do motor de gémeo digital, com um contrato real de sincronização de compatibilidade de versões.
-- **[HYDRA-UMC-HIL-BRIDGE](https://github.com/JuanenRac/HYDRA-UMC-HIL-BRIDGE)** — interlock de segurança real de hardware-in-the-loop que encaminha comandos entre a simulação e o hardware real.
+- **[HYDRA-UMC-HIL-BRIDGE](https://github.com/JuanenRac/HYDRA-UMC-HIL-BRIDGE)** — encaminhador hardware-in-the-loop com um interlock de software de colisão entre a simulação e o hardware real (testado sem hardware real).
 - **[HYDRA-UMC-PHYSICS-REPLICA](https://github.com/JuanenRac/HYDRA-UMC-PHYSICS-REPLICA)** — cinemática direta real e validação de limites de juntas sobre um subconjunto real de URDF.
 - **[HYDRA-UMC-SYNTHETIC-DATA-GEN](https://github.com/JuanenRac/HYDRA-UMC-SYNTHETIC-DATA-GEN)** — gerador procedural real de cenas 2D com exportação de anotações YOLO/COCO.
 
