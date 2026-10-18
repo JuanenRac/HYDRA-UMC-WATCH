@@ -11,6 +11,10 @@ REM License   : GPL-3.0 - see LICENSE
 REM *****************************************************************************
 REM HYDRA_UMC_SCRIPT_STANDARD_HEADER_END
 setlocal EnableExtensions DisableDelayedExpansion
+rem Keep the window open for people, never in automation (CI / HYDRA_UMC_CI).
+set "KEEP_OPEN=pause"
+if defined CI set "KEEP_OPEN=ver >nul"
+if "%HYDRA_UMC_CI%"=="1" set "KEEP_OPEN=ver >nul"
 
 echo.
 echo *****************************************************************************
@@ -125,11 +129,11 @@ goto :success
 if exist "%HYDRA_UMC_TEMP_APK%" del /q "%HYDRA_UMC_TEMP_APK%" >nul 2>nul
 echo.
 echo [FAILED] No project files or versions were changed.
-pause
+%KEEP_OPEN%
 exit /b 1
 
 :success
 echo.
 echo [INFO] Script completed without changing project files or versions.
-pause
+%KEEP_OPEN%
 exit /b 0
