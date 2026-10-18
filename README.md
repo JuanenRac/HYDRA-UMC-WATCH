@@ -22,7 +22,7 @@
 
 | | |
 |---|---|
-| Version | `0.2.4` |
+| Version | `0.2.5` |
 | Maturity | Functional |
 | Stack | Kotlin / Wear OS |
 | Target | A Wear OS watch (paired with the phone) |

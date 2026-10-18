@@ -28,6 +28,13 @@ strictly increase across every build that ever ships.
 
 ---
 
+## [0.2.5] - Messages from the phone can no longer escape the parser
+
+- **Message type:** a message whose `type` was an object or a list raised an `IllegalArgumentException` instead of the parser's own error, so a listener that catches only the parse error was taken down by one such message. It is now a parse error.
+- **Size:** a message longer than 8 KB is refused before it is parsed; a deeply nested document used to overflow the stack (an `Error`, which no handler of the parse error catches).
+- **Blank replies:** a reply made only of blanks and longer than the 500 character limit was cut to "blanks plus an ellipsis" and accepted; blankness is now checked before the cut.
+- 15 new tests: wrong field types, exact limits of every field, request id and companion version formats, unknown fields, round trip of quotes and non-Latin text, and what the relay forwards.
+
 ## [0.2.4] - Reliable voice replies, level-driven haptics, working run and update scripts
 
 - **Voice replies:** the watch remembers the request it is waiting on, ignores a late answer to an older question (it used to be shown and spoken as the answer to the newest one) and, after 20 seconds without an answer, says the phone is unavailable and vibrates instead of staying on "sending". An answer longer than the 500 characters the watch shows (the Server allows 600) is cut with an ellipsis instead of being dropped.

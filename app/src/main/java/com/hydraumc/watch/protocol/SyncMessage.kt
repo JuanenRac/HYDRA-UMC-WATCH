@@ -10,7 +10,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.JsonPrimitive
 
 private const val CURRENT_PROTOCOL_VERSION = 1
 private const val MAX_ALERT_MESSAGE_LENGTH = 280
@@ -18,6 +18,12 @@ private const val MAX_VOICE_TRANSCRIPT_LENGTH = 500
 private const val MAX_ASSISTANT_TEXT_LENGTH = 500
 private const val MAX_STATUS_HEADLINE_LENGTH = 80
 private const val MAX_STATUS_DETAIL_LENGTH = 280
+
+/**
+ * No message of this protocol comes near this size; refusing a longer one before
+ * it is parsed keeps a deeply nested or huge document from exhausting the stack.
+ */
+private const val MAX_RAW_MESSAGE_LENGTH = 8 * 1024
 private val stableVersionPattern = Regex("^\\d+\\.\\d+\\.\\d+$")
 private val requestIdPattern = Regex("^[A-Za-z0-9_-]{1,64}$")
 
@@ -151,6 +157,9 @@ fun SyncMessage.toJson(): String = json.encodeToString(SyncMessage.serializer(),
  * kotlinx.serialization stack trace.
  */
 fun parseSyncMessage(raw: String): SyncMessage {
+    if (raw.length > MAX_RAW_MESSAGE_LENGTH) {
+        throw SyncMessageParseException("message too long (${raw.length} characters)")
+    }
     val element = try {
         json.parseToJsonElement(raw)
     } catch (exc: Exception) {
@@ -158,8 +167,9 @@ fun parseSyncMessage(raw: String): SyncMessage {
     }
     val obj = element as? JsonObject
         ?: throw SyncMessageParseException("expected a JSON object, got: $raw")
-    val type = obj["type"]?.jsonPrimitive?.content
-        ?: throw SyncMessageParseException("missing 'type' field: $raw")
+    val typeElement = obj["type"] ?: throw SyncMessageParseException("missing 'type' field: $raw")
+    val type = (typeElement as? JsonPrimitive)?.content
+        ?: throw SyncMessageParseException("'type' must be a text, got: $raw")
     if (type !in setOf(
             "voice_turn",
             "assistant_reply",
@@ -176,9 +186,9 @@ fun parseSyncMessage(raw: String): SyncMessage {
     } catch (exc: Exception) {
         throw SyncMessageParseException("malformed '$type' message: ${exc.message}")
     }
-    val bounded = truncateLongReply(decoded)
-    validateProtocolMessage(bounded)
-    return bounded
+    // validated before the cut: a text of blanks must not become "blanks…" and pass
+    validateProtocolMessage(decoded)
+    return truncateLongReply(decoded)
 }
 
 /**
@@ -211,7 +221,8 @@ private fun validateProtocolMessage(message: SyncMessage) {
             if (!requestIdPattern.matches(message.requestId)) {
                 throw SyncMessageParseException("invalid assistant request ID")
             }
-            if (message.text.isBlank() || message.text.length > MAX_ASSISTANT_TEXT_LENGTH) {
+            // a text over the limit is cut afterwards (truncateLongReply), not refused
+            if (message.text.isBlank()) {
                 throw SyncMessageParseException("assistant text must contain 1-$MAX_ASSISTANT_TEXT_LENGTH characters")
             }
         }
