@@ -18,6 +18,16 @@
 
 ---
 
+## 📋 Num relance
+
+| | |
+|---|---|
+| Versão | `0.2.4` |
+| Maturidade | Funcional |
+| Tecnologia | Kotlin / Wear OS |
+| Destino | Um relógio Wear OS (emparelhado com o telemóvel) |
+| Em hardware real | Ainda não: não há registo de execução em hardware real para esta versão |
+
 ## 1. 🛠️ VISÃO TÉCNICA GERAL
 
 O **HYDRA-UMC-WATCH** é a extensão tática para o operador da fábrica. Fornece informação crítica, legível de relance, e controlos de segurança diretamente no pulso, garantindo que o operador está sempre no controlo, mesmo longe do HMI principal.
