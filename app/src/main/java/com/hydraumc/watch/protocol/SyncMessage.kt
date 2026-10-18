@@ -99,7 +99,7 @@ sealed class SyncMessage {
     data class SystemStatus(
         val headline: String,
         val detail: String,
-        val level: WatchStatusLevel,
+        val level: WatchStatusLevel = WatchStatusLevel.ATTENTION,
         val speak: Boolean = false,
         val errorCode: String? = null,
     ) : SyncMessage()
@@ -132,6 +132,9 @@ class SyncMessageParseException(message: String) : Exception(message)
 
 private val json = Json {
     ignoreUnknownKeys = true
+    // an enum value a newer sender adds (a new status level) falls back to the
+    // property's default instead of dropping the whole message
+    coerceInputValues = true
     classDiscriminator = "type"
 }
 
@@ -173,8 +176,21 @@ fun parseSyncMessage(raw: String): SyncMessage {
     } catch (exc: Exception) {
         throw SyncMessageParseException("malformed '$type' message: ${exc.message}")
     }
-    validateProtocolMessage(decoded)
-    return decoded
+    val bounded = truncateLongReply(decoded)
+    validateProtocolMessage(bounded)
+    return bounded
+}
+
+/**
+ * The Server accepts assistant answers up to 600 characters while this watch
+ * shows 500: a longer answer is cut with an ellipsis instead of being dropped
+ * whole (an answer that vanishes leaves the operator on "sending" forever).
+ */
+private fun truncateLongReply(message: SyncMessage): SyncMessage {
+    if (message is SyncMessage.AssistantReply && message.text.length > MAX_ASSISTANT_TEXT_LENGTH) {
+        return message.copy(text = message.text.take(MAX_ASSISTANT_TEXT_LENGTH - 1) + "…")
+    }
+    return message
 }
 
 /** Rejects messages that are syntactically valid but unsafe or incompatible. */

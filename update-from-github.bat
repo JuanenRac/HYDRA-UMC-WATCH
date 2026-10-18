@@ -30,7 +30,10 @@ echo.
 REM This updater never changes project files, versions or CHANGELOG.md. It
 REM consumes the published release artifact only.
 set "HYDRA_UMC_REPOSITORY=JuanenRac/HYDRA-UMC-WATCH"
-set "HYDRA_UMC_PACKAGE=com.hydraumc.watch"
+REM The watch app shares the phone app's applicationId; the activity class keeps
+REM the watch package name.
+set "HYDRA_UMC_PACKAGE=com.hydraumc.control"
+set "HYDRA_UMC_ACTIVITY=com.hydraumc.watch.MainActivity"
 set "HYDRA_UMC_ASSET=HYDRA-UMC-WATCH-release.apk"
 set "HYDRA_UMC_TEMP_APK=%TEMP%\HYDRA-UMC-WATCH-update.apk"
 
@@ -77,6 +80,12 @@ if not defined HYDRA_UMC_REMOTE_TAG (
     goto :error
 )
 
+REM The phone and the watch share one applicationId: never install the watch APK on a phone.
+"%HYDRA_UMC_ADB%" -s "%HYDRA_UMC_SERIAL%" shell getprop ro.build.characteristics | findstr /i "watch" >nul
+if errorlevel 1 (
+    echo [X] The selected device is not a watch ^(ro.build.characteristics has no "watch"^).
+    goto :error
+)
 for /f "tokens=2 delims==" %%A in ('"%HYDRA_UMC_ADB%" -s "%HYDRA_UMC_SERIAL%" shell dumpsys package %HYDRA_UMC_PACKAGE% ^| findstr /r /c:"^versionName="') do set "HYDRA_UMC_INSTALLED_VERSION=%%A"
 if not defined HYDRA_UMC_INSTALLED_VERSION (
     echo [X] %HYDRA_UMC_PACKAGE% is not installed on the selected device.
@@ -108,7 +117,7 @@ if errorlevel 1 (echo [X] GitHub APK download failed. & goto :error)
 "%HYDRA_UMC_ADB%" -s "%HYDRA_UMC_SERIAL%" install -r "%HYDRA_UMC_TEMP_APK%"
 if errorlevel 1 (echo [X] Android rejected or could not install the update. & goto :error)
 del /q "%HYDRA_UMC_TEMP_APK%" >nul 2>nul
-"%HYDRA_UMC_ADB%" -s "%HYDRA_UMC_SERIAL%" shell am start -n %HYDRA_UMC_PACKAGE%/.MainActivity >nul 2>nul
+"%HYDRA_UMC_ADB%" -s "%HYDRA_UMC_SERIAL%" shell am start -n %HYDRA_UMC_PACKAGE%/%HYDRA_UMC_ACTIVITY% >nul 2>nul
 echo [SUCCESS] HYDRA-UMC-WATCH updated to %HYDRA_UMC_REMOTE_TAG%.
 goto :success
 

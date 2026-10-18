@@ -13,9 +13,8 @@ package com.hydraumc.watch.haptics
  * index 0 is the initial off-delay, then alternating on/off durations in
  * milliseconds) rather than something that calls into the real Vibrator
  * API - that keeps this function testable on a plain JVM, no watch
- * hardware or emulator required. Wiring `VibrationEffect.createWaveform`
- * and the actual `Vibrator` service call is a one-line integration left
- * for when the wearable sync flow itself lands.
+ * hardware or emulator required. [HapticAlertPlayer] plays them through the
+ * real `Vibrator` service.
  */
 fun patternFor(severity: AlertSeverity): LongArray = when (severity) {
     // Three short, fast pulses - the most attention-grabbing pattern,

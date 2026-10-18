@@ -11,10 +11,10 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Licencia-GPL%203.0-blue.svg" alt="GPL 3.0">
   <img src="https://img.shields.io/badge/Platform-Wear%20OS-4285F4.svg" alt="Wear OS">
-  <img src="https://img.shields.io/badge/Feature-Wireless%20E--STOP-red.svg" alt="E-STOP">
+  <img src="https://img.shields.io/badge/Feature-Voice%20%26%20haptics-blue.svg" alt="E-STOP">
 </p>
 
-**诚实核查 - 今天真正能运行的部分：** 触觉振动模式（`haptics/HapticPatterns.kt`、`HapticAlertPlayer.kt`）、SERVER<->WATCH 同步消息编解码器（`protocol/SyncMessage.kt`）、带有 companion 验证节点选择、指数退避重试、消息路由与最后已知状态过期跟踪的配对手机中继传输（`transport/WatchRelayTransport.kt`、`RelayRetryPolicy.kt`、`WatchRelayRouting.kt`、`LastKnownStateCache.kt`），以及点按通话语音流程（`MainActivity.kt`）都是真实的 Kotlin 代码，由 64 个通过的 JUnit 测试（`./gradlew test`）支撑，这些测试在普通 JVM 上运行，不需要手表、模拟器或配对手机。这套测试覆盖证明了消息/策略/路由逻辑是正确的；但它并不能证明这个应用在真实手表上能正常运行——`HapticAlertPlayer` 真实的 `Vibrator` 调用、Data Layer 中继，以及语音流程都还没有在真实的 Wear OS 硬件上验证过，只在这台开发机器上通过了 `assembleDebug`/单元测试。无线 E-STOP 按钮、直接的 Watch<->Server WebSocket，以及基于 JWT 的服务器配对仍然只是计划——它们将使用的 `EStopCommand` 消息格式本身今天是真实且经过测试的，但传输和硬件接线并非如此。具体已经交付了什么，请参见 `CHANGELOG.md`，以及下文第 1 节自己的功能列表中按功能划分的真实/未来对照。
+**诚实核查 - 今天真正能运行的部分：** 触觉振动模式（`haptics/HapticPatterns.kt`、`HapticAlertPlayer.kt`）、SERVER<->WATCH 同步消息编解码器（`protocol/SyncMessage.kt`）、带有 companion 验证节点选择、指数退避重试、消息路由与最后已知状态过期跟踪的配对手机中继传输（`transport/WatchRelayTransport.kt`、`RelayRetryPolicy.kt`、`WatchRelayRouting.kt`、`LastKnownStateCache.kt`），以及点按通话语音流程（`MainActivity.kt`）都是真实的 Kotlin 代码，由 70 个通过的 JUnit 测试（`./gradlew test`）支撑，这些测试在普通 JVM 上运行，不需要手表、模拟器或配对手机。这套测试覆盖证明了消息/策略/路由逻辑是正确的；但它并不能证明这个应用在真实手表上能正常运行——`HapticAlertPlayer` 真实的 `Vibrator` 调用、Data Layer 中继，以及语音流程都还没有在真实的 Wear OS 硬件上验证过，只在这台开发机器上通过了 `assembleDebug`/单元测试。无线 E-STOP 按钮、直接的 Watch<->Server WebSocket，以及基于 JWT 的服务器配对仍然只是计划——它们将使用的 `EStopCommand` 消息格式本身今天是真实且经过测试的，但传输和硬件接线并非如此。具体已经交付了什么，请参见 `CHANGELOG.md`，以及下文第 1 节自己的功能列表中按功能划分的真实/未来对照。
 
 ---
 
@@ -30,7 +30,7 @@
 
 ### 关键特性：
 * ✅ **真实 v0 —— 触觉模式与同步协议：** `haptics/HapticPatterns.kt` 为每种告警严重程度（严重/警告/信息）定义了一个真实且各不相同的振动模式；`protocol/SyncMessage.kt` 定义并（反）序列化了下方 SERVER<->WATCH 同步流程中 `EStopCommand`/`Alert` 消息的真实结构。两者都是纯 Kotlin 代码，可测试——运行或测试都不需要手表硬件、模拟器，或者打开的 WebSocket。
-* 🛑 **无线 E-STOP** —— 通过工业 Wi-Fi 实现亚 50ms 延迟的专用紧急按钮。*（它会发送的 `EStopCommand` 消息是真实的并且已测试；WebSocket 传输和物理按钮的接线仍是计划中——需要与 HYDRA-UMC-SERVER 配对。）*
+* 🛑 **无线 E-STOP（计划中）** —— 专用紧急按钮。*（它会发送的 `EStopCommand` 消息是真实的并且已测试；WebSocket 传输和物理按钮的接线仍是计划中——需要与 HYDRA-UMC-SERVER 配对。）*
 * 📳 **触觉告警** —— 针对不同告警类型（严重、警告、信息）的差异化振动模式，通过 Android 真实的 `Vibrator`/`VibratorManager` 服务播放。*（已实现——`haptics/HapticAlertPlayer.kt`；与本应用其余部分一样，尚未在真实 Wear OS 设备上验证。）*
 * 🎙️ **语音** —— 按住说话：明确请求 `RECORD_AUDIO` 权限、使用系统语音识别 intent（`RecognizerIntent`）进行转录、将转录内容作为受限的 `voice_turn` 同步消息中继给 HYDRA-UMC-ANDROID-CONTROL，并在手表上通过本地 `TextToSpeech` 回复。*（已实现——`MainActivity.kt`；语音绝不能直接操控机器人，见下文架构部分，完整的端到端消息流程和安全边界见 [docs/VOICE_AI_PROTOCOL.md](docs/VOICE_AI_PROTOCOL.md)。）*
 * ⌚ **一目了然的状态：** **刷新状态**按钮通过已配对的 Data Layer 向 HYDRA-UMC-ANDROID-CONTROL 中继一个受限的状态请求；返回的 `system_status` 卡片在过时后会显示"最后已知——可能已过时"的提示。*（已实现——`MainActivity.kt`/`WatchRelayTransport.requestSystemStatus()`；通过手机中继按需拉取，而非手表到服务器的直接推送套接字，且尚未在真实 Wear OS 设备上验证。）*
@@ -104,7 +104,6 @@ HYDRA-UMC-WATCH/
 ├── settings.gradle.kts        # 模块接入
 ├── gradlew / gradlew.bat      # Gradle wrapper 启动器
 ├── docs/                      # 文档与安全协议
-├── build/                     # 预留（Gradle 自身的 app/build/ 已被 gitignore）
 ├── images/                    # 媒体与图表
 ├── hydra-umc.project.json     # 生态系统清单（版本、构建/健康元数据）
 ├── keystore.properties.example # 已被 gitignore 的发布签名配置模板
@@ -113,8 +112,7 @@ HYDRA-UMC-WATCH/
 ├── build.sh / build.bat       # 真实构建：递增版本、运行测试、assembleDebug
 ├── build-test.sh / build-test.bat # tools/build_test.py 的不产生变更的包装脚本
 ├── run.sh / run.bat           # 真实运行：gradlew installDebug + adb launch
-├── update-from-github.sh / .bat # 不依赖 Play 的更新渠道：GitHub Release APK + `adb install -r`
-└── src/                       # 预留（本项目的代码位于 app/src/ 下）
+└── update-from-github.sh / .bat # 不依赖 Play 的更新渠道：GitHub Release APK + `adb install -r`
 ```
 
 ---

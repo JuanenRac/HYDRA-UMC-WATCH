@@ -29,7 +29,10 @@ printf '\n'
 # This updater is read-only for the repository: it never changes versions,
 # manifests, or CHANGELOG.md.
 readonly HYDRA_UMC_REPOSITORY='JuanenRac/HYDRA-UMC-WATCH'
-readonly HYDRA_UMC_PACKAGE='com.hydraumc.watch'
+# The watch app shares the phone app's applicationId; the activity class keeps
+# the watch package name.
+readonly HYDRA_UMC_PACKAGE='com.hydraumc.control'
+readonly HYDRA_UMC_ACTIVITY='com.hydraumc.watch.MainActivity'
 readonly HYDRA_UMC_ASSET='HYDRA-UMC-WATCH-release.apk'
 readonly HYDRA_UMC_API="https://api.github.com/repos/${HYDRA_UMC_REPOSITORY}/releases/latest"
 readonly HYDRA_UMC_TEMP_APK="${TMPDIR:-/tmp}/HYDRA-UMC-WATCH-update.apk"
@@ -84,6 +87,11 @@ print(asset["browser_download_url"])
 HYDRA_UMC_REMOTE_TAG="${HYDRA_UMC_RELEASE[0]}"
 HYDRA_UMC_DOWNLOAD_URL="${HYDRA_UMC_RELEASE[1]}"
 
+# The phone and the watch share one applicationId: never install the watch APK on a phone.
+adb -s "$HYDRA_UMC_SERIAL" shell getprop ro.build.characteristics | grep -qi watch || {
+    echo '[X] The selected device is not a watch (ro.build.characteristics has no "watch").'
+    exit 1
+}
 HYDRA_UMC_INSTALLED_VERSION="$(adb -s "$HYDRA_UMC_SERIAL" shell dumpsys package "$HYDRA_UMC_PACKAGE" | sed -n 's/^versionName=//p' | tr -d '\r' | head -n 1)"
 [[ -n "$HYDRA_UMC_INSTALLED_VERSION" ]] || {
     echo "[X] $HYDRA_UMC_PACKAGE is not installed on the selected device."
@@ -107,5 +115,5 @@ fi
 # [5/5] ADB delegates signature/package validation to Android on the watch.
 curl --fail --location --retry 3 --silent --show-error --output "$HYDRA_UMC_TEMP_APK" "$HYDRA_UMC_DOWNLOAD_URL"
 adb -s "$HYDRA_UMC_SERIAL" install -r "$HYDRA_UMC_TEMP_APK"
-adb -s "$HYDRA_UMC_SERIAL" shell am start -n "$HYDRA_UMC_PACKAGE/.MainActivity" >/dev/null 2>&1 || true
+adb -s "$HYDRA_UMC_SERIAL" shell am start -n "$HYDRA_UMC_PACKAGE/$HYDRA_UMC_ACTIVITY" >/dev/null 2>&1 || true
 printf '[SUCCESS] HYDRA-UMC-WATCH updated to %s.\n' "$HYDRA_UMC_REMOTE_TAG"

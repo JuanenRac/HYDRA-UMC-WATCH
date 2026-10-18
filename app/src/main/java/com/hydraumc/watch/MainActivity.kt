@@ -3,12 +3,10 @@
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 // GPL-3.0 - see LICENSE
 // =============================================================================
-// STARTING POINT ONLY - proves the Wear OS toolchain (Gradle/Kotlin/Jetpack
-// Compose for Wear, same pattern as sibling repo HYDRA-UMC-ANDROID-CONTROL)
-// actually builds and renders a real screen on a round/square watch face,
-// not the safety dashboard/haptic E-STOP yet. That real work (WebSocket
-// pairing with HYDRA-UMC-SERVER, wireless E-STOP, differentiated haptic
-// alert patterns) is planned with the production integration.
+// The watch screen: glanceable system status, tap-to-talk voice turns relayed
+// through the paired phone, local text-to-speech and level-driven haptics. The
+// wireless E-STOP and a direct WebSocket pairing with HYDRA-UMC-SERVER are
+// still planned; nothing on this screen can command a robot.
 package com.hydraumc.watch
 
 import android.Manifest
@@ -44,11 +42,13 @@ import com.hydraumc.watch.haptics.HapticAlertPlayer
 import com.hydraumc.watch.protocol.SyncMessage
 import com.hydraumc.watch.protocol.errorCodeToDetailStringRes
 import com.hydraumc.watch.protocol.errorCodeToStringRes
+import com.hydraumc.watch.protocol.hapticSeverityFor
 import com.hydraumc.watch.protocol.parseSyncMessage
 import com.hydraumc.watch.transport.ACTION_WATCH_RELAY_MESSAGE
 import com.hydraumc.watch.transport.EXTRA_WATCH_RELAY_MESSAGE
 import com.hydraumc.watch.transport.CriticalActionGate
 import com.hydraumc.watch.transport.LastKnownStateCache
+import com.hydraumc.watch.transport.PendingVoiceRequest
 import com.hydraumc.watch.transport.WatchRelayTransport
 import java.util.Locale
 
@@ -57,6 +57,7 @@ import java.util.Locale
 // diagnosis notes' "no presentar una alerta caducada como orden
 // vigente".
 private const val RELAY_STATE_STALE_AFTER_MS = 5 * 60_000L
+private const val STALE_CHECK_PERIOD_MS = 5_000L
 
 class MainActivity : ComponentActivity() {
     private var latestVoiceTranscript by mutableStateOf<String?>(null)
@@ -65,7 +66,9 @@ class MainActivity : ComponentActivity() {
     private var systemStatusStale by mutableStateOf(false)
     private var companionAvailable by mutableStateOf(false)
     private var textToSpeech: TextToSpeech? = null
-    private var textToSpeechReady = false
+    @Volatile private var textToSpeechReady = false
+    private var pendingSpeech: String? = null
+    private val pendingVoiceRequest = PendingVoiceRequest()
     private lateinit var relayTransport: WatchRelayTransport
     // Real Vibrator-backed player (see HapticAlertPlayer's own header) -
     // created here, not inside the composable below, so the non-Compose
@@ -83,7 +86,13 @@ class MainActivity : ComponentActivity() {
         override fun run() {
             systemStatusStale = lastKnownStateCache.isStale()
             companionAvailable = CriticalActionGate.isAvailable(lastKnownStateCache)
-            staleCheckHandler.postDelayed(this, 30_000L)
+            if (pendingVoiceRequest.isExpired(System.currentTimeMillis())) {
+                // nobody answered: say so instead of staying on "sending"
+                pendingVoiceRequest.clear()
+                voiceStatus = getString(R.string.voice_phone_unavailable)
+                hapticAlertPlayer.play(AlertSeverity.WARNING)
+            }
+            staleCheckHandler.postDelayed(this, STALE_CHECK_PERIOD_MS)
         }
     }
 
@@ -92,6 +101,9 @@ class MainActivity : ComponentActivity() {
             val raw = intent.getStringExtra(EXTRA_WATCH_RELAY_MESSAGE) ?: return
             when (val message = runCatching { parseSyncMessage(raw) }.getOrNull()) {
                 is SyncMessage.AssistantReply -> {
+                    // a late answer to an older question is not shown as the
+                    // answer to the latest one
+                    if (!pendingVoiceRequest.accept(message.requestId)) return
                     lastKnownStateCache.update(message)
                     systemStatusStale = false
                     companionAvailable = true
@@ -112,7 +124,7 @@ class MainActivity : ComponentActivity() {
                     // (e.g. "connection_unavailable") is a real degraded
                     // condition, not an ordinary reply - WARNING's two-pulse
                     // pattern instead of INFO's single glanceable one.
-                    hapticAlertPlayer.play(if (message.errorCode != null) AlertSeverity.WARNING else AlertSeverity.INFO)
+                    hapticAlertPlayer.play(hapticSeverityFor(message.level, message.errorCode))
                 }
                 is SyncMessage.SystemStatus -> {
                     lastKnownStateCache.update(message)
@@ -124,7 +136,7 @@ class MainActivity : ComponentActivity() {
                     val detail = errorCodeToDetailStringRes(message.errorCode)?.let { getString(it) } ?: message.detail
                     systemStatus = "$headline: $detail"
                     if (message.speak) speak("$headline. $detail")
-                    hapticAlertPlayer.play(if (message.errorCode != null) AlertSeverity.WARNING else AlertSeverity.INFO)
+                    hapticAlertPlayer.play(hapticSeverityFor(message.level, message.errorCode))
                 }
                 else -> Unit
             }
@@ -143,13 +155,16 @@ class MainActivity : ComponentActivity() {
         if (transcript.isNotEmpty()) {
             latestVoiceTranscript = transcript
             voiceStatus = getString(R.string.voice_sending)
+            val requestId = "watch-${System.currentTimeMillis()}"
+            pendingVoiceRequest.begin(requestId, System.currentTimeMillis())
             val turn = SyncMessage.VoiceTurn(
-                requestId = "watch-${System.currentTimeMillis()}",
+                requestId = requestId,
                 transcript = transcript,
                 locale = Locale.getDefault().toLanguageTag(),
             )
             relayTransport.sendVoiceTurn(turn) { result ->
                 if (result.isFailure) runOnUiThread {
+                    pendingVoiceRequest.clear()
                     voiceStatus = getString(R.string.voice_phone_unavailable)
                     // Connection lost, detected locally (no reachable
                     // paired-phone node) rather than reported by the phone -
@@ -181,8 +196,8 @@ class MainActivity : ComponentActivity() {
         )
         textToSpeech = TextToSpeech(this) { status ->
             textToSpeechReady = status == TextToSpeech.SUCCESS
+            if (textToSpeechReady) runOnUiThread { pendingSpeech?.let { speak(it) } }
         }
-        staleCheckHandler.post(staleCheckRunnable)
         setContent {
             HydraWatchApp(
                 latestVoiceTranscript = latestVoiceTranscript,
@@ -230,8 +245,23 @@ class MainActivity : ComponentActivity() {
 
     private fun speak(text: String) {
         if (textToSpeechReady) {
+            pendingSpeech = null
             textToSpeech?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "hydra-umc-watch-status")
+        } else {
+            // the engine is still starting: say it as soon as it is ready
+            pendingSpeech = text
         }
+    }
+
+    // the freshness check only runs while the screen is visible
+    override fun onStart() {
+        super.onStart()
+        staleCheckHandler.post(staleCheckRunnable)
+    }
+
+    override fun onStop() {
+        staleCheckHandler.removeCallbacks(staleCheckRunnable)
+        super.onStop()
     }
 
     override fun onDestroy() {

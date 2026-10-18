@@ -11,10 +11,10 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Licencia-GPL%203.0-blue.svg" alt="GPL 3.0">
   <img src="https://img.shields.io/badge/Platform-Wear%20OS-4285F4.svg" alt="Wear OS">
-  <img src="https://img.shields.io/badge/Feature-Wireless%20E--STOP-red.svg" alt="E-STOP">
+  <img src="https://img.shields.io/badge/Feature-Voice%20%26%20haptics-blue.svg" alt="E-STOP">
 </p>
 
-**正直な現状確認 - 実際に今動くもの:** 触覚振動パターン（`haptics/HapticPatterns.kt`、`HapticAlertPlayer.kt`）、SERVER<->WATCH 同期メッセージコーデック（`protocol/SyncMessage.kt`）、コンパニオン検証済みノード選択・指数バックオフ再試行・メッセージルーティング・最終既知状態の陳腐化追跡を備えたペアリング済みスマートフォン経由のリレー転送（`transport/WatchRelayTransport.kt`、`RelayRetryPolicy.kt`、`WatchRelayRouting.kt`、`LastKnownStateCache.kt`）、そしてタップ・トゥ・トークの音声フロー（`MainActivity.kt`）は本物の Kotlin であり、64件の通過している JUnit テスト（`./gradlew test`）に裏付けられている。これらは腕時計やエミュレータ、ペアリングされたスマートフォンを一切必要とせず、普通の JVM 上で動く。このテストカバレッジはメッセージ/ポリシー/ルーティングのロジックが正しいことを証明するものであり、アプリが実機の腕時計上で動くことを証明するものではない — `HapticAlertPlayer` の本物の `Vibrator` 呼び出しも、Data Layer リレーも、音声フローも、実機の Wear OS ハードウェア上では検証されておらず、この開発マシン上の `assembleDebug`/単体テストのみで確認されている。ワイヤレス E-STOP ボタン、Watch<->Server の直接 WebSocket、そして JWT ベースのサーバーペアリングは、依然として計画段階のままだ — それらが使うことになる `EStopCommand` メッセージの形だけは今日すでに本物でテスト済みだが、トランスポートやハードウェア配線はそうではない。これまでに実際に出荷されたものの詳細は `CHANGELOG.md` を、機能ごとの実装済み/将来の内訳は下記セクション1の機能リスト自体を参照。
+**正直な現状確認 - 実際に今動くもの:** 触覚振動パターン（`haptics/HapticPatterns.kt`、`HapticAlertPlayer.kt`）、SERVER<->WATCH 同期メッセージコーデック（`protocol/SyncMessage.kt`）、コンパニオン検証済みノード選択・指数バックオフ再試行・メッセージルーティング・最終既知状態の陳腐化追跡を備えたペアリング済みスマートフォン経由のリレー転送（`transport/WatchRelayTransport.kt`、`RelayRetryPolicy.kt`、`WatchRelayRouting.kt`、`LastKnownStateCache.kt`）、そしてタップ・トゥ・トークの音声フロー（`MainActivity.kt`）は本物の Kotlin であり、70件の通過している JUnit テスト（`./gradlew test`）に裏付けられている。これらは腕時計やエミュレータ、ペアリングされたスマートフォンを一切必要とせず、普通の JVM 上で動く。このテストカバレッジはメッセージ/ポリシー/ルーティングのロジックが正しいことを証明するものであり、アプリが実機の腕時計上で動くことを証明するものではない — `HapticAlertPlayer` の本物の `Vibrator` 呼び出しも、Data Layer リレーも、音声フローも、実機の Wear OS ハードウェア上では検証されておらず、この開発マシン上の `assembleDebug`/単体テストのみで確認されている。ワイヤレス E-STOP ボタン、Watch<->Server の直接 WebSocket、そして JWT ベースのサーバーペアリングは、依然として計画段階のままだ — それらが使うことになる `EStopCommand` メッセージの形だけは今日すでに本物でテスト済みだが、トランスポートやハードウェア配線はそうではない。これまでに実際に出荷されたものの詳細は `CHANGELOG.md` を、機能ごとの実装済み/将来の内訳は下記セクション1の機能リスト自体を参照。
 
 ---
 
@@ -31,7 +31,7 @@ HYDRA-UMC-ANDROID-CONTROL と同じ Gradle/Kotlin ツールチェーンを再利
 
 ### 主な機能：
 * ✅ **実装済み v0 —— ハプティックパターンと同期プロトコル：** `haptics/HapticPatterns.kt` はアラートの重大度（重大/警告/情報）ごとに実際の、区別された振動パターンを定義します。`protocol/SyncMessage.kt` は下記の SERVER<->WATCH 同期フローにおける `EStopCommand`/`Alert` メッセージの実際の形を定義し、（デ）シリアライズします。どちらも純粋な Kotlin でテスト可能です——実行にもテストにも、ウォッチのハードウェア、エミュレーター、開かれた WebSocket は一切不要です。
-* 🛑 **ワイヤレス E-STOP** — 産業用 Wi-Fi 経由でサブ 50ms の遅延を実現する専用の緊急ボタン。*（送信することになる `EStopCommand` メッセージは実装済みでテスト済みです。WebSocket トランスポートと物理ボタンの配線はまだ計画中です——HYDRA-UMC-SERVER とのペアリングが必要。）*
+* 🛑 **ワイヤレス E-STOP（計画中）** — 専用の緊急ボタン。*（送信することになる `EStopCommand` メッセージは実装済みでテスト済みです。WebSocket トランスポートと物理ボタンの配線はまだ計画中です——HYDRA-UMC-SERVER とのペアリングが必要。）*
 * 📳 **ハプティックアラート** — さまざまなアラートタイプ（重大、警告、情報）向けの差別化された振動パターン。Androidの実際の`Vibrator`/`VibratorManager`サービス経由で再生。*（実装済み——`haptics/HapticAlertPlayer.kt`。このアプリの他部分と同様、実際のWear OSデバイスではまだ未検証です。）*
 * 🎙️ **音声** — タップして話す：明示的な`RECORD_AUDIO`権限リクエスト、文字起こしのためのシステム音声認識インテント（`RecognizerIntent`）、文字起こし結果を境界付きの`voice_turn`同期メッセージとしてHYDRA-UMC-ANDROID-CONTROLへ中継、そしてウォッチ上でのローカル`TextToSpeech`応答。*（実装済み——`MainActivity.kt`。音声がロボットを直接作動させることは決してありません。下記アーキテクチャおよび完全なエンドツーエンドのメッセージフローと安全境界については [docs/VOICE_AI_PROTOCOL.md](docs/VOICE_AI_PROTOCOL.md) を参照。）*
 * ⌚ **一目でわかるステータス：** **ステータス更新**ボタンが、ペアリングされた Data Layer 経由で境界付きのステータス要求を HYDRA-UMC-ANDROID-CONTROL に中継します。返された `system_status` カードは、陳腐化すると「最終既知——古い可能性あり」の表示とともに示されます。*（実装済み——`MainActivity.kt`/`WatchRelayTransport.requestSystemStatus()`。電話のリレー経由のプル型であり、ウォッチからサーバーへの直接プッシュソケットではなく、実際の Wear OS デバイスではまだ未検証です。）*
@@ -109,7 +109,6 @@ HYDRA-UMC-WATCH/
 ├── settings.gradle.kts        # モジュール接続
 ├── gradlew / gradlew.bat      # Gradle wrapper ランチャー
 ├── docs/                      # ドキュメントと安全プロトコル
-├── build/                     # 予約済み（Gradle 自身の app/build/ は gitignore 対象）
 ├── images/                    # メディアと図表
 ├── hydra-umc.project.json     # エコシステムマニフェスト（バージョン、ビルド/健全性メタデータ）
 ├── keystore.properties.example # gitignore 対象のリリース署名設定のテンプレート
@@ -118,8 +117,7 @@ HYDRA-UMC-WATCH/
 ├── build.sh / build.bat       # 実際のビルド：バージョンを増加させ、テストを実行し、assembleDebug
 ├── build-test.sh / build-test.bat # tools/build_test.py 用の、変更を加えないラッパー
 ├── run.sh / run.bat           # 実際の実行：gradlew installDebug + adb launch
-├── update-from-github.sh / .bat # Google Play を使わない更新チャネル：GitHub Release APK + `adb install -r`
-└── src/                       # 予約済み（本プロジェクトのコードは app/src/ 下に存在します）
+└── update-from-github.sh / .bat # Google Play を使わない更新チャネル：GitHub Release APK + `adb install -r`
 ```
 
 ---

@@ -35,7 +35,7 @@ cd /d "%~dp0"
 call gradlew.bat installDebug
 if errorlevel 1 goto :error
 
-adb shell am start -n com.hydraumc.watch/.MainActivity
+adb shell am start -n com.hydraumc.control/com.hydraumc.watch.MainActivity
 set "HYDRA_UMC_SCRIPT_RESULT=0"
 goto :hydra_umc_pause
 :error

@@ -19,12 +19,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.HydraUmcWatch">
 
-        <!-- Runs standalone on the watch (no paired-phone companion app
-             required to launch it) - the safety dashboard/E-STOP has to
-             work even if the operator's phone is out of Bluetooth range. -->
+        <!-- Not standalone: voice and status go through the paired phone's
+             Data Layer relay today. Switch to true only once the watch has its
+             own direct connection to the Server. -->
         <meta-data
             android:name="com.google.android.wearable.standalone"
-            android:value="true" />
+            android:value="false" />
 
         <activity
             android:name=".MainActivity"

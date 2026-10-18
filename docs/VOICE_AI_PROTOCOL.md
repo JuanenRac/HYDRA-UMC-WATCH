@@ -94,6 +94,9 @@ The transcript is capped at 500 characters before it reaches any AI service.
 - Any mission start, motion, tool action or configuration change must return
   `requiresConfirmation: true` and be confirmed through an authenticated
   primary control surface.
+- The confirmation flow is not wired yet: the confirmation token a voice reply
+  may carry is dropped by the phone relay and no client offers a confirmation
+  surface, so a reply that requires confirmation is only spoken and shown.
 - A physical or explicitly operated E-STOP remains independent of the AI,
   speech recognizer and network path.
 - Unavailable AI/STT/TTS must show `OFFLINE` or `ATTENTION`; the watch must

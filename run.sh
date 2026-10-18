@@ -46,4 +46,4 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 ./gradlew installDebug
-adb shell am start -n com.hydraumc.watch/.MainActivity
+adb shell am start -n com.hydraumc.control/com.hydraumc.watch.MainActivity

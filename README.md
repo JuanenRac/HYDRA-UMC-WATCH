@@ -11,10 +11,10 @@
 <p align="center">
   <img src="https://img.shields.io/badge/License-GPL%203.0-blue.svg" alt="GPL 3.0">
   <img src="https://img.shields.io/badge/Platform-Wear%20OS-4285F4.svg" alt="Wear OS">
-  <img src="https://img.shields.io/badge/Feature-Wireless%20E--STOP-red.svg" alt="E-STOP">
+  <img src="https://img.shields.io/badge/Feature-Voice%20%26%20haptics-blue.svg" alt="E-STOP">
 </p>
 
-**Honesty check - what actually runs today:** the haptic vibration patterns (`haptics/HapticPatterns.kt`, `HapticAlertPlayer.kt`), the SERVER<->WATCH sync message codec (`protocol/SyncMessage.kt`), the paired-phone relay transport with companion-verified node selection, exponential-backoff retry, message routing and last-known-state staleness tracking (`transport/WatchRelayTransport.kt`, `RelayRetryPolicy.kt`, `WatchRelayRouting.kt`, `LastKnownStateCache.kt`), and the tap-to-talk voice flow (`MainActivity.kt`) are real Kotlin, backed by 64 passing JUnit tests (`./gradlew test`) that run on a plain JVM with no watch, emulator, or paired phone needed. That test coverage proves the message/policy/routing logic is correct; it does not prove the app on a real watch - none of `HapticAlertPlayer`'s real `Vibrator` calls, the Data Layer relay, or the voice flow have been verified on physical Wear OS hardware, only via `assembleDebug`/unit tests on this development machine. The wireless E-STOP button, a direct Watch<->Server WebSocket, and JWT-based Server pairing remain planned - only the `EStopCommand` message shape they'd use is real and tested today, not the transport or hardware wiring. See `CHANGELOG.md` for exactly what has shipped so far, and section 1's own feature list below for the per-feature real/future breakdown.
+**Honesty check - what actually runs today:** the haptic vibration patterns (`haptics/HapticPatterns.kt`, `HapticAlertPlayer.kt`), the SERVER<->WATCH sync message codec (`protocol/SyncMessage.kt`), the paired-phone relay transport with companion-verified node selection, exponential-backoff retry, message routing and last-known-state staleness tracking (`transport/WatchRelayTransport.kt`, `RelayRetryPolicy.kt`, `WatchRelayRouting.kt`, `LastKnownStateCache.kt`), and the tap-to-talk voice flow (`MainActivity.kt`) are real Kotlin, backed by 70 passing JUnit tests (`./gradlew test`) that run on a plain JVM with no watch, emulator, or paired phone needed. That test coverage proves the message/policy/routing logic is correct; it does not prove the app on a real watch - none of `HapticAlertPlayer`'s real `Vibrator` calls, the Data Layer relay, or the voice flow have been verified on physical Wear OS hardware, only via `assembleDebug`/unit tests on this development machine. The wireless E-STOP button, a direct Watch<->Server WebSocket, and JWT-based Server pairing remain planned - only the `EStopCommand` message shape they'd use is real and tested today, not the transport or hardware wiring. See `CHANGELOG.md` for exactly what has shipped so far, and section 1's own feature list below for the per-feature real/future breakdown.
 
 ---
 
@@ -26,7 +26,7 @@ Built as a standalone Wear OS app (Kotlin + Jetpack Compose for Wear), reusing t
 
 ### Key Features:
 * ✅ **Real v0 - haptic patterns & sync protocol:** `haptics/HapticPatterns.kt` defines a real, distinct vibration waveform per alert severity (Critical/Warning/Info); `protocol/SyncMessage.kt` defines and (de)serializes the real `EStopCommand`/`Alert` message shapes for the SERVER<->WATCH sync flow below. Both are plain, testable Kotlin - no watch hardware, emulator, or open WebSocket needed to run or test either.
-* 🛑 **Wireless E-STOP** — dedicated emergency button with sub-50ms latency over industrial Wi-Fi. *(the `EStopCommand` message it would send is real and tested; the WebSocket transport and physical button wiring are still planned - needs HYDRA-UMC-SERVER pairing.)*
+* 🛑 **Wireless E-STOP (planned)** — dedicated emergency button. *(the `EStopCommand` message it would send is real and tested; the WebSocket transport and physical button wiring are still planned - needs HYDRA-UMC-SERVER pairing.)*
 * 📳 **Haptic Alerts** — differentiated vibration patterns for various alert types (Critical, Warning, Info), played through Android's real `Vibrator`/`VibratorManager` service. *(implemented - `haptics/HapticAlertPlayer.kt`; still unverified on a real Wear OS device, same as the rest of this app.)*
 * 🎙️ **Voice** — tap-to-talk: explicit `RECORD_AUDIO` permission request, the system speech-recognition intent (`RecognizerIntent`) for transcription, the transcript relayed to HYDRA-UMC-ANDROID-CONTROL as a bounded `voice_turn` sync message, and a local `TextToSpeech` reply on the watch. *(implemented - `MainActivity.kt`; voice can never actuate a robot directly, see Architecture below and [docs/VOICE_AI_PROTOCOL.md](docs/VOICE_AI_PROTOCOL.md) for the full end-to-end message flow and safety boundary.)*
 * ⌚ **Glanceable Status** — a **Refresh status** button relays a bounded status request to HYDRA-UMC-ANDROID-CONTROL over the paired Data Layer; the returned `system_status` card is shown with a "last known - may be outdated" indicator once it goes stale. *(implemented - `MainActivity.kt`/`WatchRelayTransport.requestSystemStatus()`; pull-based over the phone relay, not a direct watch-to-server push socket, and still unverified on a real Wear OS device.)*
@@ -101,7 +101,6 @@ HYDRA-UMC-WATCH/
 ├── settings.gradle.kts        # Module wiring
 ├── gradlew / gradlew.bat      # Gradle wrapper launcher
 ├── docs/                      # Documentation and safety protocols
-├── build/                     # Reserved (Gradle's own app/build/ is gitignored)
 ├── images/                    # Media and diagrams
 ├── hydra-umc.project.json     # Ecosystem manifest (version, build/health metadata)
 ├── keystore.properties.example # Template for the ignored release-signing config
@@ -110,8 +109,7 @@ HYDRA-UMC-WATCH/
 ├── build.sh / build.bat       # Real build: bump version, run tests, assembleDebug
 ├── build-test.sh / build-test.bat # Non-mutating wrapper for tools/build_test.py
 ├── run.sh / run.bat           # Real run: gradlew installDebug + adb launch
-├── update-from-github.sh / .bat # Non-Play update channel: GitHub Release APK + `adb install -r`
-└── src/                       # Reserved (this project's code lives under app/src/)
+└── update-from-github.sh / .bat # Non-Play update channel: GitHub Release APK + `adb install -r`
 ```
 
 ---

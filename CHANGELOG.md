@@ -28,6 +28,16 @@ strictly increase across every build that ever ships.
 
 ---
 
+## [0.2.4] - Reliable voice replies, level-driven haptics, working run and update scripts
+
+- **Voice replies:** the watch remembers the request it is waiting on, ignores a late answer to an older question (it used to be shown and spoken as the answer to the newest one) and, after 20 seconds without an answer, says the phone is unavailable and vibrates instead of staying on "sending". An answer longer than the 500 characters the watch shows (the Server allows 600) is cut with an ellipsis instead of being dropped.
+- **Haptics:** the vibration now follows the message level (a critical Server temperature gives the critical pattern, warning and offline give the warning pattern) instead of a single soft pulse for everything without an error code.
+- **Protocol:** an unknown status level from a newer sender falls back to "attention" instead of discarding the whole message.
+- **Text to speech:** the first reply that arrives while the speech engine is still starting is spoken as soon as it is ready instead of being lost, and the freshness timer only runs while the screen is visible.
+- **Scripts:** `run.sh`/`run.bat` and `update-from-github.sh`/`.bat` used the watch package name for the launch and the update check, but the app is installed under the shared application id `com.hydraumc.control`, so the app never launched and the updater always reported "not installed". They now use the real component, and the updater refuses a device that is not a watch because the phone and watch share the id. `gradlew` is executable in the repository.
+- **Manifest:** the app is no longer declared standalone (voice and status need the paired phone today), and its maturity reads functional.
+- **Docs:** the README no longer advertises the wireless E-STOP with a latency figure (it is planned, not built), the directory tree lists only real folders, the confirmation flow is documented as not wired yet, and outdated code comments are corrected (70 tests).
+
 ## [0.2.3] - Portuguese interface and README, translation parity tests
 
 - **Portuguese interface:** the watch app is now available in Portuguese (`values-pt/strings.xml`, all 22 strings), picked automatically when the watch language is Portuguese; the interface now covers 8 languages and a README in Portuguese (`README_por.md`) joins the other translations.

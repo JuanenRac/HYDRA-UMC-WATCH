@@ -13,7 +13,8 @@ junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 # Real JSON codec for the SERVER<->WATCH sync protocol (protocol/SyncMessage.kt) -
-# matches the Kotlin version above, no separate pin to track.
+# an independent pin: kotlinx-serialization has its own version, unrelated to
+# the Kotlin compiler version above.
 kotlinxSerializationJson = "1.7.3"
 playServicesWearable = "20.0.1"
 

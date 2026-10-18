@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "ecosystem": "HYDRA-UMC",
   "name": "HYDRA-UMC-WATCH",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "role": "ui",
   "stack": "android",
   "technologies": [
@@ -10,7 +10,7 @@
     "Wear OS"
   ],
   "deployment_target": "wearable",
-  "maturity": "established",
+  "maturity": "functional",
   "family": "Complementary Tools",
   "parent": null,
   "build": "./build.sh or build.bat (bumps version, runs JUnit tests, assembleDebug). Wear OS 3+ target.",

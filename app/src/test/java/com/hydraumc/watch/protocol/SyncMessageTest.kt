@@ -215,4 +215,25 @@ class SyncMessageTest {
             assertTrue(exc.message!!.contains("expected a JSON object"))
         }
     }
+
+    @Test
+    fun `an assistant reply longer than the watch limit is cut with an ellipsis, not dropped`() {
+        val long = "x".repeat(550)
+        val parsed = parseSyncMessage(
+            """{"type":"assistant_reply","requestId":"r9","text":"$long","level":"NOMINAL"}""",
+        ) as SyncMessage.AssistantReply
+
+        assertEquals(500, parsed.text.length)
+        assertTrue(parsed.text.endsWith("…"))
+    }
+
+    @Test
+    fun `an unknown status level falls back to attention instead of dropping the message`() {
+        val parsed = parseSyncMessage(
+            """{"type":"system_status","headline":"Server online","detail":"ok","level":"INFO"}""",
+        ) as SyncMessage.SystemStatus
+
+        assertEquals(WatchStatusLevel.ATTENTION, parsed.level)
+        assertEquals("Server online", parsed.headline)
+    }
 }

@@ -11,10 +11,10 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Licencia-GPL%203.0-blue.svg" alt="GPL 3.0">
   <img src="https://img.shields.io/badge/Platform-Wear%20OS-4285F4.svg" alt="Wear OS">
-  <img src="https://img.shields.io/badge/Feature-Wireless%20E--STOP-red.svg" alt="E-STOP">
+  <img src="https://img.shields.io/badge/Feature-Voice%20%26%20haptics-blue.svg" alt="E-STOP">
 </p>
 
-**Vérification d'honnêteté - ce qui fonctionne réellement aujourd'hui :** les motifs de vibration haptiques (`haptics/HapticPatterns.kt`, `HapticAlertPlayer.kt`), le codec de messages de synchronisation SERVER<->WATCH (`protocol/SyncMessage.kt`), le transport relais par téléphone appairé avec sélection de nœud vérifiée par companion, retry à backoff exponentiel, routage des messages et suivi de péremption du dernier état connu (`transport/WatchRelayTransport.kt`, `RelayRetryPolicy.kt`, `WatchRelayRouting.kt`, `LastKnownStateCache.kt`), et le flux vocal tap-to-talk (`MainActivity.kt`) sont du vrai Kotlin, appuyé par 64 tests JUnit qui passent (`./gradlew test`) tournant sur une JVM ordinaire sans montre, émulateur ni téléphone appairé. Cette couverture de tests prouve que la logique de messages/politique/routage est correcte ; elle ne prouve pas que l'application fonctionne sur une vraie montre - ni les vrais appels `Vibrator` de `HapticAlertPlayer`, ni le relais Data Layer, ni le flux vocal n'ont été vérifiés sur du matériel Wear OS physique, seulement via `assembleDebug`/des tests unitaires sur cette machine de développement. Le bouton E-STOP sans fil, un WebSocket direct Watch<->Server, et l'appairage Server basé sur JWT restent prévus - seule la forme du message `EStopCommand` qu'ils utiliseraient est réelle et testée aujourd'hui, pas le transport ni le câblage matériel. Voir `CHANGELOG.md` pour savoir exactement ce qui a été livré jusqu'à présent, et la propre liste de fonctionnalités de la section 1 ci-dessous pour le détail réel/futur par fonctionnalité.
+**Vérification d'honnêteté - ce qui fonctionne réellement aujourd'hui :** les motifs de vibration haptiques (`haptics/HapticPatterns.kt`, `HapticAlertPlayer.kt`), le codec de messages de synchronisation SERVER<->WATCH (`protocol/SyncMessage.kt`), le transport relais par téléphone appairé avec sélection de nœud vérifiée par companion, retry à backoff exponentiel, routage des messages et suivi de péremption du dernier état connu (`transport/WatchRelayTransport.kt`, `RelayRetryPolicy.kt`, `WatchRelayRouting.kt`, `LastKnownStateCache.kt`), et le flux vocal tap-to-talk (`MainActivity.kt`) sont du vrai Kotlin, appuyé par 70 tests JUnit qui passent (`./gradlew test`) tournant sur une JVM ordinaire sans montre, émulateur ni téléphone appairé. Cette couverture de tests prouve que la logique de messages/politique/routage est correcte ; elle ne prouve pas que l'application fonctionne sur une vraie montre - ni les vrais appels `Vibrator` de `HapticAlertPlayer`, ni le relais Data Layer, ni le flux vocal n'ont été vérifiés sur du matériel Wear OS physique, seulement via `assembleDebug`/des tests unitaires sur cette machine de développement. Le bouton E-STOP sans fil, un WebSocket direct Watch<->Server, et l'appairage Server basé sur JWT restent prévus - seule la forme du message `EStopCommand` qu'ils utiliseraient est réelle et testée aujourd'hui, pas le transport ni le câblage matériel. Voir `CHANGELOG.md` pour savoir exactement ce qui a été livré jusqu'à présent, et la propre liste de fonctionnalités de la section 1 ci-dessous pour le détail réel/futur par fonctionnalité.
 
 ---
 
@@ -26,7 +26,7 @@ Construit comme une application Wear OS autonome (Kotlin + Jetpack Compose pour 
 
 ### Fonctionnalités Clés :
 * ✅ **Réel v0 - motifs haptiques et protocole de synchronisation :** `haptics/HapticPatterns.kt` définit un motif de vibration réel et distinct par sévérité d'alerte (Critique/Avertissement/Info) ; `protocol/SyncMessage.kt` définit et (dé)sérialise les formes réelles des messages `EStopCommand`/`Alert` du flux de synchronisation SERVER<->WATCH ci-dessous. Les deux sont du Kotlin pur, testable - aucun matériel de montre, émulateur, ou WebSocket ouvert nécessaire pour les exécuter ou les tester.
-* 🛑 **E-STOP Sans Fil** — bouton d'urgence dédié avec une latence inférieure à 50 ms sur Wi-Fi industriel. *(le message `EStopCommand` qu'il enverrait est réel et testé ; le transport WebSocket et le câblage du bouton physique restent prévus — nécessite l'appairage avec HYDRA-UMC-SERVER.)*
+* 🛑 **E-STOP Sans Fil (prévu)** — bouton d'urgence dédié. *(le message `EStopCommand` qu'il enverrait est réel et testé ; le transport WebSocket et le câblage du bouton physique restent prévus — nécessite l'appairage avec HYDRA-UMC-SERVER.)*
 * 📳 **Alertes Haptiques** — motifs de vibration différenciés selon le type d'alerte (Critique, Avertissement, Info), joués via le vrai service Android `Vibrator`/`VibratorManager`. *(implémenté - `haptics/HapticAlertPlayer.kt` ; encore non vérifié sur un vrai appareil Wear OS, comme le reste de cette app.)*
 * 🎙️ **Voix** — appuyer pour parler : demande explicite de la permission `RECORD_AUDIO`, l'intent de reconnaissance vocale système (`RecognizerIntent`) pour la transcription, la transcription relayée à HYDRA-UMC-ANDROID-CONTROL sous forme de message de sync `voice_turn` borné, et une réponse locale par `TextToSpeech` sur la montre. *(implémenté - `MainActivity.kt` ; la voix ne peut jamais actionner un robot directement, voir Architecture ci-dessous et [docs/VOICE_AI_PROTOCOL.md](docs/VOICE_AI_PROTOCOL.md) pour le flux de bout en bout et la limite de sécurité.)*
 * ⌚ **Statut en un Coup d'Œil** — un bouton **Actualiser le statut** relaie une requête de statut bornée à HYDRA-UMC-ANDROID-CONTROL via le Data Layer appairé ; la carte `system_status` reçue est affichée avec un indicateur « dernier connu - peut être obsolète » dès qu'elle devient périmée. *(implémenté - `MainActivity.kt`/`WatchRelayTransport.requestSystemStatus()` ; à la demande via le relais téléphone, pas un socket direct montre-serveur, et encore non vérifié sur un vrai appareil Wear OS.)*
@@ -101,7 +101,6 @@ HYDRA-UMC-WATCH/
 ├── settings.gradle.kts        # Câblage des modules
 ├── gradlew / gradlew.bat      # Lanceur du Gradle wrapper
 ├── docs/                      # Documentation et protocoles de sécurité
-├── build/                     # Réservé (app/build/ de Gradle lui-même est ignoré par git)
 ├── images/                    # Médias et diagrammes
 ├── hydra-umc.project.json     # Manifeste de l'écosystème (version, métadonnées build/santé)
 ├── keystore.properties.example # Modèle pour la config de signature de release ignorée par git
@@ -110,8 +109,7 @@ HYDRA-UMC-WATCH/
 ├── build.sh / build.bat       # Build réel : incrémente la version, lance les tests, assembleDebug
 ├── build-test.sh / build-test.bat # Enveloppe sans mutation pour tools/build_test.py
 ├── run.sh / run.bat           # Exécution réelle : gradlew installDebug + lancement adb
-├── update-from-github.sh / .bat # Canal de mise à jour hors Play : APK GitHub Release + `adb install -r`
-└── src/                       # Réservé (le code de ce projet vit dans app/src/)
+└── update-from-github.sh / .bat # Canal de mise à jour hors Play : APK GitHub Release + `adb install -r`
 ```
 
 ---
