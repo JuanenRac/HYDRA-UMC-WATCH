@@ -1,32 +1,6 @@
 # Changelog
 
-All notable work on **HYDRA-UMC-WATCH** is summarized here, newest first.
-This public changelog records release-relevant work rather than a
-session-by-session diary.
-
-## Versioning scheme
-
-`app/version.properties`'s `versionMajor`/`versionMinor`/`versionPatch`
-bump automatically on every real build - `build.sh`/`build.bat` are the
-single source of that bump (`bump_manifest_version.py`, keeping
-`hydra-umc.project.json` in lockstep in the same call), then invoke Gradle
-with `-PhydraUmcReadOnly=true` so `app/build.gradle.kts` only *reads*
-`version.properties`, never writes it. That flag is also how
-`tools/build_test.py`'s compile-only CI check runs Gradle, so the same
-mechanism keeps a plain `./gradlew assembleDebug` from ever touching the
-version, the manifest, or `CHANGELOG.md` on its own. Follows the same
-base-10 "odometer" rule used across the ecosystem rather than
-semantic-versioning judgment calls:
-
-- `versionPatch` +1 on every build
-- when `versionPatch` would exceed 9, it resets to 0 and `versionMinor` +1 instead (e.g. `0.0.9` -> `0.1.0`, never `0.0.10`)
-- the same carry cascades into `versionMajor` if `versionMinor` would exceed 9
-
-`versionCode` is a separate, simple monotonic counter (+1 always, no
-carry, bumped by `bump_version_code.py`) - Android requires it to
-strictly increase across every build that ever ships.
-
----
+All notable changes to this project are documented here.
 
 ## [Unreleased]
 
