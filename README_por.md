@@ -117,8 +117,8 @@ HYDRA-UMC-WATCH/
 ├── hydra-umc.project.json     # Manifesto do ecossistema (versão, metadados de compilação/saúde)
 ├── keystore.properties.example # Modelo da configuração de assinatura de versões, ignorada pelo git
 ├── bump_manifest_version.py   # Sobe major/minor/patch + o manifesto, em conjunto
-├── bump_version_code.py       # Sobe o contador separado versionCode do Android
-├── build.sh / build.bat       # Compilação real: sobe a versão, executa os testes, assembleDebug
+├── bump_version_code.py       # Subida do contador versionCode do Android (executada só pelo comando `bump` explícito)
+├── build.sh / build.bat       # Compilação real: executa os testes, assembleDebug
 ├── build-test.sh / build-test.bat # Invólucro sem alterações para tools/build_test.py
 ├── run.sh / run.bat           # Execução real: gradlew installDebug + arranque por adb
 └── update-from-github.sh / .bat # Canal de atualização fora da Play: APK da Release do GitHub + `adb install -r`
@@ -143,7 +143,7 @@ run.bat
 
 O `build` sobe a versão (`bump_manifest_version.py` para major/minor/patch em conjunto com o `hydra-umc.project.json`, `bump_version_code.py` para o próprio `versionCode` do Android), executa a verdadeira suite de testes JUnit (`haptics`, `protocol`) e compila o APK de depuração para `app/build/outputs/apk/debug/app-debug.apk` - tudo numa única invocação do Gradle com `-PhydraUmcReadOnly=true`, para que o próprio código de leitura de versão do `app/build.gradle.kts` nunca suba *também* nada (essa opção é também a forma como o `build-test.sh`/`.bat` executam a sua verificação de CI separada, só de compilação e sem alterações). O `run` instala o APK com `gradlew installDebug` e lança a `MainActivity` com o `adb`.
 
-Exemplo real - os dois scripts de subida de versão também correm isolados, úteis para inspecionar o que uma compilação fará sem acionar o Gradle:
+Exemplo real - os dois scripts de subida de versão são executados pelo comando `bump` explícito e também correm isolados (alteram os ficheiros de versão quando correm):
 
 ```bash
 python3 bump_manifest_version.py   # por exemplo "HYDRA-UMC version: v0.1.2 -> v0.1.3"

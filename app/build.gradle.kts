@@ -39,11 +39,11 @@ val hasPrivateReleaseSigning = listOf(
 // =============================================================================
 // Version source of truth
 // =============================================================================
-// Gradle always reads version.properties and never writes it. build.bat and
-// build.sh are the sole release flows: they synchronize the native version,
-// hydra-umc.project.json and CHANGELOG.md first, then increment versionCode,
-// before invoking Gradle. This prevents a direct assemble/compile command from
-// creating an APK whose version differs from the project manifest.
+// Gradle always reads version.properties and never writes it, and neither do
+// build.bat/build.sh: building never changes a version. The explicit bump
+// command (python tools/hydra_project_tool.py bump) synchronizes the native
+// version, hydra-umc.project.json and CHANGELOG.md and increments versionCode.
+// This keeps every APK's version equal to the project manifest.
 val versionPropsFile = file("version.properties")
 val versionPropsText = versionPropsFile.readText()
 

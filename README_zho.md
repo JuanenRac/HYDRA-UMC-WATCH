@@ -93,7 +93,7 @@ E-STOP 按钮仍是受硬件限制、有待未来完成的工作。*
 HYDRA-UMC-WATCH/
 ├── app/
 │   ├── build.gradle.kts       # 应用模块配置（只读取 version.properties，从不写入）
-│   ├── version.properties     # versionMajor/Minor/Patch/Code（仅由 build.sh/.bat 递增）
+│   ├── version.properties     # versionMajor/Minor/Patch/Code (仅由显式 `bump` 命令递增)
 │   └── src/
 │       ├── main/
 │       │   ├── AndroidManifest.xml
@@ -118,8 +118,8 @@ HYDRA-UMC-WATCH/
 ├── hydra-umc.project.json     # 生态系统清单（版本、构建/健康元数据）
 ├── keystore.properties.example # 已被 gitignore 的发布签名配置模板
 ├── bump_manifest_version.py   # 同时递增 major/minor/patch 和清单文件
-├── bump_version_code.py       # 递增 Android 自身的 versionCode 计数器
-├── build.sh / build.bat       # 真实构建：递增版本、运行测试、assembleDebug
+├── bump_version_code.py       # Android versionCode 计数器递增（仅由显式 `bump` 命令运行）
+├── build.sh / build.bat       # 验证并构建（构建不会更改版本）
 ├── build-test.sh / build-test.bat # tools/build_test.py 的不产生变更的包装脚本
 ├── run.sh / run.bat           # 真实运行：gradlew installDebug + adb launch
 └── update-from-github.sh / .bat # 不依赖 Play 的更新渠道：GitHub Release APK + `adb install -r`
@@ -154,7 +154,7 @@ run.bat
 `run` 通过 `gradlew installDebug` 安装该 APK，并使用 `adb`
 启动 `MainActivity`。
 
-真实示例——这两个版本递增脚本也可以独立运行，便于在不触发 Gradle 的情况下检查一次构建会做什么：
+真实示例——这两个版本递增脚本由显式的 `bump` 命令运行，也可以独立运行（运行时会修改版本文件）：
 
 ```bash
 python3 bump_manifest_version.py   # 例如 "HYDRA-UMC version: v0.1.2 -> v0.1.3"

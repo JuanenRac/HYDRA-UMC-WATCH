@@ -92,7 +92,7 @@ Standalone Wear OS app — no hardware, firmware or OS of its own (it runs on of
 HYDRA-UMC-WATCH/
 ├── app/
 │   ├── build.gradle.kts       # App module config (reads version.properties, never writes it)
-│   ├── version.properties     # versionMajor/Minor/Patch/Code (bumped by build.sh/.bat only)
+│   ├── version.properties     # versionMajor/Minor/Patch/Code (bumped only by the explicit `bump` command)
 │   └── src/
 │       ├── main/
 │       │   ├── AndroidManifest.xml
@@ -117,8 +117,8 @@ HYDRA-UMC-WATCH/
 ├── hydra-umc.project.json     # Ecosystem manifest (version, build/health metadata)
 ├── keystore.properties.example # Template for the ignored release-signing config
 ├── bump_manifest_version.py   # Bumps major/minor/patch + the manifest, in lockstep
-├── bump_version_code.py       # Bumps Android's separate versionCode counter
-├── build.sh / build.bat       # Real build: bump version, run tests, assembleDebug
+├── bump_version_code.py       # Android versionCode counter bump (run only by the explicit `bump` command)
+├── build.sh / build.bat       # Validate and build (building never changes the version)
 ├── build-test.sh / build-test.bat # Non-mutating wrapper for tools/build_test.py
 ├── run.sh / run.bat           # Real run: gradlew installDebug + adb launch
 └── update-from-github.sh / .bat # Non-Play update channel: GitHub Release APK + `adb install -r`
@@ -141,9 +141,9 @@ build.bat
 run.bat
 ```
 
-`build` bumps the version (`bump_manifest_version.py` for major/minor/patch in lockstep with `hydra-umc.project.json`, `bump_version_code.py` for Android's own `versionCode`), runs the real JUnit test suite (`haptics`, `protocol`), and compiles the debug APK to `app/build/outputs/apk/debug/app-debug.apk` - all in one Gradle invocation run with `-PhydraUmcReadOnly=true` so `app/build.gradle.kts`'s own version-reading code never *also* bumps anything (that flag is also how `build-test.sh`/`.bat` run their separate, non-mutating compile-only CI check). `run` installs the APK via `gradlew installDebug` and launches `MainActivity` with `adb`.
+`build` never changes the version (only `python tools/hydra_project_tool.py bump` raises it), runs the real JUnit test suite (`haptics`, `protocol`), and compiles the debug APK to `app/build/outputs/apk/debug/app-debug.apk` - all in one Gradle invocation run with `-PhydraUmcReadOnly=true` so `app/build.gradle.kts`'s own version-reading code never *also* bumps anything (that flag is also how `build-test.sh`/`.bat` run their separate, non-mutating compile-only CI check). `run` installs the APK via `gradlew installDebug` and launches `MainActivity` with `adb`.
 
-Real example - the two version-bump scripts run standalone too, useful to inspect what a build will do without triggering Gradle:
+Real example - the two version-bump scripts are run by the explicit bump command and also run standalone (they change the version files when they run):
 
 ```bash
 python3 bump_manifest_version.py   # e.g. "HYDRA-UMC version: v0.1.2 -> v0.1.3"

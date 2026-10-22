@@ -19,19 +19,16 @@ printf '%s\n' "* Email     : electrohobby3d@gmail.com"
 printf '%s\n' "* Copyright : (C) 2026 JuanenRac"
 printf '%s\n' "* License   : GPL-3.0 - see LICENSE"
 printf '%s\n' "* ------------------------------------------------------------------------- *"
-printf '%s\n' "* 1. Increment the project version and synchronise its manifest."
+printf '%s\n' "* 1. Read the project version (building never changes it; use the explicit bump command)."
 printf '%s\n' "* 2. Run this project's declared build, verification and packaging commands."
 printf '%s\n' "* 3. Report the result and keep an interactive terminal open."
 printf '%s\n' "*******************************************************************************"
 printf '\n'
 # HYDRA_UMC_SCRIPT_STANDARD_BANNER_END
-# Compiles the debug APK via the Gradle wrapper. This script is the single
-# source of the real version bump: it increments version.properties AND
-# hydra-umc.project.json together via bump_manifest_version.py, plus
-# versionCode via bump_version_code.py, THEN runs Gradle with
-# -PhydraUmcReadOnly=true. Gradle is always read-only for version metadata;
-# this wrapper remains the only path that changes version.properties, the
-# manifest and CHANGELOG.md together.
+# Compiles the debug APK via the Gradle wrapper with -PhydraUmcReadOnly=true.
+# Building never changes the version: version.properties, the manifest and
+# CHANGELOG.md stay as they are. Raising the version (and the Android
+# versionCode) is the explicit `python tools/hydra_project_tool.py bump`.
 #
 # Usage:
 #   chmod +x build.sh gradlew   (one-time)
@@ -41,19 +38,10 @@ cd "$(dirname "$0")"
 
 trap '[ -t 0 ] && read -r -p "Press Enter to close..." _' EXIT
 # HYDRA_UMC_SCRIPT_STANDARD_VERSION_STEP
-printf '%s\n' "[1/3] Incrementing project version and synchronising its manifest..."
-# HYDRA_UMC_SCRIPT_STANDARD_VERSION_CAPTURE_BEFORE
-HYDRA_UMC_VERSION_BEFORE="$(python3 -c 'import json, pathlib, sys; print(json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))["version"])' "$(dirname "$0")/hydra-umc.project.json")"
-python3 bump_manifest_version.py || exit 1
-# HYDRA_UMC_SCRIPT_STANDARD_VERSION_CAPTURE_AFTER
-HYDRA_UMC_VERSION_AFTER="$(python3 -c 'import json, pathlib, sys; print(json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))["version"])' "$(dirname "$0")/hydra-umc.project.json")"
-printf '\n*******************************************************************************\n'
-printf '%s\n' '* VERSION INCREMENT COMPLETED'
-printf '%s\n' "* v${HYDRA_UMC_VERSION_BEFORE:-unknown} -> v${HYDRA_UMC_VERSION_AFTER:-unknown}"
-printf '%s\n' '* Project manifest has been synchronised by the project build flow.'
-printf '%s\n' '*******************************************************************************'
-printf '\n'
-python3 bump_version_code.py || exit 1
+printf '%s\n' "[1/3] Reading the project version (building never changes it)..."
+HYDRA_UMC_VERSION_BUILT="$(python3 -c 'import json, pathlib, sys; print(json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))["version"])' "$(dirname "$0")/hydra-umc.project.json")"
+printf '%s\n' "      Building v${HYDRA_UMC_VERSION_BUILT:-unknown} (building never changes the version)"
+echo
 
 echo ""
 echo "-- Running the real unit test suite and compiling the debug APK --"
@@ -64,3 +52,4 @@ echo "========================================"
 echo " Build complete. APK: app/build/outputs/apk/debug/app-debug.apk"
 echo " Run ./run.sh to install it on a connected Wear OS device/emulator."
 echo "========================================"
+printf '%s\n' "Built v${HYDRA_UMC_VERSION_BUILT:-unknown}. Building never changes the version; to raise it run: python tools/hydra_project_tool.py bump"

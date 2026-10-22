@@ -46,8 +46,8 @@ HYDRA-UMC-WATCH-release.apk
 
 ### Preparing a private GitHub artifact
 
-Run the normal incremental build once so the project version, manifest and
-changelog advance together. Then create the release APK in read-only mode and
+Run the explicit bump (`python tools/hydra_project_tool.py bump`) once so the
+project version, manifest and changelog advance together. Then create the release APK in read-only mode and
 rename a copy for the GitHub Release asset:
 
 ```text

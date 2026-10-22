@@ -92,7 +92,7 @@ Eigenständige Wear-OS-App — ohne eigene Hardware, Firmware oder Betriebssyste
 HYDRA-UMC-WATCH/
 ├── app/
 │   ├── build.gradle.kts       # App-Modul-Konfiguration (liest version.properties, schreibt es nie)
-│   ├── version.properties     # versionMajor/Minor/Patch/Code (nur von build.sh/.bat erhöht)
+│   ├── version.properties     # versionMajor/Minor/Patch/Code (nur vom expliziten `bump`-Befehl erhöht)
 │   └── src/
 │       ├── main/
 │       │   ├── AndroidManifest.xml
@@ -117,8 +117,8 @@ HYDRA-UMC-WATCH/
 ├── hydra-umc.project.json     # Ökosystem-Manifest (Version, Build-/Health-Metadaten)
 ├── keystore.properties.example # Vorlage für die von git ignorierte Release-Signierkonfiguration
 ├── bump_manifest_version.py   # Erhöht major/minor/patch + das Manifest, gemeinsam
-├── bump_version_code.py       # Erhöht den eigenen versionCode-Zähler von Android
-├── build.sh / build.bat       # Echter Build: erhöht Version, führt Tests aus, assembleDebug
+├── bump_version_code.py       # Erhöhung des Android-versionCode-Zählers (nur vom expliziten `bump`-Befehl ausgeführt)
+├── build.sh / build.bat       # Validiert und baut (Bauen ändert nie die Version)
 ├── build-test.sh / build-test.bat # Nicht-mutierender Wrapper für tools/build_test.py
 ├── run.sh / run.bat           # Echte Ausführung: gradlew installDebug + adb-Start
 └── update-from-github.sh / .bat # Nicht-Play-Update-Kanal: GitHub-Release-APK + `adb install -r`

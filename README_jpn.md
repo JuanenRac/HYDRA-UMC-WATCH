@@ -149,7 +149,7 @@ build.bat
 run.bat
 ```
 
-`build` はバージョンを増加させ（`bump_manifest_version.py` が
+`build` はバージョンを変更せず（`bump_manifest_version.py` が
 `hydra-umc.project.json` と歩調を合わせて major/minor/patch を、
 `bump_version_code.py` が Android 独自の `versionCode` を増加させます）、
 実際の JUnit テストスイート（`haptics`、`protocol`）を実行し、デバッグ版

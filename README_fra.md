@@ -92,7 +92,7 @@ Application Wear OS autonome — sans matériel, micrologiciel ou système d'exp
 HYDRA-UMC-WATCH/
 ├── app/
 │   ├── build.gradle.kts       # Config du module app (lit version.properties, ne l'écrit jamais)
-│   ├── version.properties     # versionMajor/Minor/Patch/Code (incrémenté uniquement par build.sh/.bat)
+│   ├── version.properties     # versionMajor/Minor/Patch/Code (incrémenté uniquement par la commande `bump` explicite)
 │   └── src/
 │       ├── main/
 │       │   ├── AndroidManifest.xml
@@ -117,8 +117,8 @@ HYDRA-UMC-WATCH/
 ├── hydra-umc.project.json     # Manifeste de l'écosystème (version, métadonnées build/santé)
 ├── keystore.properties.example # Modèle pour la config de signature de release ignorée par git
 ├── bump_manifest_version.py   # Incrémente major/minor/patch + le manifeste, ensemble
-├── bump_version_code.py       # Incrémente le compteur versionCode propre à Android
-├── build.sh / build.bat       # Build réel : incrémente la version, lance les tests, assembleDebug
+├── bump_version_code.py       # Incrément du compteur versionCode d'Android (exécuté seulement par la commande `bump` explicite)
+├── build.sh / build.bat       # Build réel : lance les tests, assembleDebug
 ├── build-test.sh / build-test.bat # Enveloppe sans mutation pour tools/build_test.py
 ├── run.sh / run.bat           # Exécution réelle : gradlew installDebug + lancement adb
 └── update-from-github.sh / .bat # Canal de mise à jour hors Play : APK GitHub Release + `adb install -r`
@@ -143,7 +143,7 @@ run.bat
 
 `build` incrémente la version (`bump_manifest_version.py` pour major/minor/patch en accord avec `hydra-umc.project.json`, `bump_version_code.py` pour le `versionCode` propre à Android), lance la vraie suite de tests JUnit (`haptics`, `protocol`), et compile l'APK de débogage vers `app/build/outputs/apk/debug/app-debug.apk` - le tout en une seule invocation Gradle exécutée avec `-PhydraUmcReadOnly=true` pour que le code de `app/build.gradle.kts` qui lit la version ne l'incrémente jamais *aussi* (le même indicateur utilisé par `build-test.sh`/`.bat` pour leur vérification CI séparée, compilation seule, sans mutation). `run` installe l'APK via `gradlew installDebug` et lance `MainActivity` avec `adb`.
 
-Exemple réel - les deux scripts d'incrémentation de version fonctionnent aussi de manière autonome, utile pour inspecter ce qu'un build fera sans déclencher Gradle :
+Exemple réel - les deux scripts d'incrémentation de version sont exécutés par la commande `bump` explicite et fonctionnent aussi de manière autonome (ils modifient les fichiers de version quand ils s'exécutent) :
 
 ```bash
 python3 bump_manifest_version.py   # ex. "HYDRA-UMC version: v0.1.2 -> v0.1.3"
