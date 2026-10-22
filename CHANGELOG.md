@@ -28,6 +28,10 @@ strictly increase across every build that ever ships.
 
 ---
 
+## [Unreleased]
+
+- Added `tools/hydra_project_tool.py`: the same `validate`, `test`, `version`, `status` and `bump` commands in every repository. The checks run with `HYDRA_UMC_CI=1` and fail if the version changes; only `bump` changes it.
+
 ## [0.2.5] - Messages from the phone can no longer escape the parser
 
 - **Message type:** a message whose `type` was an object or a list raised an `IllegalArgumentException` instead of the parser's own error, so a listener that catches only the parse error was taken down by one such message. It is now a parse error.
