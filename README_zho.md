@@ -144,9 +144,7 @@ build.bat
 run.bat
 ```
 
-`build` 会递增版本号（`bump_manifest_version.py` 同步递增 major/minor/patch
-与 `hydra-umc.project.json`，`bump_version_code.py` 递增 Android 自身的
-`versionCode`），运行真实的 JUnit 测试套件（`haptics`、`protocol`），并将
+`build` 绝不会更改版本号（只有 `python tools/hydra_project_tool.py bump` 会提升它），运行真实的 JUnit 测试套件（`haptics`、`protocol`），并将
 调试版 APK 编译到 `app/build/outputs/apk/debug/app-debug.apk`——全部在
 一次以 `-PhydraUmcReadOnly=true` 执行的 Gradle 调用中完成，这样
 `app/build.gradle.kts` 中读取版本号的代码就永远不会*也*去递增它（

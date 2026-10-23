@@ -149,9 +149,7 @@ build.bat
 run.bat
 ```
 
-`build` はバージョンを変更せず（`bump_manifest_version.py` が
-`hydra-umc.project.json` と歩調を合わせて major/minor/patch を、
-`bump_version_code.py` が Android 独自の `versionCode` を増加させます）、
+`build` はバージョンを変更せず（バージョンを上げるのは `python tools/hydra_project_tool.py bump` だけです）、
 実際の JUnit テストスイート（`haptics`、`protocol`）を実行し、デバッグ版
 APK を `app/build/outputs/apk/debug/app-debug.apk` にコンパイルします
 ——これらすべてが、`-PhydraUmcReadOnly=true` を付けた 1 回の Gradle

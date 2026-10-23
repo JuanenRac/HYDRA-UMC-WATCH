@@ -141,7 +141,7 @@ build.bat
 run.bat
 ```
 
-O `build` sobe a versão (`bump_manifest_version.py` para major/minor/patch em conjunto com o `hydra-umc.project.json`, `bump_version_code.py` para o próprio `versionCode` do Android), executa a verdadeira suite de testes JUnit (`haptics`, `protocol`) e compila o APK de depuração para `app/build/outputs/apk/debug/app-debug.apk` - tudo numa única invocação do Gradle com `-PhydraUmcReadOnly=true`, para que o próprio código de leitura de versão do `app/build.gradle.kts` nunca suba *também* nada (essa opção é também a forma como o `build-test.sh`/`.bat` executam a sua verificação de CI separada, só de compilação e sem alterações). O `run` instala o APK com `gradlew installDebug` e lança a `MainActivity` com o `adb`.
+O `build` nunca altera a versão (só `python tools/hydra_project_tool.py bump` a sobe), executa a verdadeira suite de testes JUnit (`haptics`, `protocol`) e compila o APK de depuração para `app/build/outputs/apk/debug/app-debug.apk` - tudo numa única invocação do Gradle com `-PhydraUmcReadOnly=true`, para que o próprio código de leitura de versão do `app/build.gradle.kts` nunca suba *também* nada (essa opção é também a forma como o `build-test.sh`/`.bat` executam a sua verificação de CI separada, só de compilação e sem alterações). O `run` instala o APK com `gradlew installDebug` e lança a `MainActivity` com o `adb`.
 
 Exemplo real - os dois scripts de subida de versão são executados pelo comando `bump` explícito e também correm isolados (alteram os ficheiros de versão quando correm):
 
