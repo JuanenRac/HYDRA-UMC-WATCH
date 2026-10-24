@@ -24,7 +24,7 @@
 
 | | |
 |---|---|
-| Version | `0.2.5` |
+| Version | `0.2.6` |
 | Reifegrad | Funktionsfähig |
 | Technik | Kotlin / Wear OS |
 | Ziel | Eine Wear-OS-Uhr (mit dem Telefon gekoppelt) |

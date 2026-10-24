@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here.
 
-## [Unreleased]
+## [0.2.6] - A reply that arrives with the screen gone is no longer lost
 
 - **A reply that arrives with the screen gone is no longer lost.** On Wear OS the activity is destroyed as soon as the wrist is lowered; the listener service only sent a local broadcast, which then had no receiver. The service now holds the newest messages in `RelayInbox` (at most 8, none older than 10 minutes, nothing held while the screen exists) and the screen shows them when it is created again; an answer is shown even though the question was asked before the screen was created, and a held message is neither spoken nor vibrated, because it is not news any more. Checked on a plain JVM (9 tests); the Android glue has not been tried on a real watch, and no notification is posted yet.
 - Cleanups: the strings `tagline` and `voice_captured` that nothing used are gone from the eight languages, and the test button of the screen plays through the haptic player of the activity instead of building a second one inside the composable.

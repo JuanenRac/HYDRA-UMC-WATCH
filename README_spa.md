@@ -24,7 +24,7 @@
 
 | | |
 |---|---|
-| Versión | `0.2.5` |
+| Versión | `0.2.6` |
 | Madurez | Funcional |
 | Tecnología | Kotlin / Wear OS |
 | Destino | Un reloj Wear OS (emparejado con el teléfono) |

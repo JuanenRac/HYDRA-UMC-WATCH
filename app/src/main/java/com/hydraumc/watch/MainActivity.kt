@@ -9,6 +9,7 @@
 // still planned; nothing on this screen can command a robot.
 package com.hydraumc.watch
 
+import android.annotation.SuppressLint
 import android.Manifest
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -155,6 +156,7 @@ class MainActivity : ComponentActivity() {
             }
     }
 
+    @SuppressLint("InvalidFragmentVersionForActivityResult")
     private val recognizeSpeech = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
     ) { result ->
@@ -187,6 +189,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @SuppressLint("InvalidFragmentVersionForActivityResult")
     private val requestMicrophonePermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { granted ->
