@@ -30,6 +30,19 @@
 | Ziel | Eine Wear-OS-Uhr (mit dem Telefon gekoppelt) |
 | Auf echter Hardware | Noch nicht: für diese Version ist kein Lauf auf echter Hardware vermerkt |
 
+## 🚦 Projektstatus
+
+Jede Zeile ist ein Teil dieses Repositorys, und die Ampel sagt, wie weit er heute ist. Sie beruht auf dem, was das Repository zeigen kann (Tests, Builds, Läufe), nicht auf dem, was geplant ist.
+
+🟢 Fertig und überprüft · 🟡 Funktioniert, mit bekannten Grenzen · 🟠 Teilweise fertig oder noch nicht überprüft · 🔴 Nicht gemacht oder funktioniert nicht
+
+| Bereich | Stand | Was das hier bedeutet |
+|---|---|---|
+| Software | 🟡 | Funktioniert für seinen Hauptzweck; die Ehrlichkeitsprüfung oben nennt, was noch fehlt |
+| Tests | 🟠 | Für dieses Repository ist noch keine Testanzahl vermerkt |
+| Echte Hardware | 🔴 | Noch nicht: für diese Version ist kein Lauf auf echter Hardware vermerkt |
+| Dokumentation | 🟢 | README in acht Sprachen, bei jeder Änderung gegen das Manifest geprüft |
+
 ## 1. 🛠️ TECHNISCHER ÜBERBLICK
 
 **HYDRA-UMC-WATCH** ist der Handgelenk-Begleiter für den Anlagenbediener. Er zeigt Status- und Alarminformationen auf einen Blick am Handgelenk und leitet kurze Sprachbeiträge über das gekoppelte Telefon weiter. Er ist kein Sicherheitsgerät: Er hat keinen drahtlosen E-STOP und wurde noch nicht auf einer physischen Uhr ausgeführt.

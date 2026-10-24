@@ -30,6 +30,19 @@
 | Destinazione | Un orologio Wear OS (abbinato al telefono) |
 | Su hardware reale | Non ancora: per questa versione non risulta alcuna esecuzione su hardware reale |
 
+## 🚦 Stato del progetto
+
+Ogni riga è una parte di questo repository e il semaforo dice a che punto è oggi. È scritta in base a ciò che il repository può mostrare (test, compilazioni, esecuzioni), non a ciò che è previsto.
+
+🟢 Fatto e verificato · 🟡 Funziona, con limiti noti · 🟠 Fatto a metà o non ancora verificato · 🔴 Non fatto o non funzionante
+
+| Area | Stato | Cosa significa qui |
+|---|---|---|
+| Software | 🟡 | Funziona per il suo scopo principale; la verifica di onestà qui sopra elenca ciò che manca ancora |
+| Test | 🟠 | Per questo repository non è ancora registrato il numero di test |
+| Hardware reale | 🔴 | Non ancora: per questa versione non risulta alcuna esecuzione su hardware reale |
+| Documentazione | 🟢 | README in otto lingue, verificato rispetto al manifesto a ogni modifica |
+
 ## 1. 🛠️ PANORAMICA TECNICA
 
 **HYDRA-UMC-WATCH** è il compagno da polso per l'operatore d'impianto. Mostra a colpo d'occhio informazioni di stato e avvisi al polso e inoltra brevi turni vocali tramite il telefono abbinato. Non è un dispositivo di sicurezza: non ha un E-STOP wireless e non è ancora stato eseguito su un orologio fisico.
