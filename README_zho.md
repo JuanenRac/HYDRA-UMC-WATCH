@@ -49,6 +49,7 @@
 * 🔁 **中继重连策略** —— `transport/RelayRetryPolicy.kt` 是一个真实的、纯粹的指数退避策略，用于处理失败的中继发送（例如尚未配对手机的情况），并设有一个有上限的最大延迟；一旦屏幕关闭，任何待处理的重试都会被立即取消，绝不会针对已销毁的 Activity 触发。*（已实现）*
 * 🧭 **经 companion 验证的节点选择** —— `WatchRelayTransport` 现在通过真实的 `CapabilityClient` 查询发送（`hydra_umc_phone_companion`，在 HYDRA-UMC-ANDROID-CONTROL 自身的 `res/values/wear.xml` 中声明），而不再是 `connectedNodes.firstOrNull()`——一个未安装 companion 应用的已连接节点绝不会被意外选中；当有多个符合条件的节点时，会优先选择就近（可直接通过蓝牙访问）的节点，而非经云端中转的节点。*（已实现 —— `pickCompanionNode()`）*
 * 🗂️ **最后已知状态缓存** —— `transport/LastKnownStateCache.kt` 会跟踪最后一次中继的状态/告警的真实过时程度，确保旧数据永远不会被当作最新数据显示。*（已实现）*
+* 📥 **中继收件箱** — `transport/RelayInbox.kt`:在 Wear OS 上,手腕一放下屏幕就会被销毁,此时到达的回复没有接收者而丢失。监听服务现在会保留最新的消息(最多 8 条,不超过 10 分钟),屏幕重新创建时显示它们,不朗读也不振动。 *(已实现;未在真实手表上试过)*
 * 🌐 **8 语言界面：** `app/src/main/res/values-xx/strings.xml` 涵盖英语、西班牙语、法语、德语、意大利语、日语、中文和葡萄牙语，并根据手表的系统语言自动选择；`LocalizedStringsTest` 会检查每个语言文件的键和格式占位符与英语完全一致，因此缺失的字符串或损坏的占位符会让构建失败，而不是出现在手腕上。*（已实现）*
 
 ---

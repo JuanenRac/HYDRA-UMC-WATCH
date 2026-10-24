@@ -49,6 +49,7 @@ import com.hydraumc.watch.transport.EXTRA_WATCH_RELAY_MESSAGE
 import com.hydraumc.watch.transport.CriticalActionGate
 import com.hydraumc.watch.transport.LastKnownStateCache
 import com.hydraumc.watch.transport.PendingVoiceRequest
+import com.hydraumc.watch.transport.RelayInboxHolder
 import com.hydraumc.watch.transport.WatchRelayTransport
 import java.util.Locale
 
@@ -99,11 +100,21 @@ class MainActivity : ComponentActivity() {
     private val relayReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val raw = intent.getStringExtra(EXTRA_WATCH_RELAY_MESSAGE) ?: return
+            handleRelayMessage(raw, held = false)
+        }
+    }
+
+    /**
+     * Shows one relay message. [held] is true for a message the listener service kept while this screen did not exist
+     * (see RelayInbox): it is shown, but not spoken and without a haptic - it is not news any more - and an answer is
+     * shown even though the question it answers was asked before this screen was created.
+     */
+    private fun handleRelayMessage(raw: String, held: Boolean) {
             when (val message = runCatching { parseSyncMessage(raw) }.getOrNull()) {
                 is SyncMessage.AssistantReply -> {
                     // a late answer to an older question is not shown as the
                     // answer to the latest one
-                    if (!pendingVoiceRequest.accept(message.requestId)) return
+                    if (!held && !pendingVoiceRequest.accept(message.requestId)) return
                     lastKnownStateCache.update(message)
                     systemStatusStale = false
                     companionAvailable = true
@@ -119,6 +130,7 @@ class MainActivity : ComponentActivity() {
                     // already correctly localized upstream.
                     val resolvedText = errorCodeToStringRes(message.errorCode)?.let { getString(it) } ?: message.text
                     voiceStatus = resolvedText
+                    if (held) return
                     if (message.speak) speak(resolvedText)
                     // A real, distinct haptic per outcome: an errorCode
                     // (e.g. "connection_unavailable") is a real degraded
@@ -135,12 +147,12 @@ class MainActivity : ComponentActivity() {
                     val headline = errorCodeToStringRes(message.errorCode)?.let { getString(it) } ?: message.headline
                     val detail = errorCodeToDetailStringRes(message.errorCode)?.let { getString(it) } ?: message.detail
                     systemStatus = "$headline: $detail"
+                    if (held) return
                     if (message.speak) speak("$headline. $detail")
                     hapticAlertPlayer.play(hapticSeverityFor(message.level, message.errorCode))
                 }
                 else -> Unit
             }
-        }
     }
 
     private val recognizeSpeech = registerForActivityResult(
@@ -188,6 +200,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         relayTransport = WatchRelayTransport(applicationContext)
+        // From here on the screen receives the broadcasts itself; what arrived while it did not exist is shown now.
+        RelayInboxHolder.inbox.screenAttached = true
         ContextCompat.registerReceiver(
             this,
             relayReceiver,
@@ -198,6 +212,7 @@ class MainActivity : ComponentActivity() {
             textToSpeechReady = status == TextToSpeech.SUCCESS
             if (textToSpeechReady) runOnUiThread { pendingSpeech?.let { speak(it) } }
         }
+        RelayInboxHolder.inbox.drain().forEach { handleRelayMessage(it.raw, held = true) }
         setContent {
             HydraWatchApp(
                 latestVoiceTranscript = latestVoiceTranscript,
@@ -207,6 +222,7 @@ class MainActivity : ComponentActivity() {
                 companionAvailable = companionAvailable,
                 onStartVoiceRecognition = ::startVoiceRecognition,
                 onRefreshSystemStatus = ::refreshSystemStatus,
+                onTestHaptic = { hapticAlertPlayer.play(AlertSeverity.INFO) },
             )
         }
     }
@@ -265,6 +281,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
+        RelayInboxHolder.inbox.screenAttached = false
         unregisterReceiver(relayReceiver)
         staleCheckHandler.removeCallbacks(staleCheckRunnable)
         // a deferred retry (sendVoiceTurn/requestSystemStatus
@@ -293,9 +310,8 @@ fun HydraWatchApp(
     companionAvailable: Boolean = true,
     onStartVoiceRecognition: () -> Unit = {},
     onRefreshSystemStatus: () -> Unit = {},
+    onTestHaptic: () -> Unit = {},
 ) {
-    val context = LocalContext.current
-    val hapticAlertPlayer = remember(context) { HapticAlertPlayer(context.applicationContext) }
     MaterialTheme {
         Scaffold(
             timeText = { TimeText() }
@@ -376,7 +392,7 @@ fun HydraWatchApp(
                 item {
                     // Informational local waveform only: this neither
                     // connects to a server nor sends an E-STOP/robot command.
-                    Button(onClick = { hapticAlertPlayer.play(AlertSeverity.INFO) }) {
+                    Button(onClick = onTestHaptic) {
                         Text(text = stringResource(R.string.test_haptic_alert))
                     }
                 }

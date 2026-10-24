@@ -37,7 +37,7 @@ class LocalizedStringsTest {
 
     @Test fun `every language has exactly the English keys`() {
         val base = english
-        assertTrue(base.size >= 20)
+        assertTrue(base.size >= 15)
         for (lang in languages) {
             val table = load(lang)
             assertEquals("$lang is missing keys", emptySet<String>(), base.keys - table.keys)

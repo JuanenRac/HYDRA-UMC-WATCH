@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **A reply that arrives with the screen gone is no longer lost.** On Wear OS the activity is destroyed as soon as the wrist is lowered; the listener service only sent a local broadcast, which then had no receiver. The service now holds the newest messages in `RelayInbox` (at most 8, none older than 10 minutes, nothing held while the screen exists) and the screen shows them when it is created again; an answer is shown even though the question was asked before the screen was created, and a held message is neither spoken nor vibrated, because it is not news any more. Checked on a plain JVM (9 tests); the Android glue has not been tried on a real watch, and no notification is posted yet.
+- Cleanups: the strings `tagline` and `voice_captured` that nothing used are gone from the eight languages, and the test button of the screen plays through the haptic player of the activity instead of building a second one inside the composable.
 - Building no longer changes the version; raising it is the explicit `bump` command (`python tools/hydra_project_tool.py bump`). The build scripts only report the version they built, and CI fails if a build script runs a bump.
 - The banner follows the animated style of the ecosystem banners, with the name, the kind and the technologies of the project.
 - Added `tools/hydra_project_tool.py`: the same `validate`, `test`, `version`, `status` and `bump` commands in every repository. The checks run with `HYDRA_UMC_CI=1` and fail if the version changes; only `bump` changes it.

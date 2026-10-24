@@ -20,6 +20,9 @@ class WatchRelayListenerService : WearableListenerService() {
         // by-necessity Android glue that hands it real MessageEvent bytes
         // and broadcasts whatever it decides to keep.
         val raw = WatchRelayRouting.decide(event.path, event.data) ?: return
+        // With the screen gone (the wrist was lowered and the activity destroyed) the broadcast below has no receiver:
+        // the message is held for the next time the screen is created (see RelayInbox).
+        RelayInboxHolder.inbox.holdIfNoScreen(raw)
         sendBroadcast(
             Intent(ACTION_WATCH_RELAY_MESSAGE)
                 .setPackage(packageName)
