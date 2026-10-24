@@ -110,19 +110,25 @@ HYDRA-UMC-WATCH/
 │   └── src/
 │       ├── main/
 │       │   ├── AndroidManifest.xml
-│       │   └── java/com/hydraumc/watch/
-│       │       ├── MainActivity.kt         # Compose-for-Wear entry point
-│       │       ├── haptics/                # Per-severity vibration patterns
-│       │       ├── protocol/               # SERVER<->WATCH sync message codec
-│       │       └── transport/              # Data Layer relay, retry policy, last-known-state cache
+│       │   ├── java/com/hydraumc/watch/
+│       │   │   ├── MainActivity.kt         # Compose-for-Wear entry point
+│       │   │   ├── haptics/                # Per-severity vibration patterns
+│       │   │   ├── protocol/               # SERVER<->WATCH sync message codec
+│       │   │   └── transport/              # Data Layer relay, retry policy, last-known-state cache
+│       │   └── res/                    # Launcher icons and the strings of the watch app in the eight languages
 │       └── test/java/com/hydraumc/watch/   # Real JUnit tests (haptics, protocol, transport)
 ├── gradle/
+│   ├── gradle-daemon-jvm.properties    # The Java toolchain the Gradle daemon uses
 │   ├── libs.versions.toml     # Dependency version catalog
 │   └── wrapper/                # Gradle wrapper (pinned to 9.7.0)
 ├── tools/
 │   ├── build_test.py          # Non-mutating CI check: contract verification + assembleDebug
 │   ├── ci_validate.py         # Manifest/CHANGELOG/docs validation used by CI
-│   └── verify_paired_relay_contract.py # Static Watch<->Android Control Data Layer safety-boundary check
+│   ├── verify_paired_relay_contract.py # Static Watch<->Android Control Data Layer safety-boundary check
+│   ├── _doc_policy.py                  # Documentation rules shared by the family (a copy of HYDRA-UMC-SDK's, kept in sync)
+│   ├── _readme_parity.py               # Check that the eight READMEs share one structure (a copy of HYDRA-UMC-SDK's, kept in sync)
+│   ├── hydra_project_tool.py           # The same commands in every repository: validate, test, ci, version, status, bump
+│   └── extra_build_steps.py            # The build steps of this repository beyond the shared build test (its own unit tests)
 ├── build.gradle.kts           # Root Gradle build
 ├── settings.gradle.kts        # Module wiring
 ├── gradlew / gradlew.bat      # Gradle wrapper launcher

@@ -116,19 +116,25 @@ HYDRA-UMC-WATCH/
 │   └── src/
 │       ├── main/
 │       │   ├── AndroidManifest.xml
-│       │   └── java/com/hydraumc/watch/
-│       │       ├── MainActivity.kt         # Compose-for-Wear エントリポイント
-│       │       ├── haptics/                # 重大度別の振動パターン
-│       │       ├── protocol/               # SERVER<->WATCH 同期メッセージコーデック
-│       │       └── transport/              # Data Layer リレー、リトライポリシー、最終既知状態キャッシュ
+│       │   ├── java/com/hydraumc/watch/
+│       │   │   ├── MainActivity.kt         # Compose-for-Wear エントリポイント
+│       │   │   ├── haptics/                # 重大度別の振動パターン
+│       │   │   ├── protocol/               # SERVER<->WATCH 同期メッセージコーデック
+│       │   │   └── transport/              # Data Layer リレー、リトライポリシー、最終既知状態キャッシュ
+│       │   └── res/                    # ランチャーアイコンと、ウォッチアプリの文言 (8言語)
 │       └── test/java/com/hydraumc/watch/   # 実際の JUnit テスト（haptics、protocol、transport）
 ├── gradle/
+│   ├── gradle-daemon-jvm.properties    # Gradle デーモンが使う Java ツールチェーン
 │   ├── libs.versions.toml     # 依存関係バージョンカタログ
 │   └── wrapper/                # Gradle wrapper（9.7.0 に固定）
 ├── tools/
 │   ├── build_test.py          # 変更を加えない CI チェック：契約検証 + assembleDebug
 │   ├── ci_validate.py         # CI が使用するマニフェスト/CHANGELOG/ドキュメント検証
-│   └── verify_paired_relay_contract.py # Watch<->Android Control 間の Data Layer 安全境界の静的検証
+│   ├── verify_paired_relay_contract.py # Watch<->Android Control 間の Data Layer 安全境界の静的検証
+│   ├── _doc_policy.py                  # ファミリー共通のドキュメント規則 (HYDRA-UMC-SDK のコピーで、同期を維持)
+│   ├── _readme_parity.py               # 8つの README が同じ構造であることの検査 (HYDRA-UMC-SDK のコピーで、同期を維持)
+│   ├── hydra_project_tool.py           # すべてのリポジトリで共通のコマンド: validate、test、ci、version、status、bump
+│   └── extra_build_steps.py            # 共通のビルドテストに加えた、このリポジトリ固有のビルド手順 (独自のユニットテスト)
 ├── build.gradle.kts           # ルート Gradle ビルド
 ├── settings.gradle.kts        # モジュール接続
 ├── gradlew / gradlew.bat      # Gradle wrapper ランチャー

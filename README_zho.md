@@ -111,19 +111,25 @@ HYDRA-UMC-WATCH/
 │   └── src/
 │       ├── main/
 │       │   ├── AndroidManifest.xml
-│       │   └── java/com/hydraumc/watch/
-│       │       ├── MainActivity.kt         # Compose-for-Wear 入口点
-│       │       ├── haptics/                # 按严重程度划分的振动模式
-│       │       ├── protocol/               # SERVER<->WATCH 同步消息编解码器
-│       │       └── transport/              # Data Layer 中继、重试策略、最后已知状态缓存
+│       │   ├── java/com/hydraumc/watch/
+│       │   │   ├── MainActivity.kt         # Compose-for-Wear 入口点
+│       │   │   ├── haptics/                # 按严重程度划分的振动模式
+│       │   │   ├── protocol/               # SERVER<->WATCH 同步消息编解码器
+│       │   │   └── transport/              # Data Layer 中继、重试策略、最后已知状态缓存
+│       │   └── res/                    # 启动图标以及手表应用的八种语言文案
 │       └── test/java/com/hydraumc/watch/   # 真实 JUnit 测试（haptics、protocol、transport）
 ├── gradle/
+│   ├── gradle-daemon-jvm.properties    # Gradle 守护进程使用的 Java 工具链
 │   ├── libs.versions.toml     # 依赖版本目录
 │   └── wrapper/                # Gradle wrapper（锁定在 9.7.0）
 ├── tools/
 │   ├── build_test.py          # 不产生变更的 CI 检查：契约验证 + assembleDebug
 │   ├── ci_validate.py         # CI 使用的清单/CHANGELOG/文档校验
-│   └── verify_paired_relay_contract.py # Watch<->Android Control 之间 Data Layer 安全边界的静态检查
+│   ├── verify_paired_relay_contract.py # Watch<->Android Control 之间 Data Layer 安全边界的静态检查
+│   ├── _doc_policy.py                  # 家族共享的文档规则 (HYDRA-UMC-SDK 的副本,保持同步)
+│   ├── _readme_parity.py               # 检查八个 README 结构一致 (HYDRA-UMC-SDK 的副本,保持同步)
+│   ├── hydra_project_tool.py           # 每个仓库相同的命令: validate、test、ci、version、status、bump
+│   └── extra_build_steps.py            # 除共享构建测试外,本仓库自己的构建步骤 (自带的单元测试)
 ├── build.gradle.kts           # 根 Gradle 构建
 ├── settings.gradle.kts        # 模块接入
 ├── gradlew / gradlew.bat      # Gradle wrapper 启动器

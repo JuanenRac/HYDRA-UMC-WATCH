@@ -110,19 +110,25 @@ HYDRA-UMC-WATCH/
 │   └── src/
 │       ├── main/
 │       │   ├── AndroidManifest.xml
-│       │   └── java/com/hydraumc/watch/
-│       │       ├── MainActivity.kt         # Ponto de entrada Compose para Wear
-│       │       ├── haptics/                # Padrões de vibração por gravidade
-│       │       ├── protocol/               # Codec de mensagens de sincronização SERVER<->WATCH
-│       │       └── transport/              # Relé pela Data Layer, política de repetição, cache do último estado conhecido
+│       │   ├── java/com/hydraumc/watch/
+│       │   │   ├── MainActivity.kt         # Ponto de entrada Compose para Wear
+│       │   │   ├── haptics/                # Padrões de vibração por gravidade
+│       │   │   ├── protocol/               # Codec de mensagens de sincronização SERVER<->WATCH
+│       │   │   └── transport/              # Relé pela Data Layer, política de repetição, cache do último estado conhecido
+│       │   └── res/                    # Ícones do lançador e textos da app do relógio nos oito idiomas
 │       └── test/java/com/hydraumc/watch/   # Testes JUnit reais (háptica, protocolo, transporte)
 ├── gradle/
+│   ├── gradle-daemon-jvm.properties    # A toolchain de Java que o daemon do Gradle usa
 │   ├── libs.versions.toml     # Catálogo de versões de dependências
 │   └── wrapper/                # Gradle wrapper (fixado em 9.7.0)
 ├── tools/
 │   ├── build_test.py          # Verificação de CI sem alterações: verificação de contrato + assembleDebug
 │   ├── ci_validate.py         # Validação de manifesto/CHANGELOG/documentação usada pelo CI
-│   └── verify_paired_relay_contract.py # Verificação estática da fronteira de segurança da Data Layer Relógio<->Android Control
+│   ├── verify_paired_relay_contract.py # Verificação estática da fronteira de segurança da Data Layer Relógio<->Android Control
+│   ├── _doc_policy.py                  # Regras de documentação partilhadas pela família (cópia da de HYDRA-UMC-SDK, mantida em sincronia)
+│   ├── _readme_parity.py               # Verificação de que os oito README partilham a mesma estrutura (cópia da de HYDRA-UMC-SDK, mantida em sincronia)
+│   ├── hydra_project_tool.py           # Os mesmos comandos em todos os repositórios: validate, test, ci, version, status, bump
+│   └── extra_build_steps.py            # Os passos de compilação próprios deste repositório além do teste de compilação partilhado (os seus testes unitários)
 ├── build.gradle.kts           # Compilação Gradle raiz
 ├── settings.gradle.kts        # Ligação dos módulos
 ├── gradlew / gradlew.bat      # Lançador do Gradle wrapper
