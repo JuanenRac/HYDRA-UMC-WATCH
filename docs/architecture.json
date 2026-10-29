@@ -1,0 +1,177 @@
+{
+  "repo": "HYDRA-UMC-WATCH",
+  "ecosystem": "hydra",
+  "tagline": "A glanceable wrist companion that never holds a server credential and withholds an action when the phone is out of reach.",
+  "description": "HYDRA-UMC-WATCH shows the last known status with its age, plays haptic patterns per alert severity, and relays voice requests and status requests over the Wear OS Data Layer to the paired phone app, withholding actions when the companion heartbeat is missing or stale.",
+  "columns": [
+    "WHO USES IT",
+    "THIS REPOSITORY",
+    "WHAT IT TALKS TO"
+  ],
+  "nodes": [
+    {
+      "id": "op",
+      "column": 0,
+      "level": "tested",
+      "title": "The wearer",
+      "lines": [
+        "status cards, alerts and a",
+        "voice request button"
+      ],
+      "code": [
+        "app/src/main/java/com/hydraumc/watch/MainActivity.kt"
+      ]
+    },
+    {
+      "id": "pho",
+      "column": 2,
+      "level": "contract",
+      "title": "ANDROID-CONTROL",
+      "lines": [
+        "the paired phone app that",
+        "holds the credential"
+      ]
+    },
+    {
+      "id": "dir",
+      "column": 2,
+      "level": "untested",
+      "title": "Direct server link",
+      "lines": [
+        "WebSocket and wireless",
+        "E-STOP: planned"
+      ]
+    },
+    {
+      "id": "trn",
+      "column": 1,
+      "level": "tested",
+      "title": "transport",
+      "lines": [
+        "Data Layer relay, routing",
+        "and retry policy"
+      ],
+      "code": [
+        "app/src/main/java/com/hydraumc/watch/transport/WatchRelayTransport.kt",
+        "app/src/main/java/com/hydraumc/watch/transport/WatchRelayRouting.kt",
+        "app/src/main/java/com/hydraumc/watch/transport/RelayRetryPolicy.kt"
+      ]
+    },
+    {
+      "id": "pro",
+      "column": 1,
+      "level": "tested",
+      "title": "protocol",
+      "lines": [
+        "sync message codec,",
+        "error codes, severity"
+      ],
+      "code": [
+        "app/src/main/java/com/hydraumc/watch/protocol/SyncMessage.kt",
+        "app/src/main/java/com/hydraumc/watch/protocol/ErrorCodes.kt",
+        "app/src/main/java/com/hydraumc/watch/protocol/ReplySeverity.kt"
+      ]
+    },
+    {
+      "id": "act",
+      "column": 1,
+      "level": "tested",
+      "title": "MainActivity",
+      "lines": [
+        "Compose for Wear screen;",
+        "eight languages"
+      ],
+      "code": [
+        "app/src/main/java/com/hydraumc/watch/MainActivity.kt"
+      ]
+    },
+    {
+      "id": "cac",
+      "column": 1,
+      "level": "tested",
+      "title": "state cache + inbox",
+      "lines": [
+        "last known state with its",
+        "age; replies kept"
+      ],
+      "code": [
+        "app/src/main/java/com/hydraumc/watch/transport/LastKnownStateCache.kt",
+        "app/src/main/java/com/hydraumc/watch/transport/RelayInbox.kt"
+      ]
+    },
+    {
+      "id": "hap",
+      "column": 1,
+      "level": "tested",
+      "title": "haptics",
+      "lines": [
+        "one vibration pattern",
+        "per alert severity"
+      ],
+      "code": [
+        "app/src/main/java/com/hydraumc/watch/haptics/HapticPatterns.kt",
+        "app/src/main/java/com/hydraumc/watch/haptics/HapticAlertPlayer.kt"
+      ]
+    },
+    {
+      "id": "gat",
+      "column": 1,
+      "level": "tested",
+      "title": "action gates",
+      "lines": [
+        "no companion heartbeat,",
+        "no action; cancellation"
+      ],
+      "code": [
+        "app/src/main/java/com/hydraumc/watch/transport/CriticalActionGate.kt",
+        "app/src/main/java/com/hydraumc/watch/transport/CancellationGate.kt",
+        "app/src/main/java/com/hydraumc/watch/transport/PendingVoiceRequest.kt"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "op",
+      "to": "act",
+      "level": "tested"
+    },
+    {
+      "from": "trn",
+      "to": "pro",
+      "level": "tested"
+    },
+    {
+      "from": "pro",
+      "to": "cac",
+      "level": "tested"
+    },
+    {
+      "from": "cac",
+      "to": "gat",
+      "level": "tested"
+    },
+    {
+      "from": "cac",
+      "to": "act",
+      "level": "tested"
+    },
+    {
+      "from": "act",
+      "to": "hap",
+      "level": "tested"
+    },
+    {
+      "from": "trn",
+      "to": "pho",
+      "level": "contract",
+      "label": "Data Layer"
+    },
+    {
+      "from": "dir",
+      "to": "trn",
+      "level": "untested",
+      "label": "planned"
+    }
+  ],
+  "footer": "Unit-tested on a plain JVM; no watch and no paired phone were used."
+}

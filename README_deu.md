@@ -1,3 +1,9 @@
+<!-- =============================================================================
+HYDRA-UMC-WATCH - Wear OS companion: status cards, haptic alerts and a voice relay
+Copyright (C) JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+GPL-3.0-or-later - see LICENSE
+============================================================================= -->
+
 <p align="center">
   <img src="images/HYDRA_UMC_BANNER.svg" alt="HYDRA-UMC-WATCH banner" width="100%">
 </p>
@@ -9,16 +15,19 @@
 ### ⌚ Wear-OS-Begleiter: Statuskarten, haptische Alarme und ein Sprach-Relay (kein drahtloser E-STOP)
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Licencia-GPL%203.0-blue.svg" alt="GPL 3.0">
-  <img src="https://img.shields.io/badge/Platform-Wear%20OS-4285F4.svg" alt="Wear OS">
-  <img src="https://img.shields.io/badge/Feature-Voice%20%26%20haptics-blue.svg" alt="Voice and haptics">
+  <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
+  <img src="https://img.shields.io/badge/Platform-Wear%20OS-4285F4.svg" alt="Platform">
+  <img src="https://img.shields.io/badge/Feature-Voice%20%26%20haptics-blue.svg" alt="Feature">
+  <img src="https://img.shields.io/badge/Tests-94%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Version-0.2.6-0f6cbd.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Maturity-functional-0F6CBD.svg" alt="Maturity">
 </p>
-
-**Ehrlichkeitscheck - was heute wirklich funktioniert:** die haptischen Vibrationsmuster (`haptics/HapticPatterns.kt`, `HapticAlertPlayer.kt`), der SERVER<->WATCH-Sync-Nachrichtencodec (`protocol/SyncMessage.kt`), der gekoppelte Telefon-Relay-Transport mit companion-verifizierter Knotenauswahl, exponentiellem Backoff-Retry, Nachrichten-Routing und Veraltungs-Tracking des letzten bekannten Zustands (`transport/WatchRelayTransport.kt`, `RelayRetryPolicy.kt`, `WatchRelayRouting.kt`, `LastKnownStateCache.kt`), und der Tap-to-Talk-Sprachfluss (`MainActivity.kt`) sind echtes Kotlin, abgesichert durch 70 bestandene JUnit-Tests (`./gradlew test`), die auf einer gewöhnlichen JVM laufen - ohne Uhr, Emulator oder gekoppeltes Telefon. Diese Testabdeckung beweist, dass die Nachrichten-/Policy-/Routing-Logik korrekt ist; sie beweist nicht, dass die App auf einer echten Uhr läuft - weder die echten `Vibrator`-Aufrufe von `HapticAlertPlayer`, noch das Data-Layer-Relay, noch der Sprachfluss wurden auf physischer Wear-OS-Hardware verifiziert, nur über `assembleDebug`/Unit-Tests auf dieser Entwicklungsmaschine. Der kabellose E-STOP-Knopf, ein direkter Watch<->Server-WebSocket, und die JWT-basierte Server-Kopplung bleiben geplant - nur die Form der `EStopCommand`-Nachricht, die sie verwenden würden, ist heute real und getestet, nicht der Transport oder die Hardware-Verdrahtung. Siehe `CHANGELOG.md` für das, was bisher genau ausgeliefert wurde, und die eigene Feature-Liste in Abschnitt 1 weiter unten für die reale/zukünftige Aufschlüsselung pro Funktion.
 
 ---
 
 > **Stand von Sicherheit (Safety) und Security:** Dieses Ökosystem ist kein zertifiziertes Sicherheitssystem. Es gibt noch keinen Hardware-E-STOP-Pfad, keine von der Firmware durchgesetzten Grenzen oder Verriegelungen und keinen verifizierten Bewegungsbefehl; Firmware-Images werden mit CRC32 und einem HMAC-SHA256 mit gemeinsamem Schlüssel geprüft, nicht mit einer asymmetrischen Signatur; TLS und gegenseitiges TLS sind optional und standardmäßig aus; noch keine eigene Platine wurde bestückt oder getestet. Lesen Sie die [Sicherheitsbasis](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/SECURITY_BASELINE.md) und das [Bedrohungsmodell](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/THREAT_MODEL.md), bevor Sie sich für die Sicherheit einer Person auf eine Aussage hier verlassen.
+
+---
 
 ## 📋 Auf einen Blick
 
@@ -26,9 +35,12 @@
 |---|---|
 | Version | `0.2.6` |
 | Reifegrad | Funktionsfähig |
+| Tests | 94 (`./gradlew testDebugUnitTest`) |
 | Technik | Kotlin / Wear OS |
 | Ziel | Eine Wear-OS-Uhr (mit dem Telefon gekoppelt) |
 | Auf echter Hardware | Noch nicht: für diese Version ist kein Lauf auf echter Hardware vermerkt |
+
+**Springe zu:** [Überblick](#-überblick) · [Architektur](#-architektur) · [Sicherheit und Schutz](#-sicherheit-und-schutz) · [Schnellstart](#-schnellstart) · [Tests](#-tests) · [Struktur des Repositorys](#-struktur-des-repositorys) · [Verwandte Projekte](#-verwandte-projekte)
 
 ## 🚦 Projektstatus
 
@@ -39,11 +51,11 @@ Jede Zeile ist ein Teil dieses Repositorys, und die Ampel sagt, wie weit er heut
 | Bereich | Stand | Was das hier bedeutet |
 |---|---|---|
 | Software | 🟡 | Funktioniert für seinen Hauptzweck; die Ehrlichkeitsprüfung oben nennt, was noch fehlt |
-| Tests | 🟠 | Für dieses Repository ist noch keine Testanzahl vermerkt |
+| Tests | 🟢 | 94 automatische Tests, bei jeder Änderung ausgeführt |
 | Echte Hardware | 🔴 | Noch nicht: für diese Version ist kein Lauf auf echter Hardware vermerkt |
 | Dokumentation | 🟢 | README in acht Sprachen, bei jeder Änderung gegen das Manifest geprüft |
 
-## 1. 🛠️ TECHNISCHER ÜBERBLICK
+## 🎯 Überblick
 
 **HYDRA-UMC-WATCH** ist der Handgelenk-Begleiter für den Anlagenbediener. Er zeigt Status- und Alarminformationen auf einen Blick am Handgelenk und leitet kurze Sprachbeiträge über das gekoppelte Telefon weiter. Er ist kein Sicherheitsgerät: Er hat keinen drahtlosen E-STOP und wurde noch nicht auf einer physischen Uhr ausgeführt.
 
@@ -56,16 +68,25 @@ Gebaut als eigenständige Wear-OS-App (Kotlin + Jetpack Compose für Wear), die 
 * 🎙️ **Sprache** — Tap-to-Talk: explizite `RECORD_AUDIO`-Berechtigungsanfrage, das System-Spracherkennungs-Intent (`RecognizerIntent`) für die Transkription, die Transkription wird als begrenzte `voice_turn`-Sync-Nachricht an HYDRA-UMC-ANDROID-CONTROL weitergeleitet, und eine lokale `TextToSpeech`-Antwort auf der Uhr. *(implementiert - `MainActivity.kt`; Sprache kann niemals direkt einen Roboter ansteuern, siehe Architektur unten und [docs/VOICE_AI_PROTOCOL.md](docs/VOICE_AI_PROTOCOL.md) für den vollständigen Ende-zu-Ende-Nachrichtenfluss und die Sicherheitsgrenze.)*
 * ⌚ **Statusübersicht auf einen Blick** — ein **Status aktualisieren**-Knopf leitet eine begrenzte Statusanfrage über den gekoppelten Data Layer an HYDRA-UMC-ANDROID-CONTROL weiter; die zurückgegebene `system_status`-Karte wird mit einem "zuletzt bekannt - könnte veraltet sein"-Hinweis angezeigt, sobald sie veraltet. *(implementiert - `MainActivity.kt`/`WatchRelayTransport.requestSystemStatus()`; abrufbasiert über das Telefon-Relay, kein direkter Uhr-zu-Server-Push-Socket, und noch unverifiziert auf einem echten Wear-OS-Gerät.)*
 * 🔐 **JWT Auth** — JWT-basierte Kopplung mit HYDRA-UMC-SERVER. *(geplant.)*
-* ✅ **Eigenständige Wear-OS-Toolchain** — eine echte Gradle/Kotlin/Compose-for-Wear-App, die eine funktionierende Debug-APK baut. *(implementiert — siehe BUILD & AUSFÜHRUNG unten)*
+* ✅ **Eigenständige Wear-OS-Toolchain** — eine echte Gradle/Kotlin/Compose-for-Wear-App, die eine funktionierende Debug-APK baut. *(implementiert — siehe Build und Veröffentlichung unten)*
 * 🔁 **Relay-Wiederverbindungsrichtlinie** — `transport/RelayRetryPolicy.kt` ist eine echte, reine Exponential-Backoff-Richtlinie für einen fehlgeschlagenen Relay-Sendevorgang (z. B. noch kein gekoppeltes Telefon), begrenzt auf eine maximale Verzögerung; ein ausstehender Wiederholungsversuch wird sofort abgebrochen, sobald der Bildschirm geschlossen wird, und feuert nie mehr gegen eine bereits zerstörte Activity. *(implementiert)*
 * 🧭 **Companion-verifizierte Knotenauswahl** — `WatchRelayTransport` sendet über eine echte `CapabilityClient`-Abfrage (`hydra_umc_phone_companion`, deklariert in HYDRA-UMC-ANDROID-CONTROLs eigener `res/values/wear.xml`), niemals `connectedNodes.firstOrNull()` - ein zweiter verbundener Knoten ohne installierte Companion-App kann nie versehentlich ausgewählt werden; ein in der Nähe befindlicher (direkt per Bluetooth erreichbarer) Knoten wird einem über die Cloud weitergeleiteten vorgezogen, wenn mehr als einer infrage kommt. *(implementiert - `pickCompanionNode()`)*
 * 🗂️ **Cache des zuletzt bekannten Zustands** — `transport/LastKnownStateCache.kt` verfolgt die echte Veralterung des zuletzt weitergeleiteten Status/Alarms, sodass ein alter niemals als aktuell angezeigt wird. *(implementiert)*
 * 📥 **Relay-Eingang** — `transport/RelayInbox.kt`: Unter Wear OS wird die Anzeige zerstört, sobald das Handgelenk gesenkt wird, und eine Antwort, die dann eintraf, hatte keinen Empfänger und ging verloren. Der Listener-Dienst hält jetzt die neuesten Nachrichten (höchstens 8, keine älter als 10 Minuten), und die Anzeige zeigt sie, wenn sie neu erstellt wird, ohne sie vorzulesen oder zu vibrieren. *(implementiert; nicht an einer echten Uhr erprobt)*
 * 🌐 **Oberfläche in 8 Sprachen** — `app/src/main/res/values-xx/strings.xml` für Englisch, Spanisch, Französisch, Deutsch, Italienisch, Japanisch, Chinesisch und Portugiesisch, automatisch nach der Systemsprache der Uhr gewählt; `LocalizedStringsTest` prüft, dass jede Sprachdatei genau die Schlüssel und Formatplatzhalter des Englischen enthält, sodass eine fehlende Zeichenfolge oder ein kaputter Platzhalter den Build scheitern lässt, statt am Handgelenk aufzutauchen. *(implementiert)*
 
----
+## 🧩 Rolle in HYDRA-UMC
 
-## 2. 🔄 WEARABLE-SYNC-ABLAUF
+**HYDRA-UMC-WATCH** ist der Wear-OS-Begleiter der HYDRA-UMC-Steuerungs-Apps: Er zeigt den letzten bekannten Systemstatus mit seinem Alter, spielt für jede Alarmstufe ein eigenes Vibrationsmuster ab und leitet eine Sprachanfrage über das gekoppelte Telefon weiter. Er hält keine Server-Zugangsdaten und bietet keinen drahtlosen Not-Halt.
+
+## 🏛️ Architektur
+
+<p align="center">
+  <img src="images/architecture.svg" alt="HYDRA-UMC-WATCH architecture" width="100%">
+</p>
+
+<details>
+<summary>Textversion des Diagramms (Mermaid)</summary>
 
 ```mermaid
 flowchart LR
@@ -76,6 +97,10 @@ flowchart LR
     WATCH -- Haptisches Feedback --> OPERATOR["Anlagenbediener"]
 ```
 
+</details>
+
+### WEARABLE-SYNC-ABLAUF
+
 *Zielarchitektur, sobald ein direkter Server-WebSocket existiert. Der echte,
 getestete Weg heute läuft über das gekoppelte Telefon: Watch -> Data Layer
 -> HYDRA-UMC-ANDROID-CONTROL -> authentifizierter HYDRA-UMC-SERVER/Voice UI,
@@ -85,9 +110,7 @@ Ende-zu-Ende-Fluss. Die Uhr besitzt selbst niemals eine Server-Anmeldeinfo;
 ein direkter Watch-zu-Server-WebSocket und der kabellose E-STOP-Knopf
 bleiben zukünftige, hardware-abhängige Arbeit.*
 
----
-
-## 3. 🧱 ARCHITEKTUR & DESIGNENTSCHEIDUNGEN
+### ARCHITEKTUR & DESIGNENTSCHEIDUNGEN
 
 * **Warum es eine eigenständige Wear-OS-App ist, kein Feature der Telefon-App.** Eine Uhr läuft als eigener unabhängiger Prozess auf ihrem eigenen Betriebssystem - sie kann nicht einfach ein UI-Modus von HYDRA-UMC-ANDROID-CONTROL sein, sie braucht ihr eigenes Manifest, ihren eigenen Build und ihre eigene (viel eingeschränktere) UI für Status auf einen Blick/schnellen E-STOP.
 * **Warum `minSdk 30` (Wear OS 3), niedriger als der eigene minSdk der Telefon-App.** Dies zielt bewusst auf die aktuelle Wear-OS-3+-Hardware-Generation, nicht auf alte Wear-OS-2-Geräte - anders als HYDRA-UMC-ANDROID-CONTROL, das ältere Telefone unterstützt, hat eine Begleituhr-App eine deutlich engere realistische Hardware-Basis zu unterstützen.
@@ -96,83 +119,7 @@ bleiben zukünftige, hardware-abhängige Arbeit.*
 * **Warum ein veralteter zwischengespeicherter Zustand markiert, nicht verborgen wird.** Einen alten Status vollständig zurückzuhalten würde das Ziffernblatt der Uhr genau dann leer lassen, wenn die Telefonverbindung instabil ist - der eigentliche Risikomoment. Ihn klar markiert als "zuletzt bekannt - könnte veraltet sein" anzuzeigen, hält den Bediener informiert, ohne eine minutenalte Ablesung als aktuell durchgehen zu lassen.
 * **Wie sich das ins restliche Ökosystem einfügt.** Bildet ein Paar mit HYDRA-UMC-ANDROID-CONTROL und HYDRA-UMC-IOS-CONTROL als Begleiter am Handgelenk, auf einen Blick - kein Ersatz für eines von beiden, sondern eine Oberfläche für schnellen Status/schnellen E-STOP.
 
----
-
-## 📂 VERZEICHNISSTRUKTUR
-
-Eigenständige Wear-OS-App — ohne eigene Hardware, Firmware oder Betriebssystem (läuft auf handelsüblicher Uhren-Hardware); diese Ordner werden gemäß der Repository-Strukturpolitik ausgelassen.
-
-```text
-HYDRA-UMC-WATCH/
-├── app/
-│   ├── build.gradle.kts       # App-Modul-Konfiguration (liest version.properties, schreibt es nie)
-│   ├── version.properties     # versionMajor/Minor/Patch/Code (nur vom expliziten `bump`-Befehl erhöht)
-│   └── src/
-│       ├── main/
-│       │   ├── AndroidManifest.xml
-│       │   ├── java/com/hydraumc/watch/
-│       │   │   ├── MainActivity.kt         # Compose-for-Wear-Einstiegspunkt
-│       │   │   ├── haptics/                # Vibrationsmuster pro Schweregrad
-│       │   │   ├── protocol/               # SERVER<->WATCH-Sync-Nachrichten-Codec
-│       │   │   └── transport/              # Data-Layer-Relay, Retry-Richtlinie, Cache des zuletzt bekannten Zustands
-│       │   └── res/                    # Launcher-Symbole und die Texte der Uhren-App in den acht Sprachen
-│       └── test/java/com/hydraumc/watch/   # Echte JUnit-Tests (haptics, protocol, transport)
-├── gradle/
-│   ├── gradle-daemon-jvm.properties    # Die Java-Toolchain, die der Gradle-Daemon verwendet
-│   ├── libs.versions.toml     # Abhängigkeits-Versionskatalog
-│   └── wrapper/                # Gradle-Wrapper (fixiert auf 9.7.0)
-├── tools/
-│   ├── build_test.py          # Nicht-mutierende CI-Prüfung: Vertragsprüfung + assembleDebug
-│   ├── ci_validate.py         # Manifest-/CHANGELOG-/Docs-Validierung, von CI verwendet
-│   ├── verify_paired_relay_contract.py # Statische Prüfung der Data-Layer-Sicherheitsgrenze Watch<->Android Control
-│   ├── _doc_policy.py                  # Von der Familie geteilte Dokumentationsregeln (Kopie der von HYDRA-UMC-SDK, synchron gehalten)
-│   ├── _readme_parity.py               # Prüfung, dass die acht READMEs dieselbe Struktur haben (Kopie der von HYDRA-UMC-SDK, synchron gehalten)
-│   ├── hydra_project_tool.py           # Dieselben Befehle in jedem Repository: validate, test, ci, version, status, bump
-│   └── extra_build_steps.py            # Die eigenen Build-Schritte dieses Repositorys neben dem gemeinsamen Build-Test (seine Unit-Tests)
-├── build.gradle.kts           # Gradle-Root-Build
-├── settings.gradle.kts        # Modul-Verdrahtung
-├── gradlew / gradlew.bat      # Gradle-Wrapper-Launcher
-├── docs/                      # Dokumentation und Sicherheitsprotokolle
-├── images/                    # Medien und Diagramme
-├── hydra-umc.project.json     # Ökosystem-Manifest (Version, Build-/Health-Metadaten)
-├── keystore.properties.example # Vorlage für die von git ignorierte Release-Signierkonfiguration
-├── bump_manifest_version.py   # Erhöht major/minor/patch + das Manifest, gemeinsam
-├── bump_version_code.py       # Erhöhung des Android-versionCode-Zählers (nur vom expliziten `bump`-Befehl ausgeführt)
-├── build.sh / build.bat       # Validiert und baut (Bauen ändert nie die Version)
-├── build-test.sh / build-test.bat # Nicht-mutierender Wrapper für tools/build_test.py
-├── run.sh / run.bat           # Echte Ausführung: gradlew installDebug + adb-Start
-└── update-from-github.sh / .bat # Nicht-Play-Update-Kanal: GitHub-Release-APK + `adb install -r`
-```
-
----
-
-## 4. ⚙️ BUILD & AUSFÜHRUNG
-
-Erfordert JDK 21, das Android SDK (`local.properties` → `sdk.dir`, von git ignoriert — auf die eigene SDK-Installation verweisen) und ein Wear-OS-Gerät oder einen Emulator für `run`.
-
-```bash
-# Linux/macOS
-chmod +x gradlew   # einmalig
-./build.sh
-./run.sh            # benötigt ein verbundenes Wear-OS-Gerät/Emulator
-
-# Windows
-build.bat
-run.bat
-```
-
-`build` ändert die Version nie (nur `python tools/hydra_project_tool.py bump` erhöht sie), führt die echte JUnit-Test-Suite aus (`haptics`, `protocol`, `transport`) und kompiliert die Debug-APK nach `app/build/outputs/apk/debug/app-debug.apk` - alles in einem einzigen Gradle-Aufruf (die Skripte übergeben noch `-PhydraUmcReadOnly=true`, aber es hat keine Wirkung mehr: der Gradle-Build ändert die Version nie). `run` installiert die APK über `gradlew installDebug` und startet `MainActivity` mit `adb`.
-
-Echtes Beispiel - die beiden Versions-Erhöhungsskripte laufen auch eigenständig, nützlich um zu prüfen, was ein Build tun würde, ohne Gradle auszulösen:
-
-```bash
-python3 bump_manifest_version.py   # z.B. "HYDRA-UMC version: v0.1.2 -> v0.1.3"
-python3 bump_version_code.py       # z.B. "versionCode: 12 -> 13"
-```
-
----
-
-## 5. 📲 UPDATES OHNE GOOGLE PLAY
+### UPDATES OHNE GOOGLE PLAY
 
 Dieses Projekt wird nicht über Google Play verteilt. Der wiederholbare
 Update-Weg ist eine GitHub-Release-APK, installiert über ADB:
@@ -201,9 +148,101 @@ der Uhr installieren. Siehe
 [docs/COMPANION_VERSION_PROTOCOL.md](docs/COMPANION_VERSION_PROTOCOL.md)
 für diese Nachrichtenform.
 
----
+## 🔒 Sicherheit und Schutz
 
-## ✅ Aktueller Status & Nächste Schritte
+| Bedrohung | Abwehr | Wo |
+|---|---|---|
+| Eine andere App oder das Telefon eines Fremden sendet Nachrichten an die Uhr | Das Relay nutzt die Wear-OS-Data-Layer, die nur Verkehr zwischen APKs mit gleichem Paketnamen und Signaturzertifikat trägt; das Ziel wird per Capability-Abfrage gewählt, nie durch Raten eines verbundenen Knotens | `WatchRelayTransport.kt` |
+| Eine gestohlene oder verlorene Uhr, die Zugriff auf den Server gibt | Die Uhr hält nie Server-Zugangsdaten: Die App des gekoppelten Telefons authentifiziert sich und die Uhr leitet nur begrenzte Protokollnachrichten weiter | `SyncMessage.kt`, `docs/VOICE_AI_PROTOCOL.md` |
+| Eine Aktion, die angeboten wird, während das Telefon außer Reichweite ist, und später scheitert | Ohne eine aktuelle Nachricht des Telefon-Begleiters wird eine Aktion über ihn zurückgehalten; ein Aktualisieren wird nie gesperrt, da so der Herzschlag entsteht, und ein alter Status wird als alt markiert gezeigt, nicht versteckt | `CriticalActionGate.kt`, `LastKnownStateCache.kt` |
+
+**Was er nie tut:** als Not-Halt dienen. Ein drahtloser Not-Halt-Knopf und eine direkte Verbindung zum Server sind künftige Arbeit, die Hardware braucht.
+
+## 🚀 Schnellstart
+
+Benötigt das Android-SDK mit einem JDK, das der mitgelieferte Gradle-Wrapper akzeptiert, und eine Uhr oder einen Emulator mit Wear OS 3 oder neuer.
+
+```bash
+./build.sh               # Linux, macOS (build.bat on Windows)
+./run.sh                 # installs the debug app on the connected watch and starts it
+./update-from-github.sh  # installs the newest release by ADB, without Google Play
+```
+
+## 🧪 Tests
+
+94 automatische Tests laufen mit `./gradlew testDebugUnitTest`. Sie brauchen weder Hardware noch etwas außerhalb dieses Rechners.
+
+Die CI führt `HYDRA_UMC_CI=1 python tools/ci_validate.py` aus; das prüft das Manifest, die Dokumente, die acht READMEs und die Bilder.
+
+## 🏗️ Build und Veröffentlichung
+
+Erfordert JDK 21, das Android SDK (`local.properties` → `sdk.dir`, von git ignoriert — auf die eigene SDK-Installation verweisen) und ein Wear-OS-Gerät oder einen Emulator für `run`.
+
+```bash
+# Linux/macOS
+chmod +x gradlew   # einmalig
+./build.sh
+./run.sh            # benötigt ein verbundenes Wear-OS-Gerät/Emulator
+
+# Windows
+build.bat
+run.bat
+```
+
+`build` ändert die Version nie (nur `python tools/hydra_project_tool.py bump` erhöht sie), führt die echte JUnit-Test-Suite aus (`haptics`, `protocol`, `transport`) und kompiliert die Debug-APK nach `app/build/outputs/apk/debug/app-debug.apk` - alles in einem einzigen Gradle-Aufruf (die Skripte übergeben noch `-PhydraUmcReadOnly=true`, aber es hat keine Wirkung mehr: der Gradle-Build ändert die Version nie). `run` installiert die APK über `gradlew installDebug` und startet `MainActivity` mit `adb`.
+
+Echtes Beispiel - die beiden Versions-Erhöhungsskripte laufen auch eigenständig, nützlich um zu prüfen, was ein Build tun würde, ohne Gradle auszulösen:
+
+```bash
+python3 bump_manifest_version.py   # z.B. "HYDRA-UMC version: v0.1.2 -> v0.1.3"
+python3 bump_version_code.py       # z.B. "versionCode: 12 -> 13"
+```
+
+## 📂 Struktur des Repositorys
+
+<p align="center">
+  <img src="images/repository-structure.svg" alt="Repository structure of HYDRA-UMC-WATCH" width="100%">
+</p>
+
+<details>
+<summary>Textversion des Baums</summary>
+
+```text
+HYDRA-UMC-WATCH/
+├── tools/                                Quellcode
+│   ├── build_test.py                     Nicht-mutierende CI-Prüfung: Vertragsprüfung + assembleDebug
+│   ├── ci_validate.py                    Manifest-/CHANGELOG-/Docs-Validierung, von CI verwendet
+│   ├── verify_paired_relay_contract.py   Statische Prüfung der Data-Layer-Sicherheitsgrenze Watch<->Android Control
+│   ├── _doc_policy.py                    Von der Familie geteilte Dokumentationsregeln (Kopie der von HYDRA-UMC-SDK, synchron gehalten)
+│   ├── _readme_parity.py                 Prüfung, dass die acht READMEs dieselbe Struktur haben (Kopie der von HYDRA-UMC-SDK, synchron gehalten)
+│   ├── hydra_project_tool.py             Dieselben Befehle in jedem Repository: validate, test, ci, version, status, bump
+│   └── extra_build_steps.py              Die eigenen Build-Schritte dieses Repositorys neben dem gemeinsamen Build-Test (seine Unit-Tests)
+├── app/
+├── gradle/
+├── docs/                                 Dokumentation und Sicherheitsprotokolle
+├── images/                               Medien und Diagramme
+├── .github/                              CI-Workflow und Issue-Vorlagen
+├── build.gradle.kts                      Gradle-Root-Build
+├── settings.gradle.kts                   Modul-Verdrahtung
+├── gradlew / gradlew.bat                 Gradle-Wrapper-Launcher
+├── hydra-umc.project.json                Ökosystem-Manifest (Version, Build-/Health-Metadaten)
+├── keystore.properties.example           Vorlage für die von git ignorierte Release-Signierkonfiguration
+├── bump_manifest_version.py              Erhöht major/minor/patch + das Manifest, gemeinsam
+├── bump_version_code.py                  Erhöhung des Android-versionCode-Zählers (nur vom expliziten `bump`-Befehl ausgeführt)
+├── build.sh / build.bat                  Validiert und baut (Bauen ändert nie die Version)
+├── build-test.sh / build-test.bat        Nicht-mutierender Wrapper für tools/build_test.py
+├── run.sh / run.bat                      Echte Ausführung: gradlew installDebug + adb-Start
+├── CHANGELOG.md                          was sich in jeder Version geändert hat
+├── test.sh                               führt die Tests aus
+├── update-from-github.bat                installiert die neueste Version per ADB
+└── update-from-github.sh                 installiert die neueste Version per ADB
+```
+
+</details>
+
+## 🗺️ Roadmap und bekannte Grenzen
+
+**Bekannte Grenzen heute**
 
 **Heute real:** lokale Alarmwiedergabe über den Android-Dienst `Vibrator`, explizite Mikrofonberechtigung und System-Spracherkennung, sichtbares Transkript und lokale Sprachausgabe sowie getestete typisierte Nachrichten für `voice_turn`, `assistant_reply`, `system_status`, `EStopCommand`, `Alert` und den Versionsstatus des Begleitgeräts. Der offizielle Wear-OS-Data-Layer-Transport leitet begrenzte Sprachanfragen und Statuskarten über HYDRA-UMC-ANDROID-CONTROL an den authentifizierten Server und Voice UI weiter.
 
@@ -211,7 +250,9 @@ für diese Nachrichtenform.
 
 **Noch offen:** Validierung von Kopplung, Funktransport, Mikrofon/Lautsprecher und Ende-zu-Ende-Status auf einem echten Wear-OS-Gerät; drahtloser E-STOP und CM5-Livetelemetrie bleiben getrennte hardwareabhängige Arbeit.
 
----
+## 🌍 Sprachen
+
+Diese README und die Dokumente des Repositorys gibt es in acht Sprachen: Englisch, Spanisch, Deutsch, Französisch, Italienisch, Japanisch, Chinesisch und Portugiesisch (Portugal). Sie entstehen gemeinsam, und die CI prüft, dass die acht Dateien dieselben Abschnitte und dieselben Links haben.
 
 ## 🔗 Verwandte Projekte
 
@@ -302,21 +343,26 @@ Dieses Projekt ist Teil des HYDRA-UMC-Robotik-Ökosystems desselben Autors (Juan
 - **[HYDRA-UMC-OPS-AGENT](https://github.com/JuanenRac/HYDRA-UMC-OPS-AGENT)** — Wartungsvorfall-Koordinator: eine Edge-Rolle mit niedrigem Privileg sammelt einen bereinigten Inventar-/Gesundheits-Snapshot, eine Control-Plane-Rolle rendert ihn schreibgeschützt und bittet einen KI-Anbieter um einen Diagnosevorschlag - wendet nie einen Patch an und stellt nie etwas bereit.
 - **[HYDRA-UMC-DEV-SERVER](https://github.com/JuanenRac/HYDRA-UMC-DEV-SERVER)** — reproduzierbarer Entwicklungshost (Raspberry Pi 5 / CM5), der den Quellcode des Ökosystems vorhält und begrenzte Build-/Test-Aufgaben über eine dauerhafte Warteschlange ausführt; eine dedizierte Entwicklerrolle, ausdrücklich kein operativer CM5.
 
+## 📚 Dokumentation
 
----
+Hier steht mehr:
 
-## 📚 Dokumentation & Community
+* [Sicherheitsgrundlage des Ökosystems](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/SECURITY_BASELINE.md)
+* [Bedrohungsmodell des Ökosystems](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/THREAT_MODEL.md)
+* [Änderungsprotokoll dieses Repositorys](CHANGELOG.md)
+* [Lizenz dieses Repositorys](LICENSE.md)
 
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** — Technologie-Stack und Coding-Richtlinien für einen Pull Request.
-- **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** — die in dieser Community erwarteten Verhaltensstandards.
-- **[SECURITY.md](SECURITY.md)** — wie man eine Schwachstelle meldet, und die echten Sicherheitsschwerpunkte dieses Projekts.
-- **[SUPPORT.md](SUPPORT.md)** — wo man Fragen stellt und Fehler meldet.
-- **[LICENSE.md](LICENSE.md)** — die eigene Lizenz dieses Projekts.
+## 🤝 Mitwirken und Community
+
+* Führe vor einem Pull Request `HYDRA_UMC_CI=1 py -3 tools/ci_validate.py` (oder `HYDRA_UMC_CI=1 python3 tools/ci_validate.py`) aus: Es muss `CI_VALIDATION=PASS` ausgeben. Führe dafür nicht `build.sh` oder `build.bat` aus; Bauen ist keine Prüfung.
+* Die acht READMEs entstehen aus einer einzigen Quelle in HYDRA-UMC-DOCS; bearbeite sie nicht von Hand. Ändere die Quelle und schreibe sie mit `tools/make_readmes.py` neu.
+* Behaupte in einer README nichts, was nicht gelaufen ist: Schreibe „simuliert“ oder „nicht auf Hardware erprobt“, wo das stimmt.
+* Siehe [CONTRIBUTING.md](CONTRIBUTING.md), den [Verhaltenskodex](CODE_OF_CONDUCT.md), [SECURITY.md](SECURITY.md) und [SUPPORT.md](SUPPORT.md).
 
 ## 👤 AUTOR
-**JuanenRac** (Electro Hobby 3D)
-📧 electrohobby3d@gmail.com
-📺 [youtube.com/@electrohobby3d](https://youtube.com/@electrohobby3d)
+
+**JuanenRac (Electro Hobby 3D)** · electrohobby3d@gmail.com
 
 ## 📜 LIZENZ
-GPL-3.0 - Siehe LICENSE für Details.
+
+GPL-3.0-or-later - [LICENSE](LICENSE).

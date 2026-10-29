@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **README in the universal layout:** the README and its seven translations follow the layout that the four families share (22 sections in a fixed order), with an architecture picture and a repository-structure picture drawn from `docs/architecture.json` and `docs/structure.json`; the CI validator checks both pictures and the file tree.
+
 - **The layout of the README is checked in the CI:** the validator runs `tools/universal_readme_check.py` and lists, as a warning, what differs from the universal layout of the README.
 - `run.sh` and `run.bat` name the package and the activity once, in variables, like the update scripts.
 - The README in the eight languages lists the three groups of JUnit tests that `build` runs (`haptics`, `protocol`, `transport`) and no longer says that `-PhydraUmcReadOnly=true` protects the version: the Gradle build never changes it, and the flag has no effect.
@@ -295,7 +297,7 @@ exercise end to end.
   HYDRA-UMC-ANDROID-CONTROL, reused rather than reinvented.
 - **`app/build.gradle.kts`** - real app module: `applicationId
   com.hydraumc.watch`, `minSdk 30` (Wear OS 3 baseline), `compileSdk 36`,
-  `targetSdk 35`, the same odometer-style version-bump block as
+  `targetSdk 35`, the same version-bump block as
   ANDROID-CONTROL adapted to this module.
 - **`MainActivity.kt`** - a real Jetpack Compose for Wear OS screen
   (`androidx.wear.compose.material` - Wear's own `MaterialTheme` /

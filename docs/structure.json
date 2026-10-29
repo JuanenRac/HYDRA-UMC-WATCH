@@ -1,0 +1,628 @@
+{
+  "repo": "HYDRA-UMC-WATCH",
+  "ecosystem": "hydra",
+  "svg": "en",
+  "exempt": [
+    "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+    "SUPPORT.md",
+    "LICENSE",
+    "LICENSE.md",
+    "gradle.properties",
+    "test.bat"
+  ],
+  "cards": [
+    {
+      "name": "tools/",
+      "span": 3,
+      "accent": "a",
+      "rows": [
+        {
+          "name": "build_test.py",
+          "desc": {
+            "en": "Non-mutating CI check",
+            "es": "Chequeo de CI sin mutación",
+            "de": "Nicht-mutierende CI-Prüfung",
+            "fr": "Vérification CI sans mutation",
+            "it": "Verifica CI senza mutazioni",
+            "ja": "変更を加えない CI チェック",
+            "zh": "不产生变更的 CI 检查：契约验证 + as",
+            "pt": "Verificação de CI sem alterações"
+          },
+          "tree_desc": {
+            "en": "Non-mutating CI check: contract verification + assembleDebug",
+            "es": "Chequeo de CI sin mutación: verificación de contrato + assembleDebug",
+            "de": "Nicht-mutierende CI-Prüfung: Vertragsprüfung + assembleDebug",
+            "fr": "Vérification CI sans mutation : vérification du contrat + assembleDebug",
+            "it": "Verifica CI senza mutazioni: verifica del contratto + assembleDebug",
+            "ja": "変更を加えない CI チェック：契約検証 + assembleDebug",
+            "zh": "不产生变更的 CI 检查：契约验证 + assembleDebug",
+            "pt": "Verificação de CI sem alterações: verificação de contrato + assembleDebug"
+          }
+        },
+        {
+          "name": "ci_validate.py",
+          "desc": {
+            "en": "Manifest/CHANGELOG/docs validation used",
+            "es": "Validación de manifiesto/CHANGELOG/docs",
+            "de": "Manifest-/CHANGELOG-/Docs-Validierung",
+            "fr": "Validation manifeste/CHANGELOG/docs",
+            "it": "Validazione manifest/CHANGELOG/docs usata",
+            "ja": "CI が使用するマニフェスト/CHANGEL",
+            "zh": "CI 使用的清单/CHANGELOG/文档校",
+            "pt": "Validação de"
+          },
+          "tree_desc": {
+            "en": "Manifest/CHANGELOG/docs validation used by CI",
+            "es": "Validación de manifiesto/CHANGELOG/docs usada por CI",
+            "de": "Manifest-/CHANGELOG-/Docs-Validierung, von CI verwendet",
+            "fr": "Validation manifeste/CHANGELOG/docs utilisée par CI",
+            "it": "Validazione manifest/CHANGELOG/docs usata dalla CI",
+            "ja": "CI が使用するマニフェスト/CHANGELOG/ドキュメント検証",
+            "zh": "CI 使用的清单/CHANGELOG/文档校验",
+            "pt": "Validação de manifesto/CHANGELOG/documentação usada pelo CI"
+          }
+        },
+        {
+          "name": "verify_paired_relay_contract.py",
+          "desc": {
+            "en": "Static Watch<->Android Control Data Layer",
+            "es": "Chequeo estático del límite de seguridad",
+            "de": "Statische Prüfung der",
+            "fr": "Vérification statique de la limite de",
+            "it": "Verifica statica del limite di sicurezza",
+            "ja": "Watch<->Android Contro",
+            "zh": "Watch<->Android Contro",
+            "pt": "Verificação estática da fronteira de"
+          },
+          "tree_desc": {
+            "en": "Static Watch<->Android Control Data Layer safety-boundary check",
+            "es": "Chequeo estático del límite de seguridad Data Layer Watch<->Android Control",
+            "de": "Statische Prüfung der Data-Layer-Sicherheitsgrenze Watch<->Android Control",
+            "fr": "Vérification statique de la limite de sécurité Data Layer Watch<->Android Control",
+            "it": "Verifica statica del limite di sicurezza Data Layer Watch<->Android Control",
+            "ja": "Watch<->Android Control 間の Data Layer 安全境界の静的検証",
+            "zh": "Watch<->Android Control 之间 Data Layer 安全边界的静态检查",
+            "pt": "Verificação estática da fronteira de segurança da Data Layer Relógio<->Android Control"
+          }
+        },
+        {
+          "name": "_doc_policy.py",
+          "desc": {
+            "en": "Documentation rules shared by the family",
+            "es": "Reglas de documentación compartidas por la",
+            "de": "Von der Familie geteilte",
+            "fr": "Règles de documentation partagées par la",
+            "it": "Regole di documentazione condivise dalla",
+            "ja": "ファミリー共通のドキュメント規則",
+            "zh": "家族共享的文档规则 (HYDRA-UMC-S",
+            "pt": "Regras de documentação partilhadas pela"
+          },
+          "tree_desc": {
+            "en": "Documentation rules shared by the family (a copy of HYDRA-UMC-SDK's, kept in sync)",
+            "es": "Reglas de documentación compartidas por la familia (copia de la de HYDRA-UMC-SDK, mantenida en sincronía)",
+            "de": "Von der Familie geteilte Dokumentationsregeln (Kopie der von HYDRA-UMC-SDK, synchron gehalten)",
+            "fr": "Règles de documentation partagées par la famille (copie de celle de HYDRA-UMC-SDK, tenue synchronisée)",
+            "it": "Regole di documentazione condivise dalla famiglia (copia di quella di HYDRA-UMC-SDK, mantenuta sincronizzata)",
+            "ja": "ファミリー共通のドキュメント規則 (HYDRA-UMC-SDK のコピーで、同期を維持)",
+            "zh": "家族共享的文档规则 (HYDRA-UMC-SDK 的副本,保持同步)",
+            "pt": "Regras de documentação partilhadas pela família (cópia da de HYDRA-UMC-SDK, mantida em sincronia)"
+          }
+        },
+        {
+          "name": "_readme_parity.py",
+          "desc": {
+            "en": "Check that the eight READMEs share",
+            "es": "Comprobación de que los ocho README",
+            "de": "Prüfung, dass die acht READMEs dieselbe",
+            "fr": "Contrôle que les huit README partagent la",
+            "it": "Verifica che gli otto README abbiano la",
+            "ja": "8つの README が同じ構造であることの",
+            "zh": "检查八个 README 结构一致",
+            "pt": "Verificação de que os oito README partilham"
+          },
+          "tree_desc": {
+            "en": "Check that the eight READMEs share one structure (a copy of HYDRA-UMC-SDK's, kept in sync)",
+            "es": "Comprobación de que los ocho README comparten estructura (copia de la de HYDRA-UMC-SDK, mantenida en sincronía)",
+            "de": "Prüfung, dass die acht READMEs dieselbe Struktur haben (Kopie der von HYDRA-UMC-SDK, synchron gehalten)",
+            "fr": "Contrôle que les huit README partagent la même structure (copie de celui de HYDRA-UMC-SDK, tenue synchronisée)",
+            "it": "Verifica che gli otto README abbiano la stessa struttura (copia di quella di HYDRA-UMC-SDK, mantenuta sincronizzata)",
+            "ja": "8つの README が同じ構造であることの検査 (HYDRA-UMC-SDK のコピーで、同期を維持)",
+            "zh": "检查八个 README 结构一致 (HYDRA-UMC-SDK 的副本,保持同步)",
+            "pt": "Verificação de que os oito README partilham a mesma estrutura (cópia da de HYDRA-UMC-SDK, mantida em sincronia)"
+          }
+        },
+        {
+          "name": "hydra_project_tool.py",
+          "desc": {
+            "en": "The same commands in every repository",
+            "es": "Los mismos comandos en todos los",
+            "de": "Dieselben Befehle in jedem Repository",
+            "fr": "Les mêmes commandes dans chaque dépôt",
+            "it": "Gli stessi comandi in ogni repository",
+            "ja": "すべてのリポジトリで共通のコマンド",
+            "zh": "每个仓库相同的命令: validate",
+            "pt": "Os mesmos comandos em todos os repositórios"
+          },
+          "tree_desc": {
+            "en": "The same commands in every repository: validate, test, ci, version, status, bump",
+            "es": "Los mismos comandos en todos los repositorios: validate, test, ci, version, status, bump",
+            "de": "Dieselben Befehle in jedem Repository: validate, test, ci, version, status, bump",
+            "fr": "Les mêmes commandes dans chaque dépôt : validate, test, ci, version, status, bump",
+            "it": "Gli stessi comandi in ogni repository: validate, test, ci, version, status, bump",
+            "ja": "すべてのリポジトリで共通のコマンド: validate、test、ci、version、status、bump",
+            "zh": "每个仓库相同的命令: validate、test、ci、version、status、bump",
+            "pt": "Os mesmos comandos em todos os repositórios: validate, test, ci, version, status, bump"
+          }
+        },
+        {
+          "name": "extra_build_steps.py",
+          "desc": {
+            "en": "The build steps of this repository beyond",
+            "es": "Los pasos de compilación propios de este",
+            "de": "Die eigenen Build-Schritte dieses",
+            "fr": "Les étapes de compilation propres à ce",
+            "it": "I passi di compilazione propri di questo",
+            "ja": "共通のビルドテストに加えた、このリポジトリ固",
+            "zh": "除共享构建测试外,本仓库自己的构建步骤",
+            "pt": "Os passos de compilação próprios deste"
+          },
+          "tree_desc": {
+            "en": "The build steps of this repository beyond the shared build test (its own unit tests)",
+            "es": "Los pasos de compilación propios de este repositorio además de la prueba de compilación compartida (sus tests unitarios)",
+            "de": "Die eigenen Build-Schritte dieses Repositorys neben dem gemeinsamen Build-Test (seine Unit-Tests)",
+            "fr": "Les étapes de compilation propres à ce dépôt en plus du test de compilation partagé (ses tests unitaires)",
+            "it": "I passi di compilazione propri di questo repository oltre al test di compilazione condiviso (i suoi unit test)",
+            "ja": "共通のビルドテストに加えた、このリポジトリ固有のビルド手順 (独自のユニットテスト)",
+            "zh": "除共享构建测试外,本仓库自己的构建步骤 (自带的单元测试)",
+            "pt": "Os passos de compilação próprios deste repositório além do teste de compilação partilhado (os seus testes unitários)"
+          }
+        }
+      ],
+      "tree_head": {
+        "en": "source code",
+        "es": "código fuente",
+        "de": "Quellcode",
+        "fr": "code source",
+        "it": "codice sorgente",
+        "ja": "ソースコード",
+        "zh": "源代码",
+        "pt": "código-fonte"
+      },
+      "sub": {
+        "en": "source code",
+        "es": "código fuente",
+        "de": "Quellcode",
+        "fr": "code source",
+        "it": "codice sorgente",
+        "ja": "ソースコード",
+        "zh": "源代码",
+        "pt": "código-fonte"
+      }
+    },
+    {
+      "name": {
+        "en": "folders",
+        "es": "carpetas",
+        "de": "Ordner",
+        "fr": "dossiers",
+        "it": "cartelle",
+        "ja": "フォルダ",
+        "zh": "文件夹",
+        "pt": "pastas"
+      },
+      "kind": "group",
+      "span": 3,
+      "accent": "b",
+      "columns": 2,
+      "rows": [
+        {
+          "name": "app/",
+          "desc": {
+            "en": "",
+            "es": "",
+            "de": "",
+            "fr": "",
+            "it": "",
+            "ja": "",
+            "zh": "",
+            "pt": ""
+          },
+          "tree_desc": {
+            "en": "",
+            "es": "",
+            "de": "",
+            "fr": "",
+            "it": "",
+            "ja": "",
+            "zh": "",
+            "pt": ""
+          }
+        },
+        {
+          "name": "gradle/",
+          "desc": {
+            "en": "",
+            "es": "",
+            "de": "",
+            "fr": "",
+            "it": "",
+            "ja": "",
+            "zh": "",
+            "pt": ""
+          },
+          "tree_desc": {
+            "en": "",
+            "es": "",
+            "de": "",
+            "fr": "",
+            "it": "",
+            "ja": "",
+            "zh": "",
+            "pt": ""
+          }
+        },
+        {
+          "name": "docs/",
+          "desc": {
+            "en": "Documentation and safety protocols",
+            "es": "Documentación y protocolos de seguridad",
+            "de": "Dokumentation und Sicherheitsprotokolle",
+            "fr": "Documentation et protocoles de sécurité",
+            "it": "Documentazione e protocolli di sicurezza",
+            "ja": "ドキュメントと安全プロトコル",
+            "zh": "文档与安全协议",
+            "pt": "Documentação e protocolos de segurança"
+          },
+          "tree_desc": {
+            "en": "Documentation and safety protocols",
+            "es": "Documentación y protocolos de seguridad",
+            "de": "Dokumentation und Sicherheitsprotokolle",
+            "fr": "Documentation et protocoles de sécurité",
+            "it": "Documentazione e protocolli di sicurezza",
+            "ja": "ドキュメントと安全プロトコル",
+            "zh": "文档与安全协议",
+            "pt": "Documentação e protocolos de segurança"
+          }
+        },
+        {
+          "name": "images/",
+          "desc": {
+            "en": "Media and diagrams",
+            "es": "Medios y diagramas",
+            "de": "Medien und Diagramme",
+            "fr": "Médias et diagrammes",
+            "it": "Media e diagrammi",
+            "ja": "メディアと図表",
+            "zh": "媒体与图表",
+            "pt": "Multimédia e diagramas"
+          },
+          "tree_desc": {
+            "en": "Media and diagrams",
+            "es": "Medios y diagramas",
+            "de": "Medien und Diagramme",
+            "fr": "Médias et diagrammes",
+            "it": "Media e diagrammi",
+            "ja": "メディアと図表",
+            "zh": "媒体与图表",
+            "pt": "Multimédia e diagramas"
+          }
+        },
+        {
+          "name": ".github/",
+          "desc": {
+            "en": "CI workflow and issue templates",
+            "es": "flujo de CI y plantillas de incidencias",
+            "de": "CI-Workflow und Issue-Vorlagen",
+            "fr": "workflow de CI et modèles de tickets",
+            "it": "workflow di CI e modelli di segnalazione",
+            "ja": "CI ワークフローと Issue テンプレート",
+            "zh": "CI 工作流和 Issue 模板",
+            "pt": "fluxo de CI e modelos de problemas"
+          }
+        }
+      ]
+    },
+    {
+      "name": {
+        "en": "project files",
+        "es": "ficheros del proyecto",
+        "de": "Projektdateien",
+        "fr": "fichiers du projet",
+        "it": "file del progetto",
+        "ja": "プロジェクトのファイル",
+        "zh": "项目文件",
+        "pt": "ficheiros do projeto"
+      },
+      "kind": "group",
+      "span": 3,
+      "accent": "c",
+      "columns": 2,
+      "rows": [
+        {
+          "name": "build.gradle.kts",
+          "desc": {
+            "en": "Root Gradle build",
+            "es": "Build raíz de Gradle",
+            "de": "Gradle-Root-Build",
+            "fr": "Build racine Gradle",
+            "it": "Build radice di Gradle",
+            "ja": "ルート Gradle ビルド",
+            "zh": "根 Gradle 构建",
+            "pt": "Compilação Gradle raiz"
+          },
+          "tree_desc": {
+            "en": "Root Gradle build",
+            "es": "Build raíz de Gradle",
+            "de": "Gradle-Root-Build",
+            "fr": "Build racine Gradle",
+            "it": "Build radice di Gradle",
+            "ja": "ルート Gradle ビルド",
+            "zh": "根 Gradle 构建",
+            "pt": "Compilação Gradle raiz"
+          }
+        },
+        {
+          "name": "settings.gradle.kts",
+          "desc": {
+            "en": "Module wiring",
+            "es": "Cableado de módulos",
+            "de": "Modul-Verdrahtung",
+            "fr": "Câblage des modules",
+            "it": "Cablaggio dei moduli",
+            "ja": "モジュール接続",
+            "zh": "模块接入",
+            "pt": "Ligação dos módulos"
+          },
+          "tree_desc": {
+            "en": "Module wiring",
+            "es": "Cableado de módulos",
+            "de": "Modul-Verdrahtung",
+            "fr": "Câblage des modules",
+            "it": "Cablaggio dei moduli",
+            "ja": "モジュール接続",
+            "zh": "模块接入",
+            "pt": "Ligação dos módulos"
+          }
+        },
+        {
+          "name": "gradlew / gradlew.bat",
+          "desc": {
+            "en": "Gradle wrapper launcher",
+            "es": "Lanzador del Gradle wrapper",
+            "de": "Gradle-Wrapper-Launcher",
+            "fr": "Lanceur du Gradle wrapper",
+            "it": "Launcher del Gradle wrapper",
+            "ja": "Gradle wrapper ランチャー",
+            "zh": "Gradle wrapper 启动器",
+            "pt": "Lançador do Gradle wrapper"
+          },
+          "tree_desc": {
+            "en": "Gradle wrapper launcher",
+            "es": "Lanzador del Gradle wrapper",
+            "de": "Gradle-Wrapper-Launcher",
+            "fr": "Lanceur du Gradle wrapper",
+            "it": "Launcher del Gradle wrapper",
+            "ja": "Gradle wrapper ランチャー",
+            "zh": "Gradle wrapper 启动器",
+            "pt": "Lançador do Gradle wrapper"
+          }
+        },
+        {
+          "name": "hydra-umc.project.json",
+          "desc": {
+            "en": "Ecosystem manifest",
+            "es": "Manifiesto del ecosistema",
+            "de": "Ökosystem-Manifest",
+            "fr": "Manifeste de l'écosystème",
+            "it": "Manifest dell'ecosistema",
+            "ja": "エコシステムマニフェスト（バージョン",
+            "zh": "生态系统清单（版本、构建/健康元数据）",
+            "pt": "Manifesto do ecossistema"
+          },
+          "tree_desc": {
+            "en": "Ecosystem manifest (version, build/health metadata)",
+            "es": "Manifiesto del ecosistema (versión, metadatos de build/salud)",
+            "de": "Ökosystem-Manifest (Version, Build-/Health-Metadaten)",
+            "fr": "Manifeste de l'écosystème (version, métadonnées build/santé)",
+            "it": "Manifest dell'ecosistema (versione, metadati build/salute)",
+            "ja": "エコシステムマニフェスト（バージョン、ビルド/健全性メタデータ）",
+            "zh": "生态系统清单（版本、构建/健康元数据）",
+            "pt": "Manifesto do ecossistema (versão, metadados de compilação/saúde)"
+          }
+        },
+        {
+          "name": "keystore.properties.example",
+          "desc": {
+            "en": "Template for the ignored release-signing",
+            "es": "Plantilla para la config de firma de",
+            "de": "Vorlage für die von git ignorierte",
+            "fr": "Modèle pour la config de signature de",
+            "it": "Modello per la config di firma release",
+            "ja": "gitignore 対象のリリース署名設定の",
+            "zh": "已被 gitignore 的发布签名配置模板",
+            "pt": "Modelo da configuração de assinatura de"
+          },
+          "tree_desc": {
+            "en": "Template for the ignored release-signing config",
+            "es": "Plantilla para la config de firma de release ignorada por git",
+            "de": "Vorlage für die von git ignorierte Release-Signierkonfiguration",
+            "fr": "Modèle pour la config de signature de release ignorée par git",
+            "it": "Modello per la config di firma release ignorata da git",
+            "ja": "gitignore 対象のリリース署名設定のテンプレート",
+            "zh": "已被 gitignore 的发布签名配置模板",
+            "pt": "Modelo da configuração de assinatura de versões, ignorada pelo git"
+          }
+        },
+        {
+          "name": "bump_manifest_version.py",
+          "desc": {
+            "en": "Bumps major/minor/patch + the manifest",
+            "es": "Incrementa major/minor/patch + el manifiesto",
+            "de": "Erhöht major/minor/patch + das Manifest",
+            "fr": "Incrémente major/minor/patch + le manifeste",
+            "it": "Incrementa major/minor/patch + il manifest",
+            "ja": "major/minor/patch とマニフ",
+            "zh": "同时递增 major/minor/patch",
+            "pt": "Sobe major/minor/patch + o manifesto"
+          },
+          "tree_desc": {
+            "en": "Bumps major/minor/patch + the manifest, in lockstep",
+            "es": "Incrementa major/minor/patch + el manifiesto, a la vez",
+            "de": "Erhöht major/minor/patch + das Manifest, gemeinsam",
+            "fr": "Incrémente major/minor/patch + le manifeste, ensemble",
+            "it": "Incrementa major/minor/patch + il manifest, insieme",
+            "ja": "major/minor/patch とマニフェストを同時に増加させる",
+            "zh": "同时递增 major/minor/patch 和清单文件",
+            "pt": "Sobe major/minor/patch + o manifesto, em conjunto"
+          }
+        },
+        {
+          "name": "bump_version_code.py",
+          "desc": {
+            "en": "Android versionCode counter bump",
+            "es": "Incremento del contador versionCode de",
+            "de": "Erhöhung des Android-versionCode-Zählers",
+            "fr": "Incrément du compteur versionCode d'Android",
+            "it": "Incremento del contatore versionCode di",
+            "ja": "Android 独自の versionCod",
+            "zh": "Android versionCode 计数",
+            "pt": "Subida do contador versionCode do Android"
+          },
+          "tree_desc": {
+            "en": "Android versionCode counter bump (run only by the explicit `bump` command)",
+            "es": "Incremento del contador versionCode de Android (solo lo ejecuta el comando `bump` explícito)",
+            "de": "Erhöhung des Android-versionCode-Zählers (nur vom expliziten `bump`-Befehl ausgeführt)",
+            "fr": "Incrément du compteur versionCode d'Android (exécuté seulement par la commande `bump` explicite)",
+            "it": "Incremento del contatore versionCode di Android (eseguito solo dal comando `bump` esplicito)",
+            "ja": "Android 独自の versionCode カウンターを増加させる",
+            "zh": "Android versionCode 计数器递增（仅由显式 `bump` 命令运行）",
+            "pt": "Subida do contador versionCode do Android (executada só pelo comando `bump` explícito)"
+          }
+        },
+        {
+          "name": "build.sh / build.bat",
+          "desc": {
+            "en": "Validate and build",
+            "es": "Valida y compila",
+            "de": "Validiert und baut",
+            "fr": "Build réel : lance les tests, assembleDebug",
+            "it": "Build reale: esegue i test, assembleDebug",
+            "ja": "実際のビルド：バージョンを増加させ",
+            "zh": "验证并构建（构建不会更改版本）",
+            "pt": "Compilação real"
+          },
+          "tree_desc": {
+            "en": "Validate and build (building never changes the version)",
+            "es": "Valida y compila (compilar nunca cambia la versión)",
+            "de": "Validiert und baut (Bauen ändert nie die Version)",
+            "fr": "Build réel : lance les tests, assembleDebug",
+            "it": "Build reale: esegue i test, assembleDebug",
+            "ja": "実際のビルド：バージョンを増加させ、テストを実行し、assembleDebug",
+            "zh": "验证并构建（构建不会更改版本）",
+            "pt": "Compilação real: executa os testes, assembleDebug"
+          }
+        },
+        {
+          "name": "build-test.sh / build-test.bat",
+          "desc": {
+            "en": "Non-mutating wrapper for tools/build_test.py",
+            "es": "Envoltorio sin mutación para",
+            "de": "Nicht-mutierender Wrapper für",
+            "fr": "Enveloppe sans mutation pour",
+            "it": "Wrapper senza mutazioni per",
+            "ja": "tools/build_test.py 用の",
+            "zh": "tools/build_test.py 的不",
+            "pt": "Invólucro sem alterações para"
+          },
+          "tree_desc": {
+            "en": "Non-mutating wrapper for tools/build_test.py",
+            "es": "Envoltorio sin mutación para tools/build_test.py",
+            "de": "Nicht-mutierender Wrapper für tools/build_test.py",
+            "fr": "Enveloppe sans mutation pour tools/build_test.py",
+            "it": "Wrapper senza mutazioni per tools/build_test.py",
+            "ja": "tools/build_test.py 用の、変更を加えないラッパー",
+            "zh": "tools/build_test.py 的不产生变更的包装脚本",
+            "pt": "Invólucro sem alterações para tools/build_test.py"
+          }
+        },
+        {
+          "name": "run.sh / run.bat",
+          "desc": {
+            "en": "Real run: gradlew installDebug + adb launch",
+            "es": "Ejecución real",
+            "de": "Echte Ausführung",
+            "fr": "Exécution réelle",
+            "it": "Esecuzione reale",
+            "ja": "実際の実行：gradlew installD",
+            "zh": "真实运行：gradlew installDe",
+            "pt": "Execução real: gradlew installDebug +"
+          },
+          "tree_desc": {
+            "en": "Real run: gradlew installDebug + adb launch",
+            "es": "Ejecución real: gradlew installDebug + lanzamiento adb",
+            "de": "Echte Ausführung: gradlew installDebug + adb-Start",
+            "fr": "Exécution réelle : gradlew installDebug + lancement adb",
+            "it": "Esecuzione reale: gradlew installDebug + avvio adb",
+            "ja": "実際の実行：gradlew installDebug + adb launch",
+            "zh": "真实运行：gradlew installDebug + adb launch",
+            "pt": "Execução real: gradlew installDebug + arranque por adb"
+          }
+        },
+        {
+          "name": "CHANGELOG.md",
+          "desc": {
+            "en": "what changed in each version",
+            "es": "qué cambió en cada versión",
+            "de": "was sich in jeder Version geändert hat",
+            "fr": "ce qui a changé à chaque version",
+            "it": "cosa è cambiato in ogni versione",
+            "ja": "各バージョンの変更点",
+            "zh": "每个版本的变更",
+            "pt": "o que mudou em cada versão"
+          }
+        },
+        {
+          "name": "test.sh",
+          "desc": {
+            "en": "runs the tests",
+            "es": "ejecuta las pruebas",
+            "de": "führt die Tests aus",
+            "fr": "lance les tests",
+            "it": "esegue i test",
+            "ja": "テストを実行",
+            "zh": "运行测试",
+            "pt": "executa os testes"
+          }
+        },
+        {
+          "name": "update-from-github.bat",
+          "desc": {
+            "en": "installs the newest release by ADB",
+            "es": "instala la última versión por ADB",
+            "de": "installiert die neueste Version per ADB",
+            "fr": "installe la dernière version par ADB",
+            "it": "installa l'ultima versione tramite ADB",
+            "ja": "ADB で最新リリースをインストール",
+            "zh": "通过 ADB 安装最新版本",
+            "pt": "instala a versão mais recente por ADB"
+          }
+        },
+        {
+          "name": "update-from-github.sh",
+          "desc": {
+            "en": "installs the newest release by ADB",
+            "es": "instala la última versión por ADB",
+            "de": "installiert die neueste Version per ADB",
+            "fr": "installe la dernière version par ADB",
+            "it": "installa l'ultima versione tramite ADB",
+            "ja": "ADB で最新リリースをインストール",
+            "zh": "通过 ADB 安装最新版本",
+            "pt": "instala a versão mais recente por ADB"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,3 +1,9 @@
+<!-- =============================================================================
+HYDRA-UMC-WATCH - Wear OS companion: status cards, haptic alerts and a voice relay
+Copyright (C) JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+GPL-3.0-or-later - see LICENSE
+============================================================================= -->
+
 <p align="center">
   <img src="images/HYDRA_UMC_BANNER.svg" alt="HYDRA-UMC-WATCH banner" width="100%">
 </p>
@@ -9,16 +15,19 @@
 ### ⌚ Wear OS 伴侣应用:状态卡片、触觉提醒和语音中继(没有无线 E-STOP)
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Licencia-GPL%203.0-blue.svg" alt="GPL 3.0">
-  <img src="https://img.shields.io/badge/Platform-Wear%20OS-4285F4.svg" alt="Wear OS">
-  <img src="https://img.shields.io/badge/Feature-Voice%20%26%20haptics-blue.svg" alt="Voice and haptics">
+  <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
+  <img src="https://img.shields.io/badge/Platform-Wear%20OS-4285F4.svg" alt="Platform">
+  <img src="https://img.shields.io/badge/Feature-Voice%20%26%20haptics-blue.svg" alt="Feature">
+  <img src="https://img.shields.io/badge/Tests-94%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Version-0.2.6-0f6cbd.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Maturity-functional-0F6CBD.svg" alt="Maturity">
 </p>
-
-**诚实核查 - 今天真正能运行的部分：** 触觉振动模式（`haptics/HapticPatterns.kt`、`HapticAlertPlayer.kt`）、SERVER<->WATCH 同步消息编解码器（`protocol/SyncMessage.kt`）、带有 companion 验证节点选择、指数退避重试、消息路由与最后已知状态过期跟踪的配对手机中继传输（`transport/WatchRelayTransport.kt`、`RelayRetryPolicy.kt`、`WatchRelayRouting.kt`、`LastKnownStateCache.kt`），以及点按通话语音流程（`MainActivity.kt`）都是真实的 Kotlin 代码，由 70 个通过的 JUnit 测试（`./gradlew test`）支撑，这些测试在普通 JVM 上运行，不需要手表、模拟器或配对手机。这套测试覆盖证明了消息/策略/路由逻辑是正确的；但它并不能证明这个应用在真实手表上能正常运行——`HapticAlertPlayer` 真实的 `Vibrator` 调用、Data Layer 中继，以及语音流程都还没有在真实的 Wear OS 硬件上验证过，只在这台开发机器上通过了 `assembleDebug`/单元测试。无线 E-STOP 按钮、直接的 Watch<->Server WebSocket，以及基于 JWT 的服务器配对仍然只是计划——它们将使用的 `EStopCommand` 消息格式本身今天是真实且经过测试的，但传输和硬件接线并非如此。具体已经交付了什么，请参见 `CHANGELOG.md`，以及下文第 1 节自己的功能列表中按功能划分的真实/未来对照。
 
 ---
 
 > **安全与安防现状:**本生态系统不是经认证的安全系统。目前尚无硬件 E-STOP 通路,没有由固件强制执行的限位或联锁,也没有经过验证的运动指令;固件映像使用 CRC32 和共享密钥的 HMAC-SHA256 校验,而非非对称签名;TLS 与双向 TLS 均为可选项,默认关闭;自制电路板尚未组装或测试。在依赖此处任何说法来保障人身安全之前,请先阅读[安全基线](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/SECURITY_BASELINE.md)和[威胁模型](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/THREAT_MODEL.md)。
+
+---
 
 ## 📋 速览
 
@@ -26,9 +35,12 @@
 |---|---|
 | 版本 | `0.2.6` |
 | 成熟度 | 可用 |
+| 测试 | 94 (`./gradlew testDebugUnitTest`) |
 | 技术栈 | Kotlin / Wear OS |
 | 目标 | Wear OS 手表（与手机配对） |
 | 真实硬件 | 尚未：此版本没有在真实硬件上运行的记录 |
+
+**跳转：** [概述](#-概述) · [架构](#-架构) · [安全与防护](#-安全与防护) · [快速开始](#-快速开始) · [测试](#-测试) · [仓库结构](#-仓库结构) · [相关项目](#-相关项目)
 
 ## 🚦 项目状态
 
@@ -39,11 +51,11 @@
 | 领域 | 状态 | 在这里的含义 |
 |---|---|---|
 | 软件 | 🟡 | 主要用途可用；上面的诚实性检查列出了仍然缺少的内容 |
-| 测试 | 🟠 | 此仓库尚未记录测试数量 |
+| 测试 | 🟢 | 94 项自动测试，每次变更都会运行 |
 | 真实硬件 | 🔴 | 尚未：此版本没有在真实硬件上运行的记录 |
 | 文档 | 🟢 | 八种语言的 README，每次变更都会与清单核对 |
 
-## 1. 🛠️ 技术概述
+## 🎯 概述
 
 **HYDRA-UMC-WATCH** 是面向工厂操作员的腕上伴侣。它在手腕上显示一目了然的状态和警报信息,并通过配对手机中继简短的语音交互。它不是安全设备:没有无线 E-STOP,也尚未在实体手表上运行过。
 
@@ -58,16 +70,25 @@
 * 🎙️ **语音** —— 按住说话：明确请求 `RECORD_AUDIO` 权限、使用系统语音识别 intent（`RecognizerIntent`）进行转录、将转录内容作为受限的 `voice_turn` 同步消息中继给 HYDRA-UMC-ANDROID-CONTROL，并在手表上通过本地 `TextToSpeech` 回复。*（已实现——`MainActivity.kt`；语音绝不能直接操控机器人，见下文架构部分，完整的端到端消息流程和安全边界见 [docs/VOICE_AI_PROTOCOL.md](docs/VOICE_AI_PROTOCOL.md)。）*
 * ⌚ **一目了然的状态：** **刷新状态**按钮通过已配对的 Data Layer 向 HYDRA-UMC-ANDROID-CONTROL 中继一个受限的状态请求；返回的 `system_status` 卡片在过时后会显示"最后已知——可能已过时"的提示。*（已实现——`MainActivity.kt`/`WatchRelayTransport.requestSystemStatus()`；通过手机中继按需拉取，而非手表到服务器的直接推送套接字，且尚未在真实 Wear OS 设备上验证。）*
 * 🔐 **JWT Auth** 与 HYDRA-UMC-SERVER 基于 JWT 的配对。*（计划中。）*
-* ✅ **独立的 Wear OS 工具链** —— 一个真实的 Gradle/Kotlin/Compose-for-Wear 应用，能够构建出可用的调试 APK。*（已实现——见下方"构建与运行"）*
+* ✅ **独立的 Wear OS 工具链** —— 一个真实的 Gradle/Kotlin/Compose-for-Wear 应用，能够构建出可用的调试 APK。*（已实现——见下方"构建与发布"）*
 * 🔁 **中继重连策略** —— `transport/RelayRetryPolicy.kt` 是一个真实的、纯粹的指数退避策略，用于处理失败的中继发送（例如尚未配对手机的情况），并设有一个有上限的最大延迟；一旦屏幕关闭，任何待处理的重试都会被立即取消，绝不会针对已销毁的 Activity 触发。*（已实现）*
 * 🧭 **经 companion 验证的节点选择** —— `WatchRelayTransport` 现在通过真实的 `CapabilityClient` 查询发送（`hydra_umc_phone_companion`，在 HYDRA-UMC-ANDROID-CONTROL 自身的 `res/values/wear.xml` 中声明），而不再是 `connectedNodes.firstOrNull()`——一个未安装 companion 应用的已连接节点绝不会被意外选中；当有多个符合条件的节点时，会优先选择就近（可直接通过蓝牙访问）的节点，而非经云端中转的节点。*（已实现 —— `pickCompanionNode()`）*
 * 🗂️ **最后已知状态缓存** —— `transport/LastKnownStateCache.kt` 会跟踪最后一次中继的状态/告警的真实过时程度，确保旧数据永远不会被当作最新数据显示。*（已实现）*
 * 📥 **中继收件箱** — `transport/RelayInbox.kt`:在 Wear OS 上,手腕一放下屏幕就会被销毁,此时到达的回复没有接收者而丢失。监听服务现在会保留最新的消息(最多 8 条,不超过 10 分钟),屏幕重新创建时显示它们,不朗读也不振动。 *(已实现;未在真实手表上试过)*
 * 🌐 **8 语言界面：** `app/src/main/res/values-xx/strings.xml` 涵盖英语、西班牙语、法语、德语、意大利语、日语、中文和葡萄牙语，并根据手表的系统语言自动选择；`LocalizedStringsTest` 会检查每个语言文件的键和格式占位符与英语完全一致，因此缺失的字符串或损坏的占位符会让构建失败，而不是出现在手腕上。*（已实现）*
 
----
+## 🧩 在 HYDRA-UMC 中的角色
 
-## 2. 🔄 可穿戴同步流程
+**HYDRA-UMC-WATCH** 是 HYDRA-UMC 控制应用的 Wear OS 配套应用：它显示最后已知的系统状态及其时效，为每个警报级别播放不同的振动，并通过配对的手机转发语音请求。它不保存任何服务器凭据，也不提供无线紧急停止。
+
+## 🏛️ 架构
+
+<p align="center">
+  <img src="images/architecture.svg" alt="HYDRA-UMC-WATCH architecture" width="100%">
+</p>
+
+<details>
+<summary>图表的文本版本（Mermaid）</summary>
 
 ```mermaid
 flowchart LR
@@ -78,6 +99,10 @@ flowchart LR
     WATCH -- Haptic Feedback --> OPERATOR["Plant Operator"]
 ```
 
+</details>
+
+### 可穿戴同步流程
+
 *这是与 Server 建立直接 WebSocket 之后的目标架构。今天真实且经过测试的
 路径是通过已配对的手机中继：Watch -> Data Layer -> HYDRA-UMC-ANDROID-CONTROL
 -> 已认证的 HYDRA-UMC-SERVER/Voice UI，再返回——参见下方架构部分，以及
@@ -85,9 +110,7 @@ flowchart LR
 手表本身从不持有 Server 凭据；手表到服务器的直接 WebSocket 以及无线
 E-STOP 按钮仍是受硬件限制、有待未来完成的工作。*
 
----
-
-## 3. 🧱 架构与设计决策
+### 架构与设计决策
 
 * **为何这是一款独立的 Wear OS 应用，而非手机应用的一项功能。** 手表运行在自己独立的操作系统进程上——它不能只是 HYDRA-UMC-ANDROID-CONTROL 的一种 UI 模式，它需要自己的清单文件、自己的构建，以及自己的（约束条件严格得多的）UI，用于一目了然的状态显示/快速 E-STOP。
 * **为何 `minSdk 30`（Wear OS 3）低于手机应用自身的 minSdk。** 这是刻意针对当前 Wear OS 3+ 硬件世代，而非旧款 Wear OS 2 设备——与支持较旧手机的 HYDRA-UMC-ANDROID-CONTROL 不同，一款配套手表应用需要支持的现实硬件基础要窄得多。
@@ -96,58 +119,57 @@ E-STOP 按钮仍是受硬件限制、有待未来完成的工作。*
 * **为何过时的缓存状态会被标记，而不是被隐藏。** 完全隐藏旧状态会导致手表表盘在手机连接不稳定——真正的风险时刻——时恰好一片空白。清晰地标记为"最后已知——可能已过时"能让操作员保持知情，同时不会让几分钟前的读数被误当作实时数据。
 * **这如何融入生态系统的其余部分。** 与 HYDRA-UMC-ANDROID-CONTROL 和 HYDRA-UMC-IOS-CONTROL 配对，作为一目了然的手腕端配套设备——它不是取代二者中的任何一个，而是一个快速状态查看/快速 E-STOP 的界面。
 
----
+### 不依赖 Google Play 的更新方式
 
-## 📂 目录结构
+本项目不通过 Google Play 分发。可重复的更新路径是通过 ADB 安装 GitHub
+Release 的 APK：
 
-独立的 Wear OS 应用——没有自己的硬件/固件/操作系统（它运行在现成的手表
-硬件上）；这些目录按照仓库结构策略予以省略。
-
-```text
-HYDRA-UMC-WATCH/
-├── app/
-│   ├── build.gradle.kts       # 应用模块配置（只读取 version.properties，从不写入）
-│   ├── version.properties     # versionMajor/Minor/Patch/Code (仅由显式 `bump` 命令递增)
-│   └── src/
-│       ├── main/
-│       │   ├── AndroidManifest.xml
-│       │   ├── java/com/hydraumc/watch/
-│       │   │   ├── MainActivity.kt         # Compose-for-Wear 入口点
-│       │   │   ├── haptics/                # 按严重程度划分的振动模式
-│       │   │   ├── protocol/               # SERVER<->WATCH 同步消息编解码器
-│       │   │   └── transport/              # Data Layer 中继、重试策略、最后已知状态缓存
-│       │   └── res/                    # 启动图标以及手表应用的八种语言文案
-│       └── test/java/com/hydraumc/watch/   # 真实 JUnit 测试（haptics、protocol、transport）
-├── gradle/
-│   ├── gradle-daemon-jvm.properties    # Gradle 守护进程使用的 Java 工具链
-│   ├── libs.versions.toml     # 依赖版本目录
-│   └── wrapper/                # Gradle wrapper（锁定在 9.7.0）
-├── tools/
-│   ├── build_test.py          # 不产生变更的 CI 检查：契约验证 + assembleDebug
-│   ├── ci_validate.py         # CI 使用的清单/CHANGELOG/文档校验
-│   ├── verify_paired_relay_contract.py # Watch<->Android Control 之间 Data Layer 安全边界的静态检查
-│   ├── _doc_policy.py                  # 家族共享的文档规则 (HYDRA-UMC-SDK 的副本,保持同步)
-│   ├── _readme_parity.py               # 检查八个 README 结构一致 (HYDRA-UMC-SDK 的副本,保持同步)
-│   ├── hydra_project_tool.py           # 每个仓库相同的命令: validate、test、ci、version、status、bump
-│   └── extra_build_steps.py            # 除共享构建测试外,本仓库自己的构建步骤 (自带的单元测试)
-├── build.gradle.kts           # 根 Gradle 构建
-├── settings.gradle.kts        # 模块接入
-├── gradlew / gradlew.bat      # Gradle wrapper 启动器
-├── docs/                      # 文档与安全协议
-├── images/                    # 媒体与图表
-├── hydra-umc.project.json     # 生态系统清单（版本、构建/健康元数据）
-├── keystore.properties.example # 已被 gitignore 的发布签名配置模板
-├── bump_manifest_version.py   # 同时递增 major/minor/patch 和清单文件
-├── bump_version_code.py       # Android versionCode 计数器递增（仅由显式 `bump` 命令运行）
-├── build.sh / build.bat       # 验证并构建（构建不会更改版本）
-├── build-test.sh / build-test.bat # tools/build_test.py 的不产生变更的包装脚本
-├── run.sh / run.bat           # 真实运行：gradlew installDebug + adb launch
-└── update-from-github.sh / .bat # 不依赖 Play 的更新渠道：GitHub Release APK + `adb install -r`
+```bash
+# 在项目根目录下，手表已配对且已开启 Wireless debugging
+update-from-github.bat    # Windows
+./update-from-github.sh   # Linux / macOS / WSL
 ```
 
----
+该脚本会读取 GitHub 上的 `releases/latest`，要求使用稳定的
+`vMAJOR.MINOR.PATCH` 标签，检查已安装的版本，请求操作员明确确认，然后
+下载并调用 `adb install -r`。它绝不会触碰仓库版本号、清单文件或
+`CHANGELOG.md`。对于没有可用 ADB 路径的设备，也记录了一种手动的、尽力
+而为的安装方式（直接在手表上用包安装器打开下载的 APK）。完整流程、
+发布 APK 的必需命名，以及发布签名配置，参见
+[docs/GITHUB_ADB_UPDATES.md](docs/GITHUB_ADB_UPDATES.md)。
 
-## 4. ⚙️ 构建与运行
+一旦配套版本状态消息接通，`HYDRA-UMC-ANDROID-CONTROL` 就可以告知操作员
+存在新的手表版本——这仅仅是信息性的，绝不能在手表本身上安装任何东西。
+该消息结构参见
+[docs/COMPANION_VERSION_PROTOCOL.md](docs/COMPANION_VERSION_PROTOCOL.md)。
+
+## 🔒 安全与防护
+
+| 威胁 | 防御 | 位置 |
+|---|---|---|
+| 其他应用或陌生人的手机向手表发送消息 | 中继使用 Wear OS 数据层，它只在包名和签名证书相同的 APK 之间传输；目标通过能力查询选择，从不猜测已连接的节点 | `WatchRelayTransport.kt` |
+| 被盗或丢失的手表获得服务器访问权 | 手表从不持有服务器凭据：由配对手机上的应用完成认证，手表只转发有界的协议消息 | `SyncMessage.kt`, `docs/VOICE_AI_PROTOCOL.md` |
+| 在手机不在范围内时提供、随后失败的操作 | 手机配套应用没有最近的消息时，经由它的操作会被隐藏；刷新从不受限，因为这正是获取心跳的方式；旧状态会标明为旧，而不是隐藏 | `CriticalActionGate.kt`, `LastKnownStateCache.kt` |
+
+**它绝不做的事：** 充当紧急停止。无线急停按钮和直连服务器是需要硬件的后续工作。
+
+## 🚀 快速开始
+
+需要带有随附 Gradle 包装器可接受的 JDK 的 Android SDK，以及运行 Wear OS 3 或更高版本的手表或模拟器。
+
+```bash
+./build.sh               # Linux, macOS (build.bat on Windows)
+./run.sh                 # installs the debug app on the connected watch and starts it
+./update-from-github.sh  # installs the newest release by ADB, without Google Play
+```
+
+## 🧪 测试
+
+运行 `./gradlew testDebugUnitTest` 会执行 94 个自动测试。 不需要硬件，也不需要这台机器以外的任何东西。
+
+CI 运行 `HYDRA_UMC_CI=1 python tools/ci_validate.py`，检查清单、文档、八个 README 和图片。
+
+## 🏗️ 构建与发布
 
 需要 JDK 21、Android SDK（`local.properties` → `sdk.dir`，已被
 gitignore——请指向你自己的 SDK 安装路径），以及用于 `run` 的 Wear OS
@@ -178,35 +200,51 @@ python3 bump_manifest_version.py   # 例如 "HYDRA-UMC version: v0.1.2 -> v0.1.3
 python3 bump_version_code.py       # 例如 "versionCode: 12 -> 13"
 ```
 
----
+## 📂 仓库结构
 
-## 5. 📲 不依赖 Google Play 的更新方式
+<p align="center">
+  <img src="images/repository-structure.svg" alt="Repository structure of HYDRA-UMC-WATCH" width="100%">
+</p>
 
-本项目不通过 Google Play 分发。可重复的更新路径是通过 ADB 安装 GitHub
-Release 的 APK：
+<details>
+<summary>目录树的文本版本</summary>
 
-```bash
-# 在项目根目录下，手表已配对且已开启 Wireless debugging
-update-from-github.bat    # Windows
-./update-from-github.sh   # Linux / macOS / WSL
+```text
+HYDRA-UMC-WATCH/
+├── tools/                                源代码
+│   ├── build_test.py                     不产生变更的 CI 检查：契约验证 + assembleDebug
+│   ├── ci_validate.py                    CI 使用的清单/CHANGELOG/文档校验
+│   ├── verify_paired_relay_contract.py   Watch<->Android Control 之间 Data Layer 安全边界的静态检查
+│   ├── _doc_policy.py                    家族共享的文档规则 (HYDRA-UMC-SDK 的副本,保持同步)
+│   ├── _readme_parity.py                 检查八个 README 结构一致 (HYDRA-UMC-SDK 的副本,保持同步)
+│   ├── hydra_project_tool.py             每个仓库相同的命令: validate、test、ci、version、status、bump
+│   └── extra_build_steps.py              除共享构建测试外,本仓库自己的构建步骤 (自带的单元测试)
+├── app/
+├── gradle/
+├── docs/                                 文档与安全协议
+├── images/                               媒体与图表
+├── .github/                              CI 工作流和 Issue 模板
+├── build.gradle.kts                      根 Gradle 构建
+├── settings.gradle.kts                   模块接入
+├── gradlew / gradlew.bat                 Gradle wrapper 启动器
+├── hydra-umc.project.json                生态系统清单（版本、构建/健康元数据）
+├── keystore.properties.example           已被 gitignore 的发布签名配置模板
+├── bump_manifest_version.py              同时递增 major/minor/patch 和清单文件
+├── bump_version_code.py                  Android versionCode 计数器递增（仅由显式 `bump` 命令运行）
+├── build.sh / build.bat                  验证并构建（构建不会更改版本）
+├── build-test.sh / build-test.bat        tools/build_test.py 的不产生变更的包装脚本
+├── run.sh / run.bat                      真实运行：gradlew installDebug + adb launch
+├── CHANGELOG.md                          每个版本的变更
+├── test.sh                               运行测试
+├── update-from-github.bat                通过 ADB 安装最新版本
+└── update-from-github.sh                 通过 ADB 安装最新版本
 ```
 
-该脚本会读取 GitHub 上的 `releases/latest`，要求使用稳定的
-`vMAJOR.MINOR.PATCH` 标签，检查已安装的版本，请求操作员明确确认，然后
-下载并调用 `adb install -r`。它绝不会触碰仓库版本号、清单文件或
-`CHANGELOG.md`。对于没有可用 ADB 路径的设备，也记录了一种手动的、尽力
-而为的安装方式（直接在手表上用包安装器打开下载的 APK）。完整流程、
-发布 APK 的必需命名，以及发布签名配置，参见
-[docs/GITHUB_ADB_UPDATES.md](docs/GITHUB_ADB_UPDATES.md)。
+</details>
 
-一旦配套版本状态消息接通，`HYDRA-UMC-ANDROID-CONTROL` 就可以告知操作员
-存在新的手表版本——这仅仅是信息性的，绝不能在手表本身上安装任何东西。
-该消息结构参见
-[docs/COMPANION_VERSION_PROTOCOL.md](docs/COMPANION_VERSION_PROTOCOL.md)。
+## 🗺️ 路线图与已知限制
 
----
-
-## ✅ 当前状态与后续步骤
+**当前已知限制**
 
 **今天的真实进展：** 已通过 Android `Vibrator` 服务播放本地告警，已实现显式
 麦克风权限与系统语音识别、可见转写和本地文字转语音；还具有经过测试的
@@ -219,7 +257,9 @@ Data Layer 要求两端 APK 使用相同包名和签名证书。语音绝不能�
 
 **仍待完成：** 在真实 Wear OS 设备上验证配对、无线传输、麦克风/扬声器和端到端状态；无线 E-STOP 与实时 CM5 遥测仍是受硬件限制的独立工作。
 
----
+## 🌍 语言
+
+本 README 和仓库文档提供八种语言：英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语（葡萄牙）。它们同时编写，并由 CI 检查八个文件拥有相同的章节和相同的链接。
 
 ## 🔗 相关项目
 
@@ -310,21 +350,26 @@ Data Layer 要求两端 APK 使用相同包名和签名证书。语音绝不能�
 - **[HYDRA-UMC-OPS-AGENT](https://github.com/JuanenRac/HYDRA-UMC-OPS-AGENT)** — 维护事件协调器：一个低权限的边缘角色采集经过脱敏的库存/健康快照，一个控制面角色以只读方式渲染它，并请求某个 AI 提供方给出诊断建议——从不应用补丁，也从不部署任何内容。
 - **[HYDRA-UMC-DEV-SERVER](https://github.com/JuanenRac/HYDRA-UMC-DEV-SERVER)** — 可复现的开发主机（Raspberry Pi 5 / CM5），保存整个生态系统的源代码，并在持久队列下运行有界的构建/测试任务；这是专用的开发角色，明确区别于运行中的 CM5。
 
+## 📚 文档
 
----
+更多阅读：
 
-## 📚 文档与社区
+* [生态系统的安全基线](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/SECURITY_BASELINE.md)
+* [生态系统的威胁模型](https://github.com/JuanenRac/HYDRA-UMC-DOCS/blob/main/docs/THREAT_MODEL.md)
+* [本仓库的更新日志](CHANGELOG.md)
+* [本仓库的许可证](LICENSE.md)
 
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** —— 提交 Pull Request 所需的技术栈和编码规范。
-- **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** —— 本社区所期望的行为准则。
-- **[SECURITY.md](SECURITY.md)** —— 如何报告漏洞，以及本项目真实的安全关注重点。
-- **[SUPPORT.md](SUPPORT.md)** —— 在哪里提问和报告缺陷。
-- **[LICENSE.md](LICENSE.md)** —— 本项目自身的许可证。
+## 🤝 参与贡献与社区
+
+* 提交 pull request 之前，请运行 `HYDRA_UMC_CI=1 py -3 tools/ci_validate.py`（或 `HYDRA_UMC_CI=1 python3 tools/ci_validate.py`）：它必须输出 `CI_VALIDATION=PASS`。此检查不要运行 `build.sh` 或 `build.bat`；构建不是检查。
+* 八个 README 由 HYDRA-UMC-DOCS 中的同一个源生成；请勿手工编辑。修改源文件，再用 `tools/make_readmes.py` 重新生成。
+* 不要在 README 中声称尚未运行过的内容：属实时请写“仅模拟”或“尚未在硬件上试过”。
+* 请参阅 [CONTRIBUTING.md](CONTRIBUTING.md)、[行为准则](CODE_OF_CONDUCT.md)、[SECURITY.md](SECURITY.md) 和 [SUPPORT.md](SUPPORT.md)。
 
 ## 👤 作者
-**JuanenRac** (Electro Hobby 3D)
-📧 electrohobby3d@gmail.com
-📺 [youtube.com/@electrohobby3d](https://youtube.com/@electrohobby3d)
+
+**JuanenRac (Electro Hobby 3D)** · electrohobby3d@gmail.com
 
 ## 📜 许可证
-GPL-3.0 —— 详见 LICENSE。
+
+GPL-3.0-or-later - [LICENSE](LICENSE).
