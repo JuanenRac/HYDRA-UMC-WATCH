@@ -170,13 +170,11 @@ run.bat
 ```
 
 `build` はバージョンを変更せず（バージョンを上げるのは `python tools/hydra_project_tool.py bump` だけです）、
-実際の JUnit テストスイート（`haptics`、`protocol`）を実行し、デバッグ版
+実際の JUnit テストスイート（`haptics`、`protocol`、`transport`）を実行し、デバッグ版
 APK を `app/build/outputs/apk/debug/app-debug.apk` にコンパイルします
-——これらすべてが、`-PhydraUmcReadOnly=true` を付けた 1 回の Gradle
-呼び出しの中で行われます。これにより、バージョンを読み取るだけの
-`app/build.gradle.kts` のコードが*同時に*それを増加させることは決してあり
-ません（同じフラグは `build-test.sh`/`.bat` の、変更を一切加えない
-コンパイルのみの CI チェックでも使われています）。`run` は
+——これらすべてが 1 回の Gradle 呼び出しの中で行われます（スクリプトは今も
+`-PhydraUmcReadOnly=true` を渡しますが、もう効果はありません。Gradle のビルドは
+バージョンを変更しません）。`run` は
 `gradlew installDebug` 経由でこの APK をインストールし、`adb` を使用して
 `MainActivity` を起動します。
 

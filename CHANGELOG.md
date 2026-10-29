@@ -2,6 +2,10 @@
 
 All notable changes to this project are documented here.
 
+## [Unreleased]
+
+- The README in the eight languages lists the three groups of JUnit tests that `build` runs (`haptics`, `protocol`, `transport`) and no longer says that `-PhydraUmcReadOnly=true` protects the version: the Gradle build never changes it, and the flag has no effect.
+
 ## [0.2.6] - A reply that arrives with the screen gone is no longer lost
 
 - **A reply that arrives with the screen gone is no longer lost.** On Wear OS the activity is destroyed as soon as the wrist is lowered; the listener service only sent a local broadcast, which then had no receiver. The service now holds the newest messages in `RelayInbox` (at most 8, none older than 10 minutes, nothing held while the screen exists) and the screen shows them when it is created again; an answer is shown even though the question was asked before the screen was created, and a held message is neither spoken nor vibrated, because it is not news any more. Checked on a plain JVM (9 tests); the Android glue has not been tried on a real watch, and no notification is posted yet.

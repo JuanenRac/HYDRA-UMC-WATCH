@@ -161,7 +161,7 @@ build.bat
 run.bat
 ```
 
-`build` ne change jamais la version (seul `python tools/hydra_project_tool.py bump` la fait monter), lance la vraie suite de tests JUnit (`haptics`, `protocol`), et compile l'APK de débogage vers `app/build/outputs/apk/debug/app-debug.apk` - le tout en une seule invocation Gradle exécutée avec `-PhydraUmcReadOnly=true` pour que le code de `app/build.gradle.kts` qui lit la version ne l'incrémente jamais *aussi* (le même indicateur utilisé par `build-test.sh`/`.bat` pour leur vérification CI séparée, compilation seule, sans mutation). `run` installe l'APK via `gradlew installDebug` et lance `MainActivity` avec `adb`.
+`build` ne change jamais la version (seul `python tools/hydra_project_tool.py bump` la fait monter), lance la vraie suite de tests JUnit (`haptics`, `protocol`, `transport`), et compile l'APK de débogage vers `app/build/outputs/apk/debug/app-debug.apk` - le tout en une seule invocation Gradle (les scripts passent encore `-PhydraUmcReadOnly=true`, mais cela n'a plus d'effet : le build Gradle ne change jamais la version). `run` installe l'APK via `gradlew installDebug` et lance `MainActivity` avec `adb`.
 
 Exemple réel - les deux scripts d'incrémentation de version sont exécutés par la commande `bump` explicite et fonctionnent aussi de manière autonome (ils modifient les fichiers de version quand ils s'exécutent) :
 

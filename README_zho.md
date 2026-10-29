@@ -164,11 +164,10 @@ build.bat
 run.bat
 ```
 
-`build` 绝不会更改版本号（只有 `python tools/hydra_project_tool.py bump` 会提升它），运行真实的 JUnit 测试套件（`haptics`、`protocol`），并将
+`build` 绝不会更改版本号（只有 `python tools/hydra_project_tool.py bump` 会提升它），运行真实的 JUnit 测试套件（`haptics`、`protocol`、`transport`），并将
 调试版 APK 编译到 `app/build/outputs/apk/debug/app-debug.apk`——全部在
-一次以 `-PhydraUmcReadOnly=true` 执行的 Gradle 调用中完成，这样
-`app/build.gradle.kts` 中读取版本号的代码就永远不会*也*去递增它（
-`build-test.sh`/`.bat` 的仅编译、不产生变更的 CI 检查也使用同一个标志）。
+一次 Gradle 调用中完成（脚本仍会传入 `-PhydraUmcReadOnly=true`，但它已不再起作用：
+Gradle 构建从不更改版本号）。
 `run` 通过 `gradlew installDebug` 安装该 APK，并使用 `adb`
 启动 `MainActivity`。
 
