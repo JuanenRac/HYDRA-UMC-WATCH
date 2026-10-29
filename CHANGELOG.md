@@ -4,6 +4,7 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The layout of the README is checked in the CI:** the validator runs `tools/universal_readme_check.py` and lists, as a warning, what differs from the universal layout of the README.
 - `run.sh` and `run.bat` name the package and the activity once, in variables, like the update scripts.
 - The README in the eight languages lists the three groups of JUnit tests that `build` runs (`haptics`, `protocol`, `transport`) and no longer says that `-PhydraUmcReadOnly=true` protects the version: the Gradle build never changes it, and the flag has no effect.
 
