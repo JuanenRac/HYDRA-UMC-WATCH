@@ -45,5 +45,9 @@ trap 'hydra_umc_pause_on_exit' EXIT
 set -euo pipefail
 cd "$(dirname "$0")"
 
+# The same package and activity names as update-from-github.sh, kept in one place per script.
+readonly HYDRA_UMC_PACKAGE='com.hydraumc.control'
+readonly HYDRA_UMC_ACTIVITY='com.hydraumc.watch.MainActivity'
+
 ./gradlew installDebug
-adb shell am start -n com.hydraumc.control/com.hydraumc.watch.MainActivity
+adb shell am start -n "$HYDRA_UMC_PACKAGE/$HYDRA_UMC_ACTIVITY"

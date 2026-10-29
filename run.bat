@@ -36,10 +36,14 @@ REM launches MainActivity. Run build.bat first, or just run this - Gradle
 REM builds installDebug's own dependencies (assembleDebug) automatically.
 cd /d "%~dp0"
 
+REM The same package and activity names as update-from-github.bat, kept in one place per script.
+set "HYDRA_UMC_PACKAGE=com.hydraumc.control"
+set "HYDRA_UMC_ACTIVITY=com.hydraumc.watch.MainActivity"
+
 call gradlew.bat installDebug
 if errorlevel 1 goto :error
 
-adb shell am start -n com.hydraumc.control/com.hydraumc.watch.MainActivity
+adb shell am start -n %HYDRA_UMC_PACKAGE%/%HYDRA_UMC_ACTIVITY%
 set "HYDRA_UMC_SCRIPT_RESULT=0"
 goto :hydra_umc_pause
 :error
