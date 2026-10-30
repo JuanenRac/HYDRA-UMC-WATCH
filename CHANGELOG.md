@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [0.2.7] - The relay contract as a shared file with the phone app, the scripts naming the package once and the universal README
+
 - **The relay contract is a shared file:** `docs/watch_relay_contract.json` (identical in the phone app repository) lists valid and invalid messages and the limits, and a test runs every one of them through the parser of the watch.
 
 - **README in the universal layout:** the README and its seven translations follow the layout that the four families share (22 sections in a fixed order), with an architecture picture and a repository-structure picture drawn from `docs/architecture.json` and `docs/structure.json`; the CI validator checks both pictures and the file tree.
