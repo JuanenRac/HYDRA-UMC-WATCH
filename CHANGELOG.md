@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The screen is tested with Robolectric:** six tests start the main screen, relay a status from the phone and check what is shown, that a known error code is shown in the language of the watch, that an answer nobody asked for is ignored and that voice stays withheld until the phone has been heard from.
+
 ## [0.2.7] - The relay contract as a shared file with the phone app, the scripts naming the package once and the universal README
 
 - **The relay contract is a shared file:** `docs/watch_relay_contract.json` (identical in the phone app repository) lists valid and invalid messages and the limits, and a test runs every one of them through the parser of the watch.
