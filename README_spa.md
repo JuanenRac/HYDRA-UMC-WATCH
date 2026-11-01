@@ -53,6 +53,13 @@ Cada línea es una parte de este repositorio y la luz dice hasta dónde llega ho
 | Software | 🟡 | Funciona para su propósito principal; la comprobación de honestidad de arriba lista lo que aún falta |
 | Pruebas | 🟢 | 113 pruebas automáticas, ejecutadas en cada cambio |
 | Hardware real | 🔴 | Todavía no: no consta ninguna ejecución en hardware real para esta versión |
+| Interfaz y protocolos | 🟡 | Las rutas o los mensajes que ofrece están documentados y probados con un cliente; aún no los han usado todos los clientes |
+| Integración | 🟠 | Sus mensajes y rutas se comprueban contra los contratos compartidos del SDK; no ha funcionado junto con el equipo real |
+| Seguridad | 🟡 | El control de acceso, los límites de entrada o las firmas están implementados y probados en un ordenador; nadie ajeno al proyecto los ha revisado |
+| Despliegue | 🟠 | Con cada release se publica un APK firmado; no consta ninguna instalación en un móvil o reloj para esta versión |
+| Actualizaciones | 🟠 | Se actualiza instalando el APK firmado de la release; la actualización de una app instalada no consta en un dispositivo |
+| Parada y seguridad | 🟠 | El camino de parada y sus límites están implementados y probados con simuladores; nunca han funcionado en una máquina real, y esto no es un sistema de seguridad certificado |
+| Idiomas y accesibilidad | 🟡 | La interfaz y su ayuda están en ocho idiomas; el uso con teclado y lector de pantalla no se ha probado |
 | Documentación | 🟢 | README en ocho idiomas, comprobado contra el manifiesto en cada cambio |
 
 ## 🎯 Resumen
