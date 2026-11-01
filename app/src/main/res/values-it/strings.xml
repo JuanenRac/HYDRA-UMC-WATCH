@@ -14,6 +14,7 @@
     <string name="status_refresh">Aggiorna stato del sistema</string>
     <string name="status_loading">Richiesta dello stato sicuro del sistema…</string>
     <string name="status_phone_unavailable">Il telefono associato non è disponibile o non ha eseguito l\'accesso a HYDRA-UMC-SERVER.</string>
+    <string name="notification_channel_relay">Messaggi di HYDRA-UMC</string>
     <string name="status_stale">Ultimo stato noto - potrebbe non essere aggiornato</string>
     <string name="companion_required">Aggiorna prima lo stato: la voce richiede il telefono companion</string>
     <string name="voice_error_connection_unavailable">Connessione HYDRA-UMC non disponibile. Controlla la sessione del telefono associato.</string>

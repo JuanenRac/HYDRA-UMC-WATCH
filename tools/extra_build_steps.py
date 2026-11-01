@@ -7,7 +7,6 @@
 """The steps of this repository beyond the shared build test: the paired relay contract."""
 from __future__ import annotations
 
-import os
 import subprocess
 import sys
 from pathlib import Path

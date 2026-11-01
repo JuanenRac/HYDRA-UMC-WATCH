@@ -22,8 +22,12 @@ import android.speech.tts.TextToSpeech
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.setContent
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.wear.ambient.AmbientLifecycleObserver
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
@@ -41,8 +45,6 @@ import androidx.wear.compose.material.TimeText
 import com.hydraumc.watch.haptics.AlertSeverity
 import com.hydraumc.watch.haptics.HapticAlertPlayer
 import com.hydraumc.watch.protocol.SyncMessage
-import com.hydraumc.watch.protocol.errorCodeToDetailStringRes
-import com.hydraumc.watch.protocol.errorCodeToStringRes
 import com.hydraumc.watch.protocol.hapticSeverityFor
 import com.hydraumc.watch.protocol.parseSyncMessage
 import com.hydraumc.watch.protocol.securitySwitchStringRes
@@ -50,6 +52,9 @@ import com.hydraumc.watch.transport.ACTION_WATCH_RELAY_MESSAGE
 import com.hydraumc.watch.transport.EXTRA_WATCH_RELAY_MESSAGE
 import com.hydraumc.watch.transport.CriticalActionGate
 import com.hydraumc.watch.transport.LastKnownStateCache
+import com.hydraumc.watch.transport.LastRelayStore
+import com.hydraumc.watch.transport.RelayNotifier
+import com.hydraumc.watch.transport.SharedPrefsKeyValueStore
 import com.hydraumc.watch.transport.PendingVoiceRequest
 import com.hydraumc.watch.transport.RelayInboxHolder
 import com.hydraumc.watch.transport.WatchRelayTransport
@@ -69,6 +74,33 @@ class MainActivity : ComponentActivity() {
     private var systemStatusStale by mutableStateOf(false)
     private var securityStatus by mutableStateOf<String?>(null)
     private var companionAvailable by mutableStateOf(false)
+    // Low-power screen of the watch (the wrist is down): only the last state is drawn, in a quiet way.
+    private var ambient by mutableStateOf(false)
+
+    /**
+     * Follows the ambient mode of the watch. The library that provides it is part of the watch system image, not of the
+     * app, so on a device without it (or in a test on a plain JVM) the screen simply never enters ambient mode.
+     */
+    private fun attachAmbientMode() {
+        try {
+            val observer = AmbientLifecycleObserver(
+                this,
+                object : AmbientLifecycleObserver.AmbientLifecycleCallback {
+                    override fun onEnterAmbient(ambientDetails: AmbientLifecycleObserver.AmbientDetails) {
+                        ambient = true
+                    }
+
+                    override fun onExitAmbient() {
+                        ambient = false
+                    }
+                },
+            )
+            lifecycle.addObserver(observer)
+        } catch (_: Throwable) {
+            ambient = false
+        }
+    }
+    private val lastRelayStore by lazy { LastRelayStore(SharedPrefsKeyValueStore(applicationContext)) }
     private var textToSpeech: TextToSpeech? = null
     @Volatile private var textToSpeechReady = false
     private var pendingSpeech: String? = null
@@ -121,17 +153,9 @@ class MainActivity : ComponentActivity() {
                     lastKnownStateCache.update(message)
                     systemStatusStale = false
                     companionAvailable = true
-                    // a real, known errorCode means this is this
-                    // watch's OWN system-error text (never translated
-                    // upstream, since the phone that generated it has no
-                    // access to this watch's own locale) - resolved to a
-                    // real localized string from this app's own 7-language
-                    // strings.xml instead of message.text's own untranslated
-                    // English fallback. A real AI reply (errorCode == null,
-                    // or an unrecognized code from a newer phone build)
-                    // keeps using message.text exactly as before - it is
-                    // already correctly localized upstream.
-                    val resolvedText = errorCodeToStringRes(message.errorCode)?.let { getString(it) } ?: message.text
+                    // A known errorCode is this watch's OWN system-error text (the phone has no access to the language of
+                    // the watch); a real AI reply keeps its own text, already localized upstream.
+                    val resolvedText = RelayText.reply(this, message)
                     voiceStatus = resolvedText
                     if (held) return
                     if (message.speak) speak(resolvedText)
@@ -145,10 +169,8 @@ class MainActivity : ComponentActivity() {
                     lastKnownStateCache.update(message)
                     systemStatusStale = false
                     companionAvailable = true
-                    // same mechanism as AssistantReply above, applied
-                    // to this message's own headline+detail pair.
-                    val headline = errorCodeToStringRes(message.errorCode)?.let { getString(it) } ?: message.headline
-                    val detail = errorCodeToDetailStringRes(message.errorCode)?.let { getString(it) } ?: message.detail
+                    val headline = RelayText.headline(this, message)
+                    val detail = RelayText.detail(this, message)
                     systemStatus = "$headline: $detail"
                     if (held) return
                     if (message.speak) speak("$headline. $detail")
@@ -224,6 +246,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         relayTransport = WatchRelayTransport(applicationContext)
+        attachAmbientMode()
+        // The notification of a message that arrived while this screen did not exist has done its job.
+        NotificationManagerCompat.from(this).cancel(RelayNotifier.NOTIFICATION_ID)
+        askForNotificationsOnce()
+        restoreLastKnownState()
         // From here on the screen receives the broadcasts itself; what arrived while it did not exist is shown now.
         RelayInboxHolder.inbox.screenAttached = true
         ContextCompat.registerReceiver(
@@ -245,12 +272,39 @@ class MainActivity : ComponentActivity() {
                 systemStatusStale = systemStatusStale,
                 securityStatus = securityStatus,
                 companionAvailable = companionAvailable,
+                ambient = ambient,
                 onStartVoiceRecognition = ::startVoiceRecognition,
                 onRefreshSystemStatus = ::refreshSystemStatus,
                 onRefreshServerSecurity = ::refreshServerSecurity,
                 onTestHaptic = { hapticAlertPlayer.play(AlertSeverity.INFO) },
             )
         }
+    }
+
+    /** Shows the last reply or status kept on the watch, marked as outdated by the same rule as a live one. */
+    private fun restoreLastKnownState() {
+        val (message, receivedAt) = runCatching { lastRelayStore.load() }.getOrNull() ?: return
+        lastKnownStateCache.restore(message, receivedAt)
+        when (message) {
+            is SyncMessage.AssistantReply -> voiceStatus = RelayText.reply(this, message)
+            is SyncMessage.SystemStatus -> systemStatus = RelayText.statusLine(this, message)
+            else -> Unit
+        }
+        systemStatusStale = lastKnownStateCache.isStale()
+        companionAvailable = CriticalActionGate.isAvailable(lastKnownStateCache)
+    }
+
+    @SuppressLint("InvalidFragmentVersionForActivityResult")
+    private val requestNotificationPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
+
+    /** On Wear OS 4 and later a notification needs the operator's yes; it is asked once, the first time the app opens. */
+    private fun askForNotificationsOnce() {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) return
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) return
+        val prefs = getSharedPreferences("watch_prefs", MODE_PRIVATE)
+        if (prefs.getBoolean("asked_notifications", false)) return
+        prefs.edit().putBoolean("asked_notifications", true).apply()
+        requestNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 
     private fun startVoiceRecognition() {
@@ -345,12 +399,17 @@ fun HydraWatchApp(
     systemStatusStale: Boolean = false,
     securityStatus: String? = null,
     companionAvailable: Boolean = true,
+    ambient: Boolean = false,
     onStartVoiceRecognition: () -> Unit = {},
     onRefreshSystemStatus: () -> Unit = {},
     onRefreshServerSecurity: () -> Unit = {},
     onTestHaptic: () -> Unit = {},
 ) {
     MaterialTheme {
+        if (ambient) {
+            AmbientScreen(systemStatus = systemStatus, systemStatusStale = systemStatusStale, voiceStatus = voiceStatus)
+            return@MaterialTheme
+        }
         Scaffold(
             timeText = { TimeText() }
         ) {
@@ -445,6 +504,32 @@ fun HydraWatchApp(
                         Text(text = stringResource(R.string.test_haptic_alert))
                     }
                 }
+            }
+        }
+    }
+}
+
+/**
+ * The screen while the watch is in ambient (low-power) mode: no buttons and no animation, only the last state, whether it
+ * is outdated and the time. The full screen comes back when the wrist is raised.
+ */
+@Composable
+fun AmbientScreen(systemStatus: String?, systemStatusStale: Boolean, voiceStatus: String?) {
+    Scaffold(timeText = { TimeText() }) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text(text = "HYDRA-UMC", style = MaterialTheme.typography.caption1, textAlign = TextAlign.Center)
+            Text(
+                text = systemStatus ?: voiceStatus ?: stringResource(R.string.status_placeholder),
+                style = MaterialTheme.typography.body2,
+                textAlign = TextAlign.Center,
+                maxLines = 4,
+            )
+            if (systemStatus != null && systemStatusStale) {
+                Text(text = stringResource(R.string.status_stale), style = MaterialTheme.typography.caption2, textAlign = TextAlign.Center)
             }
         }
     }

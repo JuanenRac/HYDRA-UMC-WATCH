@@ -14,6 +14,7 @@
     <string name="status_refresh">Refresh system status</string>
     <string name="status_loading">Requesting secure system status…</string>
     <string name="status_phone_unavailable">Paired phone is unavailable or not signed in to HYDRA-UMC-SERVER.</string>
+    <string name="notification_channel_relay">Messages from HYDRA-UMC</string>
     <string name="status_stale">Last known - may be outdated</string>
     <string name="companion_required">Refresh the status first: voice needs the phone companion</string>
     <string name="voice_error_connection_unavailable">HYDRA-UMC connection unavailable. Check the paired phone session.</string>

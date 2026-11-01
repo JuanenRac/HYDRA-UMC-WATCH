@@ -36,6 +36,15 @@ class LastKnownStateCache(
         cached = CachedRelayState(message, now())
     }
 
+    /**
+     * Puts back a message kept from an earlier run with the instant it really arrived, so it ages (and is marked as
+     * outdated) from then, not from now. A time in the future is refused.
+     */
+    fun restore(message: SyncMessage, receivedAtMs: Long) {
+        if (receivedAtMs > now()) return
+        cached = CachedRelayState(message, receivedAtMs)
+    }
+
     /** The current cached state, or null if nothing has ever been received. */
     fun current(): CachedRelayState? = cached
 

@@ -76,6 +76,7 @@ GPL-3.0-or-later - see LICENSE
 * 🧭 **经 companion 验证的节点选择** —— `WatchRelayTransport` 现在通过真实的 `CapabilityClient` 查询发送（`hydra_umc_phone_companion`，在 HYDRA-UMC-ANDROID-CONTROL 自身的 `res/values/wear.xml` 中声明），而不再是 `connectedNodes.firstOrNull()`——一个未安装 companion 应用的已连接节点绝不会被意外选中；当有多个符合条件的节点时，会优先选择就近（可直接通过蓝牙访问）的节点，而非经云端中转的节点。*（已实现 —— `pickCompanionNode()`）*
 * 🗂️ **最后已知状态缓存** —— `transport/LastKnownStateCache.kt` 会跟踪最后一次中继的状态/告警的真实过时程度，确保旧数据永远不会被当作最新数据显示。*（已实现）*
 * 📥 **中继收件箱** — `transport/RelayInbox.kt`:在 Wear OS 上,手腕一放下屏幕就会被销毁,此时到达的回复没有接收者而丢失。监听服务现在会保留最新的消息(最多 8 条,不超过 10 分钟),屏幕重新创建时显示它们,不朗读也不振动。 *(已实现;未在真实手表上试过)*
+* 🔔 **保留最后状态、环境屏幕与通知** — `transport/LastRelayStore.kt` 在手表上保存最后一条回复或状态及其到达时间；稍后创建的屏幕会按与实时数据相同的规则把它标为“最后已知状态 - 可能已过时”，并且在再次收到手机的消息之前语音按钮保持禁用。没有屏幕时到达的消息还会显示为通知（`transport/RelayNotifier.kt`：回复总是通知，状态仅在不是正常时通知，并且仅在操作员于 Wear OS 4 及更高版本允许通知后，权限只询问一次）。手表处于环境模式时，屏幕只绘制最后状态、是否已过时以及时间，没有按钮。*（已实现；未在真实手表上试过。读取同一保存状态的磁贴和表盘组件尚未制作：它们需要额外的 Wear OS 库和一块可试用的手表。）*
 * 🌐 **8 语言界面：** `app/src/main/res/values-xx/strings.xml` 涵盖英语、西班牙语、法语、德语、意大利语、日语、中文和葡萄牙语，并根据手表的系统语言自动选择；`LocalizedStringsTest` 会检查每个语言文件的键和格式占位符与英语完全一致，因此缺失的字符串或损坏的占位符会让构建失败，而不是出现在手腕上。*（已实现）*
 
 ## 🧩 在 HYDRA-UMC 中的角色

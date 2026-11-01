@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented here.
 
+## [Unreleased]
+
+- **The last reply or status is kept on the watch:** `transport/LastRelayStore.kt` stores it with the instant it arrived; a screen created later shows it already marked as last known and possibly outdated, by the same rule as a live one, and the voice button stays withheld until the phone is heard from again.
+- **A message that arrives with no screen is shown as a notification:** an answer always, a status only when it is not nominal, and only when the operator has allowed notifications (asked once on Wear OS 4 and later); opening the app removes the notification.
+- **Ambient mode:** while the watch is in ambient mode the screen draws only the last state, whether it is outdated and the time, with no buttons.
+- A tile and a complication that read the kept state are not built yet: they need extra Wear OS libraries and a watch to try them on.
+- Unused imports of the build helper removed.
+
 ## [0.2.8] - The watch can ask the phone for the security status of the server, read only, from a button, and the screen is tested with Robolectric
 
 - **A button asks the phone for the security status:** **Server security** sends an empty request on `/hydra-umc/server-security-request/v1` (retried like the status request) and the answer of the phone is shown as before. HYDRA-UMC-ANDROID-CONTROL now answers it, and the vectors of the message are in `watch_relay_contract.json`, identical in both repositories. The button is in the eight languages.
