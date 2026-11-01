@@ -19,4 +19,17 @@
     <string name="voice_error_connection_unavailable">Ligação ao HYDRA-UMC indisponível. Verifique a sessão do telemóvel emparelhado.</string>
     <string name="status_error_offline_headline">HYDRA-UMC sem ligação</string>
     <string name="status_error_offline_detail">Verifique a ligação ao telemóvel emparelhado e a sessão do servidor.</string>
+    <string name="security_title">Segurança do servidor</string>
+    <string name="security_all_protected">Todas as opções estão no seu valor protegido.</string>
+    <string name="security_lowered_header">Proteção reduzida:</string>
+    <string name="security_locked">%1$d fixadas pelo ambiente do servidor</string>
+    <string name="security_clients">%1$d clientes ativos, %2$d inícios de sessão falhados</string>
+    <string name="security_read_only">Só leitura: altere em STUDIO ou SUITE.</string>
+    <string name="security_sw_health_open">GET /health aberto a qualquer um</string>
+    <string name="security_sw_connections_record_address">Os endereços dos clientes são guardados</string>
+    <string name="security_sw_camera_open">Imagens da câmara abertas</string>
+    <string name="security_sw_websocket_query_token">Token no endereço do WebSocket</string>
+    <string name="security_sw_logging_redaction">Segredos não ocultados no registo</string>
+    <string name="security_sw_camera_credentials">Palavra-passe da câmara numa linha de comandos</string>
+    <string name="security_sw_install_tls">Novas instalações sem TLS</string>
 </resources>

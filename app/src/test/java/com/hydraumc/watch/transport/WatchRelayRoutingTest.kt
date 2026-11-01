@@ -43,6 +43,22 @@ class WatchRelayRoutingTest {
     }
 
     @Test
+    fun `a security status on its own path is forwarded, and only there`() {
+        val status = SyncMessage.ServerSecurityStatus(protocolVersion = 1, loweredSwitches = listOf("health.open"), activeClients = 2)
+        val raw = status.toJson()
+
+        assertEquals(raw, WatchRelayRouting.decide(WatchRelayPaths.SERVER_SECURITY, raw.encodeToByteArray()))
+        assertNull(WatchRelayRouting.decide(WatchRelayPaths.ASSISTANT_REPLY, raw.encodeToByteArray()))
+        assertNull(WatchRelayRouting.decide(WatchRelayPaths.SYSTEM_STATUS, raw.encodeToByteArray()))
+    }
+
+    @Test
+    fun `an assistant reply is not accepted on the path of the security status`() {
+        val reply = SyncMessage.AssistantReply(requestId = "watch-req-1", text = "hello")
+        assertNull(WatchRelayRouting.decide(WatchRelayPaths.SERVER_SECURITY, reply.toJson().encodeToByteArray()))
+    }
+
+    @Test
     fun `an unrelated path is dropped even with an otherwise valid message`() {
         val reply = SyncMessage.AssistantReply(requestId = "watch-req-1", text = "hello")
         val decision = WatchRelayRouting.decide("/hydra-umc/not-a-real-relay-path", reply.toJson().encodeToByteArray())

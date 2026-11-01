@@ -22,6 +22,7 @@ object WatchRelayPaths {
     const val STATUS_REQUEST = "/hydra-umc/system-status/v1"
     const val ASSISTANT_REPLY = "/hydra-umc/assistant-reply/v1"
     const val SYSTEM_STATUS = "/hydra-umc/system-status-reply/v1"
+    const val SERVER_SECURITY = "/hydra-umc/server-security/v1"
 }
 
 // (P2):

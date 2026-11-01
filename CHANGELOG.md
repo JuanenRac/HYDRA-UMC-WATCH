@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The watch can show the security status of the server, read only:** a new message `server_security_status` on its own path (`/hydra-umc/server-security/v1`) carries the options that are on a value that lowers the protection, how many are fixed by the environment, the active clients and the failed sign-ins. The watch checks it (version, at most 16 ids of the form `section.key`, counts from 0 to 100000, 8 KiB at most), shows it in its own language without speaking or vibrating, and has no message that writes anything. The sender is the paired phone, which is still to be written (see `docs/SERVER_SECURITY_STATUS.md`).
+
 - **The screen is tested with Robolectric:** six tests start the main screen, relay a status from the phone and check what is shown, that a known error code is shown in the language of the watch, that an answer nobody asked for is ignored and that voice stays withheld until the phone has been heard from.
 
 ## [0.2.7] - The relay contract as a shared file with the phone app, the scripts naming the package once and the universal README

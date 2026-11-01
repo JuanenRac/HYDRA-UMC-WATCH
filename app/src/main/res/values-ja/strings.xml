@@ -19,4 +19,17 @@
     <string name="voice_error_connection_unavailable">HYDRA-UMC への接続が利用できません。ペアリングされたスマートフォンのセッションを確認してください。</string>
     <string name="status_error_offline_headline">HYDRA-UMC はオフラインです</string>
     <string name="status_error_offline_detail">ペアリングされたスマートフォンの接続とサーバーのセッションを確認してください。</string>
+    <string name="security_title">サーバーのセキュリティ</string>
+    <string name="security_all_protected">すべてのオプションが保護された値です。</string>
+    <string name="security_lowered_header">保護が下がっています：</string>
+    <string name="security_locked">%1$d 件はサーバー環境で固定</string>
+    <string name="security_clients">アクティブなクライアント %1$d、サインイン失敗 %2$d</string>
+    <string name="security_read_only">読み取り専用：STUDIO または SUITE で変更します。</string>
+    <string name="security_sw_health_open">GET /health を誰にでも公開</string>
+    <string name="security_sw_connections_record_address">クライアントのアドレスを保存</string>
+    <string name="security_sw_camera_open">カメラ画像を公開</string>
+    <string name="security_sw_websocket_query_token">WebSocket アドレスにトークン</string>
+    <string name="security_sw_logging_redaction">ログの秘密情報を伏せていない</string>
+    <string name="security_sw_camera_credentials">カメラのパスワードがコマンドライン上</string>
+    <string name="security_sw_install_tls">新規インストールで TLS なし</string>
 </resources>

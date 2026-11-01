@@ -69,6 +69,7 @@ GPL-3.0-or-later - see LICENSE
 * 📳 **触觉告警** —— 针对不同告警类型（严重、警告、信息）的差异化振动模式，通过 Android 真实的 `Vibrator`/`VibratorManager` 服务播放。*（已实现——`haptics/HapticAlertPlayer.kt`；与本应用其余部分一样，尚未在真实 Wear OS 设备上验证。）*
 * 🎙️ **语音** —— 按住说话：明确请求 `RECORD_AUDIO` 权限、使用系统语音识别 intent（`RecognizerIntent`）进行转录、将转录内容作为受限的 `voice_turn` 同步消息中继给 HYDRA-UMC-ANDROID-CONTROL，并在手表上通过本地 `TextToSpeech` 回复。*（已实现——`MainActivity.kt`；语音绝不能直接操控机器人，见下文架构部分，完整的端到端消息流程和安全边界见 [docs/VOICE_AI_PROTOCOL.md](docs/VOICE_AI_PROTOCOL.md)。）*
 * ⌚ **一目了然的状态：** **刷新状态**按钮通过已配对的 Data Layer 向 HYDRA-UMC-ANDROID-CONTROL 中继一个受限的状态请求；返回的 `system_status` 卡片在过时后会显示"最后已知——可能已过时"的提示。*（已实现——`MainActivity.kt`/`WatchRelayTransport.requestSystemStatus()`；通过手机中继按需拉取，而非手表到服务器的直接推送套接字，且尚未在真实 Wear OS 设备上验证。）*
+* 📊 **服务器安全状态（只读）：** 配对的手机可以发送服务器安全选项及其连接历史所显示的内容（取值降低了防护的选项、由环境固定的选项、活跃客户端和登录失败）。手表以自己的语言显示；它无法更改任何内容，也不会播报或振动。参见 `docs/SERVER_SECURITY_STATUS.md`。
 * 🔐 **JWT Auth** 与 HYDRA-UMC-SERVER 基于 JWT 的配对。*（计划中。）*
 * ✅ **独立的 Wear OS 工具链** —— 一个真实的 Gradle/Kotlin/Compose-for-Wear 应用，能够构建出可用的调试 APK。*（已实现——见下方"构建与发布"）*
 * 🔁 **中继重连策略** —— `transport/RelayRetryPolicy.kt` 是一个真实的、纯粹的指数退避策略，用于处理失败的中继发送（例如尚未配对手机的情况），并设有一个有上限的最大延迟；一旦屏幕关闭，任何待处理的重试都会被立即取消，绝不会针对已销毁的 Activity 触发。*（已实现）*

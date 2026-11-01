@@ -45,6 +45,7 @@ import com.hydraumc.watch.protocol.errorCodeToDetailStringRes
 import com.hydraumc.watch.protocol.errorCodeToStringRes
 import com.hydraumc.watch.protocol.hapticSeverityFor
 import com.hydraumc.watch.protocol.parseSyncMessage
+import com.hydraumc.watch.protocol.securitySwitchStringRes
 import com.hydraumc.watch.transport.ACTION_WATCH_RELAY_MESSAGE
 import com.hydraumc.watch.transport.EXTRA_WATCH_RELAY_MESSAGE
 import com.hydraumc.watch.transport.CriticalActionGate
@@ -66,6 +67,7 @@ class MainActivity : ComponentActivity() {
     private var voiceStatus by mutableStateOf<String?>(null)
     private var systemStatus by mutableStateOf<String?>(null)
     private var systemStatusStale by mutableStateOf(false)
+    private var securityStatus by mutableStateOf<String?>(null)
     private var companionAvailable by mutableStateOf(false)
     private var textToSpeech: TextToSpeech? = null
     @Volatile private var textToSpeechReady = false
@@ -152,8 +154,27 @@ class MainActivity : ComponentActivity() {
                     if (message.speak) speak("$headline. $detail")
                     hapticAlertPlayer.play(hapticSeverityFor(message.level, message.errorCode))
                 }
+                is SyncMessage.ServerSecurityStatus -> {
+                    // read only: it is shown, never acted on, and it does not speak or vibrate (it is a glance, not an alert)
+                    securityStatus = securityStatusText(message)
+                }
                 else -> Unit
             }
+    }
+
+    /** The lines of a security status in the language of the watch: what lowers the protection, then the counts. */
+    private fun securityStatusText(status: SyncMessage.ServerSecurityStatus): String {
+        val lines = mutableListOf(getString(R.string.security_title))
+        if (status.loweredSwitches.isEmpty()) {
+            lines += getString(R.string.security_all_protected)
+        } else {
+            lines += getString(R.string.security_lowered_header)
+            status.loweredSwitches.forEach { id -> lines += "- " + (securitySwitchStringRes(id)?.let { getString(it) } ?: id) }
+        }
+        if (status.lockedSwitches > 0) lines += getString(R.string.security_locked, status.lockedSwitches)
+        lines += getString(R.string.security_clients, status.activeClients, status.failedLogins)
+        lines += getString(R.string.security_read_only)
+        return lines.joinToString("\n")
     }
 
     @SuppressLint("InvalidFragmentVersionForActivityResult")
@@ -222,6 +243,7 @@ class MainActivity : ComponentActivity() {
                 voiceStatus = voiceStatus,
                 systemStatus = systemStatus,
                 systemStatusStale = systemStatusStale,
+                securityStatus = securityStatus,
                 companionAvailable = companionAvailable,
                 onStartVoiceRecognition = ::startVoiceRecognition,
                 onRefreshSystemStatus = ::refreshSystemStatus,
@@ -310,6 +332,7 @@ fun HydraWatchApp(
     voiceStatus: String? = null,
     systemStatus: String? = null,
     systemStatusStale: Boolean = false,
+    securityStatus: String? = null,
     companionAvailable: Boolean = true,
     onStartVoiceRecognition: () -> Unit = {},
     onRefreshSystemStatus: () -> Unit = {},
@@ -354,6 +377,12 @@ fun HydraWatchApp(
                             style = MaterialTheme.typography.caption2,
                             textAlign = TextAlign.Center,
                         )
+                    }
+                }
+                securityStatus?.let { text ->
+                    item {
+                        // What the server's security options and its connection history say: read only
+                        Text(text = text, style = MaterialTheme.typography.caption1, textAlign = TextAlign.Center)
                     }
                 }
                 item {

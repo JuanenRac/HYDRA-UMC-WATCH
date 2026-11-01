@@ -19,4 +19,17 @@
     <string name="voice_error_connection_unavailable">HYDRA-UMC 连接不可用。请检查已配对手机的会话状态。</string>
     <string name="status_error_offline_headline">HYDRA-UMC 已离线</string>
     <string name="status_error_offline_detail">请检查与已配对手机的连接以及服务器会话状态。</string>
+    <string name="security_title">服务器安全</string>
+    <string name="security_all_protected">所有选项都处于受保护的值。</string>
+    <string name="security_lowered_header">防护已降低：</string>
+    <string name="security_locked">%1$d 项由服务器环境固定</string>
+    <string name="security_clients">活跃客户端 %1$d 个，登录失败 %2$d 次</string>
+    <string name="security_read_only">只读：请在 STUDIO 或 SUITE 中修改。</string>
+    <string name="security_sw_health_open">GET /health 对任何人开放</string>
+    <string name="security_sw_connections_record_address">保留客户端地址</string>
+    <string name="security_sw_camera_open">相机图片已开放</string>
+    <string name="security_sw_websocket_query_token">WebSocket 地址中带令牌</string>
+    <string name="security_sw_logging_redaction">日志中的机密未遮蔽</string>
+    <string name="security_sw_camera_credentials">相机密码出现在命令行</string>
+    <string name="security_sw_install_tls">新安装默认不启用 TLS</string>
 </resources>

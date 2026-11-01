@@ -19,4 +19,17 @@
     <string name="voice_error_connection_unavailable">HYDRA-UMC-Verbindung nicht verfügbar. Bitte die Sitzung des gekoppelten Smartphones prüfen.</string>
     <string name="status_error_offline_headline">HYDRA-UMC offline</string>
     <string name="status_error_offline_detail">Bitte die Verbindung zum gekoppelten Smartphone und die Server-Sitzung prüfen.</string>
+    <string name="security_title">Serversicherheit</string>
+    <string name="security_all_protected">Alle Optionen stehen auf ihrem geschützten Wert.</string>
+    <string name="security_lowered_header">Gesenkter Schutz:</string>
+    <string name="security_locked">%1$d von der Serverumgebung festgelegt</string>
+    <string name="security_clients">%1$d Clients aktiv, %2$d fehlgeschlagene Anmeldungen</string>
+    <string name="security_read_only">Nur lesen: in STUDIO oder SUITE ändern.</string>
+    <string name="security_sw_health_open">GET /health für alle offen</string>
+    <string name="security_sw_connections_record_address">Client-Adressen werden gespeichert</string>
+    <string name="security_sw_camera_open">Kamerabilder offen</string>
+    <string name="security_sw_websocket_query_token">Token in der WebSocket-Adresse</string>
+    <string name="security_sw_logging_redaction">Geheimnisse im Protokoll nicht geschwärzt</string>
+    <string name="security_sw_camera_credentials">Kamerapasswort in einer Befehlszeile</string>
+    <string name="security_sw_install_tls">Neue Installationen ohne TLS</string>
 </resources>

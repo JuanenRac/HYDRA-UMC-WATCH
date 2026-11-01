@@ -18,6 +18,9 @@ private const val MAX_VOICE_TRANSCRIPT_LENGTH = 500
 private const val MAX_ASSISTANT_TEXT_LENGTH = 500
 private const val MAX_STATUS_HEADLINE_LENGTH = 80
 private const val MAX_STATUS_DETAIL_LENGTH = 280
+private const val MAX_LOWERED_SWITCHES = 16
+private const val MAX_SECURITY_COUNT = 100_000
+private val switchIdPattern = Regex("^[A-Za-z]{1,24}\\.[A-Za-z]{1,32}$")
 
 /**
  * No message of this protocol comes near this size; refusing a longer one before
@@ -123,6 +126,23 @@ sealed class SyncMessage {
         val updateAvailable: Boolean,
     ) : SyncMessage()
 
+    /**
+     * Phone -> watch: what the server's security options and its connection history say, to be READ on the wrist. Nothing in it can change
+     * anything: the watch has no way to write an option, and the sender is the paired phone, which reads them as an administrator.
+     * [loweredSwitches] are the `section.key` ids of the options that are on their value that lowers the protection of the server (the
+     * watch resolves each to a sentence in its own language, and shows an id it does not know as it is); [lockedSwitches] is how many
+     * options the environment of the server fixes; [activeClients] and [failedLogins] come from the history of connections.
+     */
+    @Serializable
+    @SerialName("server_security_status")
+    data class ServerSecurityStatus(
+        val protocolVersion: Int,
+        val loweredSwitches: List<String> = emptyList(),
+        val lockedSwitches: Int = 0,
+        val activeClients: Int = 0,
+        val failedLogins: Int = 0,
+    ) : SyncMessage()
+
     /** Watch -> server: the dedicated emergency button was pressed. */
     @Serializable
     @SerialName("estop_command")
@@ -175,6 +195,7 @@ fun parseSyncMessage(raw: String): SyncMessage {
             "assistant_reply",
             "system_status",
             "companion_version_status",
+            "server_security_status",
             "estop_command",
             "alert",
         )
@@ -242,6 +263,20 @@ private fun validateProtocolMessage(message: SyncMessage) {
             }
             if (!stableVersionPattern.matches(message.appVersion)) {
                 throw SyncMessageParseException("invalid companion app version '${message.appVersion}'")
+            }
+        }
+        is SyncMessage.ServerSecurityStatus -> {
+            if (message.protocolVersion != CURRENT_PROTOCOL_VERSION) {
+                throw SyncMessageParseException("unsupported security status protocol version ${message.protocolVersion}")
+            }
+            if (message.loweredSwitches.size > MAX_LOWERED_SWITCHES || message.loweredSwitches.toSet().size != message.loweredSwitches.size) {
+                throw SyncMessageParseException("security status lists at most $MAX_LOWERED_SWITCHES different switches")
+            }
+            if (message.loweredSwitches.any { !switchIdPattern.matches(it) }) {
+                throw SyncMessageParseException("security status has a switch id that is not section.key")
+            }
+            if (listOf(message.lockedSwitches, message.activeClients, message.failedLogins).any { it !in 0..MAX_SECURITY_COUNT }) {
+                throw SyncMessageParseException("security status counts must be from 0 to $MAX_SECURITY_COUNT")
             }
         }
         is SyncMessage.Alert -> {
