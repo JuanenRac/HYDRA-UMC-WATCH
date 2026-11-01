@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here.
 
-## [Unreleased]
+## [0.2.8] - The watch can ask the phone for the security status of the server, read only, from a button, and the screen is tested with Robolectric
 
 - **A button asks the phone for the security status:** **Server security** sends an empty request on `/hydra-umc/server-security-request/v1` (retried like the status request) and the answer of the phone is shown as before. HYDRA-UMC-ANDROID-CONTROL now answers it, and the vectors of the message are in `watch_relay_contract.json`, identical in both repositories. The button is in the eight languages.
 

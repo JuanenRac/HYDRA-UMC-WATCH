@@ -18,8 +18,8 @@ GPL-3.0-or-later - see LICENSE
   <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
   <img src="https://img.shields.io/badge/Platform-Wear%20OS-4285F4.svg" alt="Platform">
   <img src="https://img.shields.io/badge/Feature-Voice%20%26%20haptics-blue.svg" alt="Feature">
-  <img src="https://img.shields.io/badge/Tests-94%20passing-2ea44f.svg" alt="Tests">
-  <img src="https://img.shields.io/badge/Version-0.2.7-0f6cbd.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Tests-113%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Version-0.2.8-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-functional-0F6CBD.svg" alt="Maturity">
 </p>
 
@@ -33,9 +33,9 @@ GPL-3.0-or-later - see LICENSE
 
 | | |
 |---|---|
-| Version | `0.2.7` |
+| Version | `0.2.8` |
 | Maturité | Fonctionnel |
-| Tests | 94 (`./gradlew testDebugUnitTest`) |
+| Tests | 113 (`./gradlew testDebugUnitTest`) |
 | Technologie | Kotlin / Wear OS |
 | Cible | Une montre Wear OS (appairée au téléphone) |
 | Sur matériel réel | Pas encore : aucune exécution sur du matériel réel n'est consignée pour cette version |
@@ -51,7 +51,7 @@ Chaque ligne est une partie de ce dépôt et le feu dit où elle en est aujourd'
 | Domaine | État | Ce que cela veut dire ici |
 |---|---|---|
 | Logiciel | 🟡 | Fonctionne pour son usage principal ; la vérification d'honnêteté ci-dessus liste ce qui manque encore |
-| Tests | 🟢 | 94 tests automatiques, exécutés à chaque modification |
+| Tests | 🟢 | 113 tests automatiques, exécutés à chaque modification |
 | Matériel réel | 🔴 | Pas encore : aucune exécution sur du matériel réel n'est consignée pour cette version |
 | Documentation | 🟢 | README en huit langues, vérifié par rapport au manifeste à chaque modification |
 
@@ -171,7 +171,7 @@ Nécessite le SDK Android avec un JDK accepté par l'enveloppe Gradle fournie, e
 
 ## 🧪 Tests
 
-94 tests automatiques s'exécutent avec `./gradlew testDebugUnitTest`. Ils n'ont besoin ni de matériel ni de rien en dehors de cette machine.
+113 tests automatiques s'exécutent avec `./gradlew testDebugUnitTest`. Ils n'ont besoin ni de matériel ni de rien en dehors de cette machine.
 
 La CI exécute `HYDRA_UMC_CI=1 python tools/ci_validate.py`, qui vérifie le manifeste, les documents, les huit README et les images.
 

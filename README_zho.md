@@ -18,8 +18,8 @@ GPL-3.0-or-later - see LICENSE
   <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
   <img src="https://img.shields.io/badge/Platform-Wear%20OS-4285F4.svg" alt="Platform">
   <img src="https://img.shields.io/badge/Feature-Voice%20%26%20haptics-blue.svg" alt="Feature">
-  <img src="https://img.shields.io/badge/Tests-94%20passing-2ea44f.svg" alt="Tests">
-  <img src="https://img.shields.io/badge/Version-0.2.7-0f6cbd.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Tests-113%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Version-0.2.8-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-functional-0F6CBD.svg" alt="Maturity">
 </p>
 
@@ -33,9 +33,9 @@ GPL-3.0-or-later - see LICENSE
 
 | | |
 |---|---|
-| 版本 | `0.2.7` |
+| 版本 | `0.2.8` |
 | 成熟度 | 可用 |
-| 测试 | 94 (`./gradlew testDebugUnitTest`) |
+| 测试 | 113 (`./gradlew testDebugUnitTest`) |
 | 技术栈 | Kotlin / Wear OS |
 | 目标 | Wear OS 手表（与手机配对） |
 | 真实硬件 | 尚未：此版本没有在真实硬件上运行的记录 |
@@ -51,7 +51,7 @@ GPL-3.0-or-later - see LICENSE
 | 领域 | 状态 | 在这里的含义 |
 |---|---|---|
 | 软件 | 🟡 | 主要用途可用；上面的诚实性检查列出了仍然缺少的内容 |
-| 测试 | 🟢 | 94 项自动测试，每次变更都会运行 |
+| 测试 | 🟢 | 113 项自动测试，每次变更都会运行 |
 | 真实硬件 | 🔴 | 尚未：此版本没有在真实硬件上运行的记录 |
 | 文档 | 🟢 | 八种语言的 README，每次变更都会与清单核对 |
 
@@ -166,7 +166,7 @@ update-from-github.bat    # Windows
 
 ## 🧪 测试
 
-运行 `./gradlew testDebugUnitTest` 会执行 94 个自动测试。 不需要硬件，也不需要这台机器以外的任何东西。
+运行 `./gradlew testDebugUnitTest` 会执行 113 个自动测试。 不需要硬件，也不需要这台机器以外的任何东西。
 
 CI 运行 `HYDRA_UMC_CI=1 python tools/ci_validate.py`，检查清单、文档、八个 README 和图片。
 
