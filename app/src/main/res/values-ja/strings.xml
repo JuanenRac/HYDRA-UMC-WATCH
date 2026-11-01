@@ -32,4 +32,6 @@
     <string name="security_sw_logging_redaction">ログの秘密情報を伏せていない</string>
     <string name="security_sw_camera_credentials">カメラのパスワードがコマンドライン上</string>
     <string name="security_sw_install_tls">新規インストールで TLS なし</string>
+    <string name="security_refresh">サーバーのセキュリティ</string>
+    <string name="security_loading">セキュリティ状態を要求しています…</string>
 </resources>

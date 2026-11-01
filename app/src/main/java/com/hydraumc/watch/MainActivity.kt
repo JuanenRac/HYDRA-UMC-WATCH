@@ -247,6 +247,7 @@ class MainActivity : ComponentActivity() {
                 companionAvailable = companionAvailable,
                 onStartVoiceRecognition = ::startVoiceRecognition,
                 onRefreshSystemStatus = ::refreshSystemStatus,
+                onRefreshServerSecurity = ::refreshServerSecurity,
                 onTestHaptic = { hapticAlertPlayer.play(AlertSeverity.INFO) },
             )
         }
@@ -272,6 +273,16 @@ class MainActivity : ComponentActivity() {
         }
         voiceStatus = getString(R.string.voice_listening)
         recognizeSpeech.launch(intent)
+    }
+
+    private fun refreshServerSecurity() {
+        securityStatus = getString(R.string.security_loading)
+        relayTransport.requestServerSecurity { result ->
+            if (result.isFailure) runOnUiThread {
+                securityStatus = getString(R.string.status_phone_unavailable)
+                hapticAlertPlayer.play(AlertSeverity.WARNING)
+            }
+        }
     }
 
     private fun refreshSystemStatus() {
@@ -336,6 +347,7 @@ fun HydraWatchApp(
     companionAvailable: Boolean = true,
     onStartVoiceRecognition: () -> Unit = {},
     onRefreshSystemStatus: () -> Unit = {},
+    onRefreshServerSecurity: () -> Unit = {},
     onTestHaptic: () -> Unit = {},
 ) {
     MaterialTheme {
@@ -405,6 +417,11 @@ fun HydraWatchApp(
                 item {
                     Button(onClick = onRefreshSystemStatus) {
                         Text(text = stringResource(R.string.status_refresh))
+                    }
+                }
+                item {
+                    Button(onClick = onRefreshServerSecurity) {
+                        Text(text = stringResource(R.string.security_refresh))
                     }
                 }
                 voiceStatus?.let { status ->

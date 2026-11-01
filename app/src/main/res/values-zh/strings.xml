@@ -32,4 +32,6 @@
     <string name="security_sw_logging_redaction">日志中的机密未遮蔽</string>
     <string name="security_sw_camera_credentials">相机密码出现在命令行</string>
     <string name="security_sw_install_tls">新安装默认不启用 TLS</string>
+    <string name="security_refresh">服务器安全</string>
+    <string name="security_loading">正在请求安全状态…</string>
 </resources>

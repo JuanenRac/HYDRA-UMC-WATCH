@@ -32,4 +32,6 @@
     <string name="security_sw_logging_redaction">Secrets non masqués dans le journal</string>
     <string name="security_sw_camera_credentials">Mot de passe de caméra sur une ligne de commande</string>
     <string name="security_sw_install_tls">Nouvelles installations sans TLS</string>
+    <string name="security_refresh">Sécurité du serveur</string>
+    <string name="security_loading">Demande de l\'état de sécurité…</string>
 </resources>

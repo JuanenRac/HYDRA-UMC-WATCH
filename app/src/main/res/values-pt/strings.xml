@@ -32,4 +32,6 @@
     <string name="security_sw_logging_redaction">Segredos não ocultados no registo</string>
     <string name="security_sw_camera_credentials">Palavra-passe da câmara numa linha de comandos</string>
     <string name="security_sw_install_tls">Novas instalações sem TLS</string>
+    <string name="security_refresh">Segurança do servidor</string>
+    <string name="security_loading">A pedir o estado de segurança…</string>
 </resources>

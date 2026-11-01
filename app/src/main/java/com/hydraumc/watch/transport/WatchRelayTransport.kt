@@ -23,6 +23,8 @@ object WatchRelayPaths {
     const val ASSISTANT_REPLY = "/hydra-umc/assistant-reply/v1"
     const val SYSTEM_STATUS = "/hydra-umc/system-status-reply/v1"
     const val SERVER_SECURITY = "/hydra-umc/server-security/v1"
+    /** Watch -> phone: asks for the read-only security status of the server (the answer comes on [SERVER_SECURITY]). */
+    const val SERVER_SECURITY_REQUEST = "/hydra-umc/server-security-request/v1"
 }
 
 // (P2):
@@ -61,6 +63,11 @@ class WatchRelayTransport(
         // the current status" - unlike replaying a stale REPLY, which
         // LastKnownStateCache guards against on the receiving side instead).
         sendWithRetry(WatchRelayPaths.STATUS_REQUEST, "{}", attempt = 1, onResult)
+    }
+
+    fun requestServerSecurity(onResult: (Result<Unit>) -> Unit) {
+        // like the status request: idempotent, so it is fine to retry
+        sendWithRetry(WatchRelayPaths.SERVER_SECURITY_REQUEST, "{}", attempt = 1, onResult)
     }
 
     /**

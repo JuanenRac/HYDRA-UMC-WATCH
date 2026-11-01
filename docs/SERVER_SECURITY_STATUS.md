@@ -9,6 +9,13 @@ GPL-3.0-or-later - see LICENSE
 The watch can show what the options of security of the server and its history of connections say. It is **read only**: the watch has no message that
 writes an option, and the sender is the paired phone, which reads the server as an administrator. Nothing in this message can change anything.
 
+## How it is asked and answered
+
+The watch has a button, **Server security**, that sends the phone an empty request on `/hydra-umc/server-security-request/v1` (it may be retried: it is idempotent).
+HYDRA-UMC-ANDROID-CONTROL reads `GET /api/admin/server-config` and `GET /api/connections/clients` with the session of the person who signed in on the phone
+and answers on `/hydra-umc/server-security/v1`. An account that may not read them (the server answers `403`), a server that does not answer, or an answer without
+the options is told to the watch as the same "offline" status card that a failed status request gets. The phone writes nothing to the server.
+
 ## The message
 
 Path of the Data Layer: `/hydra-umc/server-security/v1`. Phone to watch, JSON with the type `server_security_status`:
@@ -30,6 +37,5 @@ status do not accept it. The watch shows it as lines of text in its own language
 
 ## What is still open
 
-The phone side (HYDRA-UMC-ANDROID-CONTROL) has to read `GET /api/admin/server-config` and `GET /api/connections/clients` as an administrator and send this
-message; this repository defines and checks the watch side only. The vectors of this message are not yet in `watch_relay_contract.json`, which both
-repositories keep identical, so that the phone repository can add them at the same time as its sender.
+The vectors of this message are in `watch_relay_contract.json`, which this repository and HYDRA-UMC-ANDROID-CONTROL keep identical; each runs them against its own
+code. Not tried with a real watch and phone.

@@ -32,4 +32,6 @@
     <string name="security_sw_logging_redaction">Geheimnisse im Protokoll nicht geschwärzt</string>
     <string name="security_sw_camera_credentials">Kamerapasswort in einer Befehlszeile</string>
     <string name="security_sw_install_tls">Neue Installationen ohne TLS</string>
+    <string name="security_refresh">Serversicherheit</string>
+    <string name="security_loading">Sicherheitsstatus wird angefordert…</string>
 </resources>

@@ -32,4 +32,6 @@
     <string name="security_sw_logging_redaction">Segreti non oscurati nel log</string>
     <string name="security_sw_camera_credentials">Password della telecamera su una riga di comando</string>
     <string name="security_sw_install_tls">Nuove installazioni senza TLS</string>
+    <string name="security_refresh">Sicurezza del server</string>
+    <string name="security_loading">Richiesta dello stato di sicurezza…</string>
 </resources>

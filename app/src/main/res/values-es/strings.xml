@@ -32,4 +32,6 @@
     <string name="security_sw_logging_redaction">Secretos sin ocultar en el registro</string>
     <string name="security_sw_camera_credentials">Contraseña de cámara en una línea de órdenes</string>
     <string name="security_sw_install_tls">Instalaciones nuevas sin TLS</string>
+    <string name="security_refresh">Seguridad del servidor</string>
+    <string name="security_loading">Pidiendo el estado de seguridad…</string>
 </resources>

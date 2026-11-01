@@ -32,4 +32,6 @@
     <string name="security_sw_logging_redaction">Secrets not blanked in the log</string>
     <string name="security_sw_camera_credentials">Camera password on a command line</string>
     <string name="security_sw_install_tls">New installs without TLS</string>
+    <string name="security_refresh">Server security</string>
+    <string name="security_loading">Requesting the security status…</string>
 </resources>
