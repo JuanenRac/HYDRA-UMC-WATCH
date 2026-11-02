@@ -4,6 +4,13 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **Alerts pushed by the phone:** the watch accepts an `alert` on `/hydra-umc/alert/v1` (only while `alerts.enabled` is on), vibrates by severity, shows it marked as outdated once it is older than `alerts.stale_after_s`, and posts a notification: a critical alert stays until opened, a warning only when no screen exists, an info alert never (`transport/AlertPolicy.kt`, `transport/AlertNotifier.kt`). The sender on the phone is still to be written.
+- **Presence of the operator, off by default:** with `presence.enabled = true` a button starts a foreground service that sends a numbered `presence_heartbeat` every `presence.interval_s` seconds and one last with the state `left` when the operator ends it on purpose (`transport/PresenceHeartbeatPolicy.kt`, `transport/PresenceHeartbeatService.kt`). The watch never decides what a lost heartbeat means; that belongs to the server, which has no such rule yet.
+- **Two-step confirmation of a spoken order, off by default:** with `confirm.enabled = true` a reply that asks for confirmation and brings a token is offered as a button; a first tap arms it and a second one inside the window sends a `voice_confirm` once, never retried (`transport/TwoStepConfirmation.kt`). The token lives only in the memory of the screen, is capped by `confirm.max_validity_s` and is removed from everything the watch stores or holds. The relay on the phone and in the server is still to be written.
+- **A watch-face complication with the robots running or the alarm:** `complication/RobotsComplicationService.kt` shows the number of running robots, `!` while an alarm is active and `?` once the last state is older than `complication.stale_after_s`; it never invents a count the phone did not give. The status gains the optional `robotsRunning` and `alarmActive` fields, which the phone does not send yet.
+- **The settings of these features are in a file:** `app/src/main/assets/watch.cfg` (every number kept inside its range, a broken line keeps the default, presence and confirmation off), read by `WatchConfig`.
+- The strings of the new features are in the eight languages, and `docs/PUSH_PRESENCE_CONFIRMATION.md` describes the messages the phone and the server have still to handle.
+
 ## [0.2.9] - The last reply or status is kept on the watch and a message that arrives with no screen is shown as a notification, with an ambient mode
 
 - **The last reply or status is kept on the watch:** `transport/LastRelayStore.kt` stores it with the instant it arrived; a screen created later shows it already marked as last known and possibly outdated, by the same rule as a live one, and the voice button stays withheld until the phone is heard from again.

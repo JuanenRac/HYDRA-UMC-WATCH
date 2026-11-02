@@ -18,7 +18,7 @@ GPL-3.0-or-later - see LICENSE
   <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
   <img src="https://img.shields.io/badge/Platform-Wear%20OS-4285F4.svg" alt="Platform">
   <img src="https://img.shields.io/badge/Feature-Voice%20%26%20haptics-blue.svg" alt="Feature">
-  <img src="https://img.shields.io/badge/Tests-113%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-153%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.2.9-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-functional-0F6CBD.svg" alt="Maturity">
 </p>
@@ -35,7 +35,7 @@ GPL-3.0-or-later - see LICENSE
 |---|---|
 | Versão | `0.2.9` |
 | Maturidade | Funcional |
-| Testes | 113 (`./gradlew testDebugUnitTest`) |
+| Testes | 153 (`./gradlew testDebugUnitTest`) |
 | Tecnologia | Kotlin / Wear OS |
 | Destino | Um relógio Wear OS (emparelhado com o telemóvel) |
 | Em hardware real | Ainda não: não há registo de execução em hardware real para esta versão |
@@ -51,7 +51,7 @@ Cada linha é uma parte deste repositório e a luz diz até onde chega hoje. É 
 | Área | Estado | O que significa aqui |
 |---|---|---|
 | Software | 🟡 | Funciona para o seu propósito principal; a verificação de honestidade acima lista o que ainda falta |
-| Testes | 🟢 | 113 testes automáticos, executados a cada alteração |
+| Testes | 🟢 | 153 testes automáticos, executados a cada alteração |
 | Hardware real | 🔴 | Ainda não: não há registo de execução em hardware real para esta versão |
 | Interface e protocolos | 🟡 | As rotas ou mensagens que oferece estão documentadas e testadas com um cliente; ainda nem todos os clientes as usaram |
 | Integração | 🟠 | As suas mensagens e rotas são verificadas contra os contratos partilhados do SDK; ainda não funcionou em conjunto com o equipamento real |
@@ -81,7 +81,11 @@ Construído como uma aplicação Wear OS independente (Kotlin + Jetpack Compose 
 * 🧭 **Seleção de nó verificado pelo companheiro** — o `WatchRelayTransport` envia através de uma consulta real ao `CapabilityClient` (`hydra_umc_phone_companion`, declarada no próprio `res/values/wear.xml` do HYDRA-UMC-ANDROID-CONTROL), nunca por `connectedNodes.firstOrNull()` - um segundo nó ligado sem a aplicação companheira instalada nunca pode ser escolhido por acidente; um nó próximo (alcançável diretamente por Bluetooth) é preferido a um retransmitido pela nuvem quando mais de um se qualifica. *(implementado - `pickCompanionNode()`)*
 * 🗂️ **Cache do último estado conhecido** — `transport/LastKnownStateCache.kt` acompanha a desatualização real do último estado/alerta reencaminhado, para que um antigo nunca seja mostrado como atual. *(implementado)*
 * 📥 **Caixa do relé** — `transport/RelayInbox.kt`: no Wear OS o ecrã é destruído assim que o pulso é baixado, e uma resposta que chegasse entretanto não tinha recetor e perdia-se. O serviço de escuta guarda agora as mensagens mais recentes (no máximo 8, nenhuma com mais de 10 minutos) e o ecrã mostra-as quando é criado de novo, sem as dizer em voz alta nem vibrar. *(implementado; não testado num relógio real)*
-* 🔔 **Último estado guardado, ecrã ambiente e notificação** — `transport/LastRelayStore.kt` guarda no relógio a última resposta ou estado com o instante em que chegou; um ecrã criado mais tarde mostra-o já marcado como «último dado conhecido - pode estar desatualizado» pela mesma regra de um estado em direto, e o botão de voz fica retido até o telemóvel voltar a ser ouvido. Uma mensagem que chega sem ecrã é também mostrada como notificação (`transport/RelayNotifier.kt`: sempre uma resposta, um estado apenas se não for nominal, e só se o operador permitiu as notificações no Wear OS 4 e posteriores, pedidas uma vez). Com o relógio em modo ambiente, o ecrã desenha apenas o último estado, se está desatualizado e a hora, sem botões. *(implementado; não testado num relógio real. Um mosaico (tile) e uma complicação que leiam o mesmo estado guardado ainda não estão feitos: precisam de bibliotecas Wear OS adicionais e de um relógio para os experimentar.)*
+* 🔔 **Último estado guardado, ecrã ambiente e notificação** — `transport/LastRelayStore.kt` guarda no relógio a última resposta ou estado com o instante em que chegou; um ecrã criado mais tarde mostra-o já marcado como «último dado conhecido - pode estar desatualizado» pela mesma regra de um estado em direto, e o botão de voz fica retido até o telemóvel voltar a ser ouvido. Uma mensagem que chega sem ecrã é também mostrada como notificação (`transport/RelayNotifier.kt`: sempre uma resposta, um estado apenas se não for nominal, e só se o operador permitiu as notificações no Wear OS 4 e posteriores, pedidas uma vez). Com o relógio em modo ambiente, o ecrã desenha apenas o último estado, se está desatualizado e a hora, sem botões. *(implementado; não testado num relógio real. Um mosaico (tile) que leia o mesmo estado guardado ainda não está feito: precisa de um relógio para o experimentar.)*
+* 🚨 **Alertas enviados pelo telemóvel** — o telemóvel reencaminha um `alert` por `/hydra-umc/alert/v1`; o relógio valida-o, vibra conforme a gravidade e mostra-o marcado como desatualizado quando excede `alerts.stale_after_s`. Um alerta crítico é também uma notificação que fica até ser aberta (`transport/AlertPolicy.kt`, `transport/AlertNotifier.kt`); um aviso só quando não há ecrã; uma informação nunca. Ativa-se com `alerts.enabled` em `app/src/main/assets/watch.cfg`. *(implementado e verificado numa JVM normal; o emissor no telemóvel e os eventos do servidor ainda não estão escritos; não testado num relógio real.)*
+* 🫀 **Presença do operador (homem morto), desativada por defeito** — com `presence.enabled = true` um botão inicia um serviço em primeiro plano que envia um `presence_heartbeat` a cada `presence.interval_s` segundos com um número crescente, e um último com o estado `left` quando o operador a termina de propósito (`transport/PresenceHeartbeatPolicy.kt`, `transport/PresenceHeartbeatService.kt`). O que um batimento perdido faz (reduzir a velocidade, pausar) é decidido pelo servidor, nunca pelo relógio. *(o lado do relógio está implementado; o reencaminhamento no telemóvel e a regra do servidor ainda não estão escritos e precisam de uma decisão formal de segurança; não testado num relógio real.)*
+* ✌️ **Confirmação em dois passos de uma ordem de voz, desativada por defeito** — com `confirm.enabled = true`, uma resposta que pede confirmação e traz um token é oferecida como botão: o primeiro toque arma-o, um segundo (não antes de `confirm.min_gap_ms`, não depois de `confirm.second_tap_window_s`) envia um `voice_confirm` uma só vez, sem repetições (`transport/TwoStepConfirmation.kt`). O token vive apenas na memória do ecrã, no máximo `confirm.max_validity_s`, e nunca é guardado. O telemóvel tem de ter sessão e a reserva do robô, ou não acontece nada. *(o lado do relógio está implementado; o reencaminhamento da confirmação no telemóvel e no servidor ainda não está escrito.)*
+* 🕘 **Complicação com os robôs em funcionamento ou o alarme** — `complication/RobotsComplicationService.kt` põe num mostrador o número de robôs em funcionamento, `!` enquanto há um alarme ativo e `?` quando o último estado excede `complication.stale_after_s`; nunca inventa um número que o telemóvel não dê (`robotsRunning` e `alarmActive` do estado). *(implementada; o telemóvel ainda não envia esses dois campos; não testada num relógio real.)*
 * 🌐 **Interface em 8 idiomas** — `app/src/main/res/values-xx/strings.xml` para inglês, espanhol, francês, alemão, italiano, japonês, chinês e português, escolhido automaticamente a partir do idioma do sistema do relógio; o `LocalizedStringsTest` verifica que cada ficheiro de idioma tem exatamente as chaves e os especificadores de formato do inglês, pelo que uma cadeia em falta ou um marcador partido faz falhar a compilação em vez de aparecer no pulso. *(implementado)*
 
 ## 🧩 Papel no HYDRA-UMC
@@ -176,7 +180,7 @@ Requer o SDK do Android com um JDK que o wrapper do Gradle incluído aceite, e u
 
 ## 🧪 Testes
 
-113 testes automáticos correm com `./gradlew testDebugUnitTest`. Não precisam de hardware nem de nada fora desta máquina.
+153 testes automáticos correm com `./gradlew testDebugUnitTest`. Não precisam de hardware nem de nada fora desta máquina.
 
 A CI executa `HYDRA_UMC_CI=1 python tools/ci_validate.py`, que verifica o manifesto, os documentos, os oito README e as imagens.
 

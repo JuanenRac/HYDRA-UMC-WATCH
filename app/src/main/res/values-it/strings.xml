@@ -35,4 +35,27 @@
     <string name="security_sw_install_tls">Nuove installazioni senza TLS</string>
     <string name="security_refresh">Sicurezza del server</string>
     <string name="security_loading">Richiesta dello stato di sicurezza…</string>
+    <string name="alert_critical">Allarme critico</string>
+    <string name="alert_warning">Avviso</string>
+    <string name="alert_info">Nota</string>
+    <string name="alert_line">%1$s: %2$s</string>
+    <string name="notification_channel_alerts">Avvisi di HYDRA-UMC</string>
+    <string name="notification_channel_presence">Presenza dell\'operatore</string>
+    <string name="presence_start">Sono nella cella (presenza)</string>
+    <string name="presence_stop">Termina presenza</string>
+    <string name="presence_notification_title">Presenza attiva</string>
+    <string name="presence_notification_text">L\'impianto sa che sei nella cella.</string>
+    <string name="confirm_first_tap">Conferma comando (tocca due volte)</string>
+    <string name="confirm_second_tap">Tocca ancora per confermare</string>
+    <string name="confirm_cancel">Annulla comando</string>
+    <string name="confirm_tap_again">Tocca ancora entro %1$d s per confermare.</string>
+    <string name="confirm_sent">Conferma inviata tramite il telefono associato…</string>
+    <string name="confirm_not_sent">Impossibile inviare la conferma. Ripeti il comando.</string>
+    <string name="confirm_expired">La conferma è scaduta. Ripeti il comando.</string>
+    <string name="confirm_repeat_order">Impossibile confermare sull\'orologio. Ripeti il comando.</string>
+    <string name="complication_title">Robot</string>
+    <string name="complication_unknown">Nessun dato sui robot</string>
+    <string name="complication_outdated">Dati sui robot obsoleti</string>
+    <string name="complication_alarm">Allarme attivo</string>
+    <string name="complication_running">%1$d robot in funzione</string>
 </resources>

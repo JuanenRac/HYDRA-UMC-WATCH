@@ -25,6 +25,12 @@ object WatchRelayPaths {
     const val SERVER_SECURITY = "/hydra-umc/server-security/v1"
     /** Watch -> phone: asks for the read-only security status of the server (the answer comes on [SERVER_SECURITY]). */
     const val SERVER_SECURITY_REQUEST = "/hydra-umc/server-security-request/v1"
+    /** Phone -> watch: an alert to surface and vibrate on the wrist. */
+    const val ALERT = "/hydra-umc/alert/v1"
+    /** Watch -> phone: the heartbeat of the presence of the operator. */
+    const val PRESENCE = "/hydra-umc/presence/v1"
+    /** Watch -> phone: the two-step confirmation of a spoken order. */
+    const val VOICE_CONFIRM = "/hydra-umc/voice-confirm/v1"
 }
 
 // (P2):
@@ -68,6 +74,22 @@ class WatchRelayTransport(
     fun requestServerSecurity(onResult: (Result<Unit>) -> Unit) {
         // like the status request: idempotent, so it is fine to retry
         sendWithRetry(WatchRelayPaths.SERVER_SECURITY_REQUEST, "{}", attempt = 1, onResult)
+    }
+
+    /**
+     * One heartbeat of the presence of the operator. Never retried: a late heartbeat is worse than a missed one, the
+     * next one is already on its way.
+     */
+    fun sendPresence(heartbeat: SyncMessage.PresenceHeartbeat, onResult: (Result<Unit>) -> Unit = {}) {
+        send(WatchRelayPaths.PRESENCE, heartbeat.toJson(), onResult)
+    }
+
+    /**
+     * The confirmation of a spoken order. Sent once and never retried: the token is good for one use and a replay of an
+     * order that may already have run is exactly what must not happen; on a failure the operator speaks the order again.
+     */
+    fun sendVoiceConfirm(confirmation: SyncMessage.VoiceConfirm, onResult: (Result<Unit>) -> Unit) {
+        send(WatchRelayPaths.VOICE_CONFIRM, confirmation.toJson(), onResult)
     }
 
     /**

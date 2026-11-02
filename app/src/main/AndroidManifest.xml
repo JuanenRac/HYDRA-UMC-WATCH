@@ -12,6 +12,9 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <!-- An answer that arrives while the screen is off is shown as a notification instead of being lost. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- The heartbeat of the presence of the operator (off unless presence.enabled is on in watch.cfg) runs as a foreground service. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <application
         android:allowBackup="true"
@@ -51,6 +54,33 @@
                 <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
                 <data android:scheme="wear" android:host="*" android:pathPrefix="/hydra-umc/" />
             </intent-filter>
+        </service>
+
+        <service
+            android:name=".transport.PresenceHeartbeatService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Heartbeat that tells the plant the operator wearing the watch is in the cell" />
+        </service>
+
+        <!-- Watch-face complication: robots running or the alarm, read from the last state kept on the watch. -->
+        <service
+            android:name=".complication.RobotsComplicationService"
+            android:exported="true"
+            android:label="@string/complication_title"
+            android:icon="@mipmap/ic_launcher"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="SHORT_TEXT" />
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="0" />
         </service>
     </application>
 </manifest>

@@ -50,6 +50,11 @@ import com.hydraumc.watch.protocol.parseSyncMessage
 import com.hydraumc.watch.protocol.securitySwitchStringRes
 import com.hydraumc.watch.transport.ACTION_WATCH_RELAY_MESSAGE
 import com.hydraumc.watch.transport.EXTRA_WATCH_RELAY_MESSAGE
+import com.hydraumc.watch.transport.AlertNotifier
+import com.hydraumc.watch.transport.AlertPolicy
+import com.hydraumc.watch.transport.ConfirmTapResult
+import com.hydraumc.watch.transport.PresenceHeartbeatService
+import com.hydraumc.watch.transport.TwoStepConfirmation
 import com.hydraumc.watch.transport.CriticalActionGate
 import com.hydraumc.watch.transport.LastKnownStateCache
 import com.hydraumc.watch.transport.LastRelayStore
@@ -100,6 +105,23 @@ class MainActivity : ComponentActivity() {
             ambient = false
         }
     }
+    private val config by lazy { WatchConfig.load(applicationContext) }
+    // The last alert the phone pushed, and whether it is old enough to be taken for news no longer.
+    private var alertText by mutableStateOf<String?>(null)
+    private var alertOutdated by mutableStateOf(false)
+    private var alertReceivedAtMs = 0L
+    // Two-step confirmation of a spoken order (off unless confirm.enabled): the token lives only in this object.
+    private val twoStep by lazy {
+        TwoStepConfirmation(
+            enabled = config.confirmEnabled,
+            secondTapWindowMs = config.confirmSecondTapWindowMs,
+            minGapMs = config.confirmMinGapMs,
+            maxValidityMs = config.confirmMaxValidityMs,
+        )
+    }
+    private var confirmOffered by mutableStateOf(false)
+    private var confirmArmed by mutableStateOf(false)
+    private var presenceOn by mutableStateOf(false)
     private val lastRelayStore by lazy { LastRelayStore(SharedPrefsKeyValueStore(applicationContext)) }
     private var textToSpeech: TextToSpeech? = null
     @Volatile private var textToSpeechReady = false
@@ -122,6 +144,17 @@ class MainActivity : ComponentActivity() {
         override fun run() {
             systemStatusStale = lastKnownStateCache.isStale()
             companionAvailable = CriticalActionGate.isAvailable(lastKnownStateCache)
+            if (alertText != null) alertOutdated = AlertPolicy.isOutdated(alertReceivedAtMs, System.currentTimeMillis(), config.alertsStaleAfterMs)
+            if (confirmOffered && twoStep.remainingMs(System.currentTimeMillis()) == 0L) {
+                // the validity ran out: the token is forgotten and the order has to be spoken again
+                twoStep.clear()
+                confirmOffered = false
+                confirmArmed = false
+                voiceStatus = getString(R.string.confirm_expired)
+                hapticAlertPlayer.play(AlertSeverity.WARNING)
+            }
+            confirmArmed = confirmOffered && twoStep.isArmed(System.currentTimeMillis())
+            presenceOn = PresenceHeartbeatService.running
             if (pendingVoiceRequest.isExpired(System.currentTimeMillis())) {
                 // nobody answered: say so instead of staying on "sending"
                 pendingVoiceRequest.clear()
@@ -144,7 +177,7 @@ class MainActivity : ComponentActivity() {
      * (see RelayInbox): it is shown, but not spoken and without a haptic - it is not news any more - and an answer is
      * shown even though the question it answers was asked before this screen was created.
      */
-    private fun handleRelayMessage(raw: String, held: Boolean) {
+    private fun handleRelayMessage(raw: String, held: Boolean, receivedAtMs: Long = System.currentTimeMillis()) {
             when (val message = runCatching { parseSyncMessage(raw) }.getOrNull()) {
                 is SyncMessage.AssistantReply -> {
                     // a late answer to an older question is not shown as the
@@ -158,6 +191,12 @@ class MainActivity : ComponentActivity() {
                     val resolvedText = RelayText.reply(this, message)
                     voiceStatus = resolvedText
                     if (held) return
+                    // a reply that asks for confirmation and brings a token is offered for the two taps (never a held one)
+                    confirmOffered = twoStep.offer(message, System.currentTimeMillis())
+                    confirmArmed = false
+                    if (message.requiresConfirmation && !confirmOffered && config.confirmEnabled) {
+                        voiceStatus = resolvedText + "\n" + getString(R.string.confirm_repeat_order)
+                    }
                     if (message.speak) speak(resolvedText)
                     // A real, distinct haptic per outcome: an errorCode
                     // (e.g. "connection_unavailable") is a real degraded
@@ -176,12 +215,77 @@ class MainActivity : ComponentActivity() {
                     if (message.speak) speak("$headline. $detail")
                     hapticAlertPlayer.play(hapticSeverityFor(message.level, message.errorCode))
                 }
+                is SyncMessage.Alert -> {
+                    alertText = getString(
+                        R.string.alert_line,
+                        getString(
+                            when (message.severity) {
+                                AlertSeverity.CRITICAL -> R.string.alert_critical
+                                AlertSeverity.WARNING -> R.string.alert_warning
+                                AlertSeverity.INFO -> R.string.alert_info
+                            },
+                        ),
+                        message.message,
+                    )
+                    alertReceivedAtMs = receivedAtMs
+                    alertOutdated = AlertPolicy.isOutdated(receivedAtMs, System.currentTimeMillis(), config.alertsStaleAfterMs)
+                    // a held alert is shown, but it is not news any more: no vibration (the service played it when it arrived)
+                    if (!held && !alertOutdated) hapticAlertPlayer.play(message.severity)
+                }
                 is SyncMessage.ServerSecurityStatus -> {
                     // read only: it is shown, never acted on, and it does not speak or vibrate (it is a glance, not an alert)
                     securityStatus = securityStatusText(message)
                 }
                 else -> Unit
             }
+    }
+
+    /** A tap on the confirm button: the first arms it, the second (not too soon, not too late) sends the confirmation once. */
+    private fun onConfirmTap() {
+        val now = System.currentTimeMillis()
+        when (val result = twoStep.tap(now, CriticalActionGate.isAvailable(lastKnownStateCache))) {
+            is ConfirmTapResult.Ignored -> Unit
+            is ConfirmTapResult.Expired -> {
+                confirmOffered = false
+                confirmArmed = false
+                voiceStatus = getString(R.string.confirm_expired)
+                hapticAlertPlayer.play(AlertSeverity.WARNING)
+            }
+            is ConfirmTapResult.CompanionMissing -> voiceStatus = getString(R.string.companion_required)
+            is ConfirmTapResult.FirstTap -> {
+                confirmArmed = true
+                voiceStatus = getString(R.string.confirm_tap_again, (result.windowMs / 1000L).toInt())
+                hapticAlertPlayer.play(AlertSeverity.INFO)
+            }
+            is ConfirmTapResult.TooFast -> Unit
+            is ConfirmTapResult.Confirmed -> {
+                confirmOffered = false
+                confirmArmed = false
+                voiceStatus = getString(R.string.confirm_sent)
+                pendingVoiceRequest.begin(result.confirmation.requestId, now)
+                hapticAlertPlayer.play(AlertSeverity.WARNING)
+                relayTransport.sendVoiceConfirm(result.confirmation) { sent ->
+                    if (sent.isFailure) runOnUiThread {
+                        pendingVoiceRequest.clear()
+                        voiceStatus = getString(R.string.confirm_not_sent)
+                        hapticAlertPlayer.play(AlertSeverity.WARNING)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun onDeclineConfirmation() {
+        twoStep.clear()
+        confirmOffered = false
+        confirmArmed = false
+    }
+
+    private fun onTogglePresence() {
+        if (!config.presenceEnabled) return
+        val turningOff = PresenceHeartbeatService.running
+        if (turningOff) PresenceHeartbeatService.stop(this) else PresenceHeartbeatService.start(this)
+        presenceOn = !turningOff
     }
 
     /** The lines of a security status in the language of the watch: what lowers the protection, then the counts. */
@@ -249,6 +353,8 @@ class MainActivity : ComponentActivity() {
         attachAmbientMode()
         // The notification of a message that arrived while this screen did not exist has done its job.
         NotificationManagerCompat.from(this).cancel(RelayNotifier.NOTIFICATION_ID)
+        NotificationManagerCompat.from(this).cancel(AlertNotifier.NOTIFICATION_ID)
+        presenceOn = PresenceHeartbeatService.running
         askForNotificationsOnce()
         restoreLastKnownState()
         // From here on the screen receives the broadcasts itself; what arrived while it did not exist is shown now.
@@ -263,7 +369,7 @@ class MainActivity : ComponentActivity() {
             textToSpeechReady = status == TextToSpeech.SUCCESS
             if (textToSpeechReady) runOnUiThread { pendingSpeech?.let { speak(it) } }
         }
-        RelayInboxHolder.inbox.drain().forEach { handleRelayMessage(it.raw, held = true) }
+        RelayInboxHolder.inbox.drain().forEach { handleRelayMessage(it.raw, held = true, receivedAtMs = it.receivedAtMs) }
         setContent {
             HydraWatchApp(
                 latestVoiceTranscript = latestVoiceTranscript,
@@ -273,6 +379,15 @@ class MainActivity : ComponentActivity() {
                 securityStatus = securityStatus,
                 companionAvailable = companionAvailable,
                 ambient = ambient,
+                alertText = alertText,
+                alertOutdated = alertOutdated,
+                confirmOffered = confirmOffered,
+                confirmArmed = confirmArmed,
+                presenceAvailable = config.presenceEnabled,
+                presenceOn = presenceOn,
+                onConfirmTap = ::onConfirmTap,
+                onDeclineConfirmation = ::onDeclineConfirmation,
+                onTogglePresence = ::onTogglePresence,
                 onStartVoiceRecognition = ::startVoiceRecognition,
                 onRefreshSystemStatus = ::refreshSystemStatus,
                 onRefreshServerSecurity = ::refreshServerSecurity,
@@ -371,6 +486,8 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
+        // the one-use token never outlives the screen
+        twoStep.clear()
         RelayInboxHolder.inbox.screenAttached = false
         unregisterReceiver(relayReceiver)
         staleCheckHandler.removeCallbacks(staleCheckRunnable)
@@ -400,6 +517,15 @@ fun HydraWatchApp(
     securityStatus: String? = null,
     companionAvailable: Boolean = true,
     ambient: Boolean = false,
+    alertText: String? = null,
+    alertOutdated: Boolean = false,
+    confirmOffered: Boolean = false,
+    confirmArmed: Boolean = false,
+    presenceAvailable: Boolean = false,
+    presenceOn: Boolean = false,
+    onConfirmTap: () -> Unit = {},
+    onDeclineConfirmation: () -> Unit = {},
+    onTogglePresence: () -> Unit = {},
     onStartVoiceRecognition: () -> Unit = {},
     onRefreshSystemStatus: () -> Unit = {},
     onRefreshServerSecurity: () -> Unit = {},
@@ -430,6 +556,17 @@ fun HydraWatchApp(
                         style = MaterialTheme.typography.caption1,
                         textAlign = TextAlign.Center,
                     )
+                }
+                alertText?.let { text ->
+                    item {
+                        // An alert the phone pushed; once it is old it is marked, never shown as a current order.
+                        Text(text = text, style = MaterialTheme.typography.body2, textAlign = TextAlign.Center)
+                    }
+                    if (alertOutdated) {
+                        item {
+                            Text(text = stringResource(R.string.status_stale), style = MaterialTheme.typography.caption2, textAlign = TextAlign.Center)
+                        }
+                    }
                 }
                 item {
                     Text(
@@ -486,6 +623,26 @@ fun HydraWatchApp(
                 voiceStatus?.let { status ->
                     item {
                         Text(text = status, style = MaterialTheme.typography.caption2, textAlign = TextAlign.Center)
+                    }
+                }
+                if (confirmOffered) {
+                    item {
+                        // Two deliberate taps confirm the order; nothing moves unless the phone has a session and the reservation.
+                        Button(onClick = onConfirmTap) {
+                            Text(text = stringResource(if (confirmArmed) R.string.confirm_second_tap else R.string.confirm_first_tap))
+                        }
+                    }
+                    item {
+                        Button(onClick = onDeclineConfirmation) {
+                            Text(text = stringResource(R.string.confirm_cancel))
+                        }
+                    }
+                }
+                if (presenceAvailable) {
+                    item {
+                        Button(onClick = onTogglePresence) {
+                            Text(text = stringResource(if (presenceOn) R.string.presence_stop else R.string.presence_start))
+                        }
                     }
                 }
                 latestVoiceTranscript?.let { transcript ->

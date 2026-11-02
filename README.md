@@ -18,7 +18,7 @@ GPL-3.0-or-later - see LICENSE
   <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
   <img src="https://img.shields.io/badge/Platform-Wear%20OS-4285F4.svg" alt="Platform">
   <img src="https://img.shields.io/badge/Feature-Voice%20%26%20haptics-blue.svg" alt="Feature">
-  <img src="https://img.shields.io/badge/Tests-113%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-153%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.2.9-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-functional-0F6CBD.svg" alt="Maturity">
 </p>
@@ -35,7 +35,7 @@ GPL-3.0-or-later - see LICENSE
 |---|---|
 | Version | `0.2.9` |
 | Maturity | Functional |
-| Tests | 113 (`./gradlew testDebugUnitTest`) |
+| Tests | 153 (`./gradlew testDebugUnitTest`) |
 | Stack | Kotlin / Wear OS |
 | Target | A Wear OS watch (paired with the phone) |
 | On real hardware | Not yet: no run on real hardware is recorded for this version |
@@ -51,7 +51,7 @@ Each line is one part of this repository and the light says how far it is today.
 | Area | State | What it means here |
 |---|---|---|
 | Software | 🟡 | Works for its main purpose; the honesty check above lists what is still missing |
-| Tests | 🟢 | 113 automated tests, run on every change |
+| Tests | 🟢 | 153 automated tests, run on every change |
 | Real hardware | 🔴 | Not yet: no run on real hardware is recorded for this version |
 | Interface and protocols | 🟡 | The routes or messages it offers are documented and tested with a client; not every client has used them yet |
 | Integration | 🟠 | Its messages and routes are checked against the shared contracts of the SDK; it has not run together with the real equipment |
@@ -81,7 +81,11 @@ Built as a standalone Wear OS app (Kotlin + Jetpack Compose for Wear), reusing t
 * 🧭 **Companion-verified node selection** — `WatchRelayTransport` sends over a real `CapabilityClient` query (`hydra_umc_phone_companion`, declared in HYDRA-UMC-ANDROID-CONTROL's own `res/values/wear.xml`), never `connectedNodes.firstOrNull()` - a second connected node with no companion app installed can never be picked by accident; a nearby (directly Bluetooth-reachable) node is preferred over a cloud-relayed one when more than one qualifies. *(implemented - `pickCompanionNode()`)*
 * 🗂️ **Last-Known-State Cache** — `transport/LastKnownStateCache.kt` tracks real staleness on the last relayed status/alert, so an old one is never shown as current. *(implemented)*
 * 📥 **Relay inbox** — `transport/RelayInbox.kt`: on Wear OS the screen is destroyed as soon as the wrist is lowered, and a reply that arrived meanwhile had no receiver and was lost. The listener service now holds the newest messages (at most 8, none older than 10 minutes) and the screen shows them when it is created again, without speaking them or vibrating. *(implemented; not tried on a real watch)*
-* 🔔 **Last state kept, ambient screen and notification** — `transport/LastRelayStore.kt` keeps the last reply or status on the watch with the instant it arrived; a screen created later shows it already marked "last known - may be outdated" by the same rule as a live one, and the voice button stays withheld until the phone is heard from again. A message that arrives with no screen is also shown as a notification (`transport/RelayNotifier.kt`: always an answer, a status only when it is not nominal, only when the operator allowed notifications on Wear OS 4 and later, asked once). While the watch is in ambient mode the screen draws only the last state, whether it is outdated and the time, with no buttons. *(implemented; not tried on a real watch. A tile and a complication that read the same kept state are not built yet: they need extra Wear OS libraries and a watch to try them on.)*
+* 🔔 **Last state kept, ambient screen and notification** — `transport/LastRelayStore.kt` keeps the last reply or status on the watch with the instant it arrived; a screen created later shows it already marked "last known - may be outdated" by the same rule as a live one, and the voice button stays withheld until the phone is heard from again. A message that arrives with no screen is also shown as a notification (`transport/RelayNotifier.kt`: always an answer, a status only when it is not nominal, only when the operator allowed notifications on Wear OS 4 and later, asked once). While the watch is in ambient mode the screen draws only the last state, whether it is outdated and the time, with no buttons. *(implemented; not tried on a real watch. A tile that reads the same kept state is not built yet: it needs a watch to try it on.)*
+* 🚨 **Alerts pushed by the phone** — the phone forwards an `alert` on `/hydra-umc/alert/v1`; the watch checks it, vibrates by severity and shows it marked as outdated once it is older than `alerts.stale_after_s`. A critical alert is also a notification that stays until it is opened (`transport/AlertPolicy.kt`, `transport/AlertNotifier.kt`); a warning only when no screen exists; an info alert never. On with `alerts.enabled` in `app/src/main/assets/watch.cfg`. *(implemented and checked on a plain JVM; the sender on the phone and the events of the server are not written yet; not tried on a real watch.)*
+* 🫀 **Presence of the operator (dead-man), off by default** — with `presence.enabled = true` a button starts a foreground service that sends a `presence_heartbeat` every `presence.interval_s` seconds with a rising number, and one last with the state `left` when the operator ends it on purpose (`transport/PresenceHeartbeatPolicy.kt`, `transport/PresenceHeartbeatService.kt`). What a lost heartbeat does (slow down, pause) is decided by the server, never by the watch. *(the watch side is implemented; the relay on the phone and the rule of the server are not written yet and need a formal safety decision; not tried on a real watch.)*
+* ✌️ **Two-step confirmation of a spoken order, off by default** — with `confirm.enabled = true`, a reply that asks for confirmation and brings a token is offered as a button: the first tap arms it, a second one (not sooner than `confirm.min_gap_ms`, not later than `confirm.second_tap_window_s`) sends a `voice_confirm` once, never retried (`transport/TwoStepConfirmation.kt`). The token lives only in the memory of the screen, for `confirm.max_validity_s` at most, and is never stored. The phone must have a session and the reservation of the robot, or nothing happens. *(the watch side is implemented; the relay of the confirmation on the phone and in the server is not written yet.)*
+* 🕘 **Complication with the robots running or the alarm** — `complication/RobotsComplicationService.kt` puts the number of running robots on a watch face, or `!` while an alarm is active, and `?` once the last state is older than `complication.stale_after_s`; it never invents a count when the phone does not say it (`robotsRunning` and `alarmActive` of the status). *(implemented; the phone does not send those two fields yet; not tried on a real watch.)*
 * 🌐 **8-language UI** — `app/src/main/res/values-xx/strings.xml` for English, Spanish, French, German, Italian, Japanese, Chinese and Portuguese, picked automatically from the watch's system language; `LocalizedStringsTest` checks that every language file has exactly the English keys and format specifiers, so a missing string or a broken placeholder fails the build instead of showing up on the wrist. *(implemented)*
 
 ## 🧩 Role in HYDRA-UMC
@@ -176,7 +180,7 @@ Requires the Android SDK with a JDK that the bundled Gradle wrapper accepts, and
 
 ## 🧪 Testing
 
-113 automated tests run with `./gradlew testDebugUnitTest`. They need no hardware and nothing outside this machine.
+153 automated tests run with `./gradlew testDebugUnitTest`. They need no hardware and nothing outside this machine.
 
 The CI runs `HYDRA_UMC_CI=1 python tools/ci_validate.py`, which checks the manifest, the documents, the eight READMEs and the pictures.
 

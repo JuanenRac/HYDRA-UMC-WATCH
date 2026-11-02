@@ -18,7 +18,7 @@ GPL-3.0-or-later - see LICENSE
   <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
   <img src="https://img.shields.io/badge/Platform-Wear%20OS-4285F4.svg" alt="Platform">
   <img src="https://img.shields.io/badge/Feature-Voice%20%26%20haptics-blue.svg" alt="Feature">
-  <img src="https://img.shields.io/badge/Tests-113%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-153%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.2.9-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-functional-0F6CBD.svg" alt="Maturity">
 </p>
@@ -35,7 +35,7 @@ GPL-3.0-or-later - see LICENSE
 |---|---|
 | Version | `0.2.9` |
 | Maturité | Fonctionnel |
-| Tests | 113 (`./gradlew testDebugUnitTest`) |
+| Tests | 153 (`./gradlew testDebugUnitTest`) |
 | Technologie | Kotlin / Wear OS |
 | Cible | Une montre Wear OS (appairée au téléphone) |
 | Sur matériel réel | Pas encore : aucune exécution sur du matériel réel n'est consignée pour cette version |
@@ -51,7 +51,7 @@ Chaque ligne est une partie de ce dépôt et le feu dit où elle en est aujourd'
 | Domaine | État | Ce que cela veut dire ici |
 |---|---|---|
 | Logiciel | 🟡 | Fonctionne pour son usage principal ; la vérification d'honnêteté ci-dessus liste ce qui manque encore |
-| Tests | 🟢 | 113 tests automatiques, exécutés à chaque modification |
+| Tests | 🟢 | 153 tests automatiques, exécutés à chaque modification |
 | Matériel réel | 🔴 | Pas encore : aucune exécution sur du matériel réel n'est consignée pour cette version |
 | Interface et protocoles | 🟡 | Les routes ou les messages proposés sont documentés et testés avec un client ; tous les clients ne les ont pas encore utilisés |
 | Intégration | 🟠 | Ses messages et ses routes sont vérifiés par rapport aux contrats partagés du SDK ; il n'a pas fonctionné avec l'équipement réel |
@@ -81,7 +81,11 @@ Construit comme une application Wear OS autonome (Kotlin + Jetpack Compose pour 
 * 🧭 **Sélection de nœud vérifiée par le companion** — `WatchRelayTransport` envoie via une vraie requête `CapabilityClient` (`hydra_umc_phone_companion`, déclarée dans le propre `res/values/wear.xml` de HYDRA-UMC-ANDROID-CONTROL), jamais `connectedNodes.firstOrNull()` - un second nœud connecté sans l'application companion installée ne peut jamais être choisi par accident ; un nœud à proximité (directement joignable en Bluetooth) est préféré à un nœud relayé par le cloud lorsque plusieurs sont valides. *(implémenté - `pickCompanionNode()`)*
 * 🗂️ **Cache du Dernier État Connu** — `transport/LastKnownStateCache.kt` suit l'obsolescence réelle du dernier statut/alerte relayé, afin qu'un ancien ne soit jamais affiché comme actuel. *(implémenté)*
 * 📥 **Boîte du relais** — `transport/RelayInbox.kt` : sous Wear OS l'écran est détruit dès que le poignet est baissé, et une réponse arrivée entre-temps n'avait plus de récepteur et était perdue. Le service d'écoute garde maintenant les messages les plus récents (8 au plus, aucun de plus de 10 minutes) et l'écran les affiche quand il est recréé, sans les énoncer ni vibrer. *(implémenté ; non essayé sur une vraie montre)*
-* 🔔 **Dernier état conservé, écran ambiant et notification** — `transport/LastRelayStore.kt` conserve sur la montre la dernière réponse ou le dernier état avec l'instant de son arrivée ; un écran créé plus tard l'affiche déjà marqué « dernier état connu - peut être obsolète » selon la même règle qu'un état en direct, et le bouton vocal reste retenu tant que le téléphone n'a pas été entendu de nouveau. Un message qui arrive sans écran est aussi montré comme notification (`transport/RelayNotifier.kt` : toujours une réponse, un état seulement s'il n'est pas nominal, et seulement si l'opérateur a autorisé les notifications sous Wear OS 4 et suivants, demandées une fois). Quand la montre est en mode ambiant, l'écran ne dessine que le dernier état, s'il est obsolète et l'heure, sans boutons. *(implémenté ; non essayé sur une vraie montre. Une tuile et une complication qui lisent le même état conservé ne sont pas encore faites : elles demandent des bibliothèques Wear OS supplémentaires et une montre pour les essayer.)*
+* 🔔 **Dernier état conservé, écran ambiant et notification** — `transport/LastRelayStore.kt` conserve sur la montre la dernière réponse ou le dernier état avec l'instant de son arrivée ; un écran créé plus tard l'affiche déjà marqué « dernier état connu - peut être obsolète » selon la même règle qu'un état en direct, et le bouton vocal reste retenu tant que le téléphone n'a pas été entendu de nouveau. Un message qui arrive sans écran est aussi montré comme notification (`transport/RelayNotifier.kt` : toujours une réponse, un état seulement s'il n'est pas nominal, et seulement si l'opérateur a autorisé les notifications sous Wear OS 4 et suivants, demandées une fois). Quand la montre est en mode ambiant, l'écran ne dessine que le dernier état, s'il est obsolète et l'heure, sans boutons. *(implémenté ; non essayé sur une vraie montre. Une tuile qui lit le même état conservé n'est pas encore faite : elle demande une montre pour l'essayer.)*
+* 🚨 **Alertes envoyées par le téléphone** — le téléphone relaie une `alert` sur `/hydra-umc/alert/v1` ; la montre la vérifie, vibre selon la gravité et l'affiche marquée comme périmée dès qu'elle dépasse `alerts.stale_after_s`. Une alerte critique est aussi une notification qui reste jusqu'à son ouverture (`transport/AlertPolicy.kt`, `transport/AlertNotifier.kt`) ; un avertissement seulement sans écran ; une information jamais. Activée par `alerts.enabled` dans `app/src/main/assets/watch.cfg`. *(implémenté et vérifié sur une JVM ordinaire ; l'émetteur dans le téléphone et les événements du serveur ne sont pas encore écrits ; non essayé sur une vraie montre.)*
+* 🫀 **Présence de l'opérateur (homme mort), désactivée par défaut** — avec `presence.enabled = true`, un bouton lance un service au premier plan qui envoie un `presence_heartbeat` toutes les `presence.interval_s` secondes avec un numéro croissant, et un dernier avec l'état `left` quand l'opérateur y met fin volontairement (`transport/PresenceHeartbeatPolicy.kt`, `transport/PresenceHeartbeatService.kt`). Ce que fait un battement perdu (ralentir, mettre en pause) est décidé par le serveur, jamais par la montre. *(le côté montre est implémenté ; le relais dans le téléphone et la règle du serveur ne sont pas encore écrits et demandent une décision formelle de sécurité ; non essayé sur une vraie montre.)*
+* ✌️ **Confirmation en deux temps d'un ordre vocal, désactivée par défaut** — avec `confirm.enabled = true`, une réponse qui demande confirmation et apporte un jeton est proposée comme bouton : le premier appui l'arme, un second (pas avant `confirm.min_gap_ms`, pas après `confirm.second_tap_window_s`) envoie un `voice_confirm` une seule fois, sans nouvel essai (`transport/TwoStepConfirmation.kt`). Le jeton ne vit que dans la mémoire de l'écran, `confirm.max_validity_s` au plus, et n'est jamais stocké. Le téléphone doit avoir une session et la réservation du robot, sinon rien ne se passe. *(le côté montre est implémenté ; le relais de la confirmation dans le téléphone et dans le serveur n'est pas encore écrit.)*
+* 🕘 **Complication avec les robots en marche ou l'alarme** — `complication/RobotsComplicationService.kt` met sur un cadran le nombre de robots en marche, `!` tant qu'une alarme est active et `?` quand le dernier état dépasse `complication.stale_after_s` ; elle n'invente jamais un nombre que le téléphone ne donne pas (`robotsRunning` et `alarmActive` du statut). *(implémentée ; le téléphone n'envoie pas encore ces deux champs ; non essayée sur une vraie montre.)*
 * 🌐 **Interface en 8 langues** — `app/src/main/res/values-xx/strings.xml` pour l'anglais, l'espagnol, le français, l'allemand, l'italien, le japonais, le chinois et le portugais, choisi automatiquement selon la langue système de la montre ; `LocalizedStringsTest` vérifie que chaque fichier de langue a exactement les clés et les spécificateurs de format de l'anglais, de sorte qu'une chaîne manquante ou un marqueur cassé fasse échouer la compilation au lieu d'apparaître au poignet. *(implémenté)*
 
 ## 🧩 Rôle dans HYDRA-UMC
@@ -179,7 +183,7 @@ Nécessite le SDK Android avec un JDK accepté par l'enveloppe Gradle fournie, e
 
 ## 🧪 Tests
 
-113 tests automatiques s'exécutent avec `./gradlew testDebugUnitTest`. Ils n'ont besoin ni de matériel ni de rien en dehors de cette machine.
+153 tests automatiques s'exécutent avec `./gradlew testDebugUnitTest`. Ils n'ont besoin ni de matériel ni de rien en dehors de cette machine.
 
 La CI exécute `HYDRA_UMC_CI=1 python tools/ci_validate.py`, qui vérifie le manifeste, les documents, les huit README et les images.
 

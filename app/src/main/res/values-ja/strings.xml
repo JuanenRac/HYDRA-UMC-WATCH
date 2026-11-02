@@ -35,4 +35,27 @@
     <string name="security_sw_install_tls">新規インストールで TLS なし</string>
     <string name="security_refresh">サーバーのセキュリティ</string>
     <string name="security_loading">セキュリティ状態を要求しています…</string>
+    <string name="alert_critical">重大な警報</string>
+    <string name="alert_warning">警告</string>
+    <string name="alert_info">お知らせ</string>
+    <string name="alert_line">%1$s: %2$s</string>
+    <string name="notification_channel_alerts">HYDRA-UMC からの警報</string>
+    <string name="notification_channel_presence">作業者の在席</string>
+    <string name="presence_start">セル内にいます（在席）</string>
+    <string name="presence_stop">在席を終了</string>
+    <string name="presence_notification_title">在席中</string>
+    <string name="presence_notification_text">あなたがセル内にいることが設備に伝わっています。</string>
+    <string name="confirm_first_tap">指示を確認（2回タップ）</string>
+    <string name="confirm_second_tap">もう一度タップして確認</string>
+    <string name="confirm_cancel">指示を取り消す</string>
+    <string name="confirm_tap_again">%1$d 秒以内にもう一度タップして確認します。</string>
+    <string name="confirm_sent">ペアリング済みのスマートフォン経由で確認を送信しました…</string>
+    <string name="confirm_not_sent">確認を送信できませんでした。もう一度指示を話してください。</string>
+    <string name="confirm_expired">確認の有効期限が切れました。もう一度指示を話してください。</string>
+    <string name="confirm_repeat_order">ウォッチでは確認できません。もう一度指示を話してください。</string>
+    <string name="complication_title">ロボット</string>
+    <string name="complication_unknown">ロボットのデータなし</string>
+    <string name="complication_outdated">ロボットのデータが古い</string>
+    <string name="complication_alarm">警報作動中</string>
+    <string name="complication_running">稼働中のロボット: %1$d</string>
 </resources>

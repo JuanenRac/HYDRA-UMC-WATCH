@@ -36,7 +36,8 @@ class LastRelayStore(
     fun save(raw: String): Boolean {
         val message = runCatching { parseSyncMessage(raw) }.getOrNull() ?: return false
         if (message !is SyncMessage.AssistantReply && message !is SyncMessage.SystemStatus) return false
-        store.put(KEY_RAW, raw, now())
+        // the one-use confirmation token is never written to storage
+        store.put(KEY_RAW, WatchRelayRouting.withoutConfirmationToken(raw), now())
         return true
     }
 

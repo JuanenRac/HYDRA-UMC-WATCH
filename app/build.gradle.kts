@@ -139,6 +139,8 @@ dependencies {
     // Declares this app as Wear OS-aware to the Play/ADB tooling and
     // brings the AmbientModeSupport helpers used for always-on display.
     implementation(libs.androidx.wear)
+    // The complication with the robots running or the alarm (complication/RobotsComplicationService.kt).
+    implementation(libs.androidx.wear.complications.data.source)
 
     // Real JSON codec for the SERVER<->WATCH sync protocol (see
     // protocol/SyncMessage.kt) - the actual WebSocket transport is future

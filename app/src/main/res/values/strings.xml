@@ -35,4 +35,27 @@
     <string name="security_sw_install_tls">New installs without TLS</string>
     <string name="security_refresh">Server security</string>
     <string name="security_loading">Requesting the security status…</string>
+    <string name="alert_critical">Critical alert</string>
+    <string name="alert_warning">Warning</string>
+    <string name="alert_info">Notice</string>
+    <string name="alert_line">%1$s: %2$s</string>
+    <string name="notification_channel_alerts">Alerts from HYDRA-UMC</string>
+    <string name="notification_channel_presence">Operator presence</string>
+    <string name="presence_start">I am in the cell (presence)</string>
+    <string name="presence_stop">End presence</string>
+    <string name="presence_notification_title">Presence on</string>
+    <string name="presence_notification_text">The plant is told that you are in the cell.</string>
+    <string name="confirm_first_tap">Confirm order (tap twice)</string>
+    <string name="confirm_second_tap">Tap again to confirm</string>
+    <string name="confirm_cancel">Cancel order</string>
+    <string name="confirm_tap_again">Tap again within %1$d s to confirm.</string>
+    <string name="confirm_sent">Confirmation sent through the paired phone…</string>
+    <string name="confirm_not_sent">The confirmation could not be sent. Speak the order again.</string>
+    <string name="confirm_expired">The confirmation ran out. Speak the order again.</string>
+    <string name="confirm_repeat_order">It cannot be confirmed on the watch. Speak the order again.</string>
+    <string name="complication_title">Robots</string>
+    <string name="complication_unknown">No robot data</string>
+    <string name="complication_outdated">Robot data outdated</string>
+    <string name="complication_alarm">Alarm active</string>
+    <string name="complication_running">%1$d robots running</string>
 </resources>

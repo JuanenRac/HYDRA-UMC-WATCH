@@ -35,4 +35,27 @@
     <string name="security_sw_install_tls">Nouvelles installations sans TLS</string>
     <string name="security_refresh">Sécurité du serveur</string>
     <string name="security_loading">Demande de l\'état de sécurité…</string>
+    <string name="alert_critical">Alerte critique</string>
+    <string name="alert_warning">Avertissement</string>
+    <string name="alert_info">Information</string>
+    <string name="alert_line">%1$s : %2$s</string>
+    <string name="notification_channel_alerts">Alertes de HYDRA-UMC</string>
+    <string name="notification_channel_presence">Présence de l\'opérateur</string>
+    <string name="presence_start">Je suis dans la cellule (présence)</string>
+    <string name="presence_stop">Terminer la présence</string>
+    <string name="presence_notification_title">Présence active</string>
+    <string name="presence_notification_text">L\'installation sait que vous êtes dans la cellule.</string>
+    <string name="confirm_first_tap">Confirmer l\'ordre (appuyer deux fois)</string>
+    <string name="confirm_second_tap">Appuyez encore pour confirmer</string>
+    <string name="confirm_cancel">Annuler l\'ordre</string>
+    <string name="confirm_tap_again">Appuyez encore dans %1$d s pour confirmer.</string>
+    <string name="confirm_sent">Confirmation envoyée par le téléphone associé…</string>
+    <string name="confirm_not_sent">La confirmation n\'a pas pu être envoyée. Redites l\'ordre.</string>
+    <string name="confirm_expired">La confirmation a expiré. Redites l\'ordre.</string>
+    <string name="confirm_repeat_order">Confirmation impossible sur la montre. Redites l\'ordre.</string>
+    <string name="complication_title">Robots</string>
+    <string name="complication_unknown">Aucune donnée de robot</string>
+    <string name="complication_outdated">Données de robot périmées</string>
+    <string name="complication_alarm">Alarme active</string>
+    <string name="complication_running">%1$d robots en marche</string>
 </resources>

@@ -18,7 +18,7 @@ GPL-3.0-or-later - see LICENSE
   <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
   <img src="https://img.shields.io/badge/Platform-Wear%20OS-4285F4.svg" alt="Platform">
   <img src="https://img.shields.io/badge/Feature-Voice%20%26%20haptics-blue.svg" alt="Feature">
-  <img src="https://img.shields.io/badge/Tests-113%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-153%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.2.9-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-functional-0F6CBD.svg" alt="Maturity">
 </p>
@@ -35,7 +35,7 @@ GPL-3.0-or-later - see LICENSE
 |---|---|
 | バージョン | `0.2.9` |
 | 成熟度 | 機能する |
-| テスト | 113 (`./gradlew testDebugUnitTest`) |
+| テスト | 153 (`./gradlew testDebugUnitTest`) |
 | 技術 | Kotlin / Wear OS |
 | 対象 | Wear OS ウォッチ（スマートフォンとペアリング） |
 | 実機での確認 | まだです：このバージョンについて実機での動作記録はありません |
@@ -51,7 +51,7 @@ GPL-3.0-or-later - see LICENSE
 | 領域 | 状態 | ここでの意味 |
 |---|---|---|
 | ソフトウェア | 🟡 | 主な目的では動作します。足りない点は上の正直さの確認に書かれています |
-| テスト | 🟢 | 自動テスト 113 件。変更のたびに実行されます |
+| テスト | 🟢 | 自動テスト 153 件。変更のたびに実行されます |
 | 実機 | 🔴 | まだです：このバージョンについて実機での動作記録はありません |
 | インターフェースとプロトコル | 🟡 | 提供するルートやメッセージは文書化され、クライアントで試験済みです。すべてのクライアントがまだ使ったわけではありません |
 | 連携 | 🟠 | メッセージとルートは SDK の共通契約に照らして検証されていますが、実機と一緒に動かしたことはありません |
@@ -84,7 +84,11 @@ HYDRA-UMC-ANDROID-CONTROL と同じ Gradle/Kotlin ツールチェーンを再利
 * 🧭 **コンパニオン検証済みノード選択** — `WatchRelayTransport` は、`connectedNodes.firstOrNull()` ではなく、実際の `CapabilityClient` クエリ（HYDRA-UMC-ANDROID-CONTROL 自身の `res/values/wear.xml` で宣言されている `hydra_umc_phone_companion`）経由で送信します——コンパニオンアプリがインストールされていない2つ目の接続ノードが誤って選ばれることは決してありません。複数の候補が有効な場合、クラウド経由で中継されるノードよりも、近く（Bluetooth で直接到達可能）にあるノードが優先されます。*（実装済み — `pickCompanionNode()`）*
 * 🗂️ **最終既知状態キャッシュ** — `transport/LastKnownStateCache.kt` は、最後に中継されたステータス/アラートの実際の陳腐化を追跡し、古い情報が最新のものとして表示されることを防ぎます。*（実装済み）*
 * 📥 **リレー受信箱** — `transport/RelayInbox.kt`: Wear OS では手首を下げるとすぐに画面が破棄され、その間に届いた返信は受信者がなく失われていました。リスナーサービスが最新のメッセージ(最大 8 件、10 分より古いものは除く)を保持し、画面が再び作られたときに、読み上げや振動なしで表示します。 *(実装済み、実機の時計では未検証)*
-* 🔔 **最後の状態の保持、アンビエント画面、通知** — `transport/LastRelayStore.kt` が最後の応答またはステータスを到着時刻とともにウォッチに保存します。後から作られた画面は、ライブの値と同じ規則で「最終確認情報 - 古い可能性があります」と表示し、スマートフォンから再び応答があるまで音声ボタンは無効のままです。画面がないときに届いたメッセージは通知としても表示されます（`transport/RelayNotifier.kt`：応答は常に、ステータスは通常でないときだけ、Wear OS 4 以降で操作者が通知を許可した場合のみ。許可は1回だけ求めます）。ウォッチがアンビエントモードのときは、最後の状態、古いかどうか、時刻だけをボタンなしで描画します。*（実装済み。実機では未確認。同じ保存済みの状態を読むタイルとコンプリケーションはまだ作っていません。追加の Wear OS ライブラリと試すためのウォッチが必要です。）*
+* 🔔 **最後の状態の保持、アンビエント画面、通知** — `transport/LastRelayStore.kt` が最後の応答またはステータスを到着時刻とともにウォッチに保存します。後から作られた画面は、ライブの値と同じ規則で「最終確認情報 - 古い可能性があります」と表示し、スマートフォンから再び応答があるまで音声ボタンは無効のままです。画面がないときに届いたメッセージは通知としても表示されます（`transport/RelayNotifier.kt`：応答は常に、ステータスは通常でないときだけ、Wear OS 4 以降で操作者が通知を許可した場合のみ。許可は1回だけ求めます）。ウォッチがアンビエントモードのときは、最後の状態、古いかどうか、時刻だけをボタンなしで描画します。*（実装済み。実機では未確認。同じ保存済みの状態を読むタイルはまだ作っていません。試すためのウォッチが必要です。）*
+* 🚨 **スマートフォンから届く警報** — スマートフォンが `/hydra-umc/alert/v1` で `alert` を中継し、ウォッチは検証して重大度ごとに振動し、`alerts.stale_after_s` を過ぎたものは古いと印を付けて表示します。重大な警報は開くまで残る通知にもなります（`transport/AlertPolicy.kt`、`transport/AlertNotifier.kt`）。警告は画面がないときだけ、情報は通知しません。`app/src/main/assets/watch.cfg` の `alerts.enabled` で有効にします。*（実装済みで通常の JVM で確認済み。スマートフォン側の送信とサーバーのイベントはまだ未実装。実機では未確認。）*
+* 🫀 **作業者の在席（デッドマン）、既定ではオフ** — `presence.enabled = true` にするとボタンでフォアグラウンドサービスが始まり、`presence.interval_s` 秒ごとに番号が増える `presence_heartbeat` を送り、作業者が意図して終了したときは状態 `left` の最後の1通を送ります（`transport/PresenceHeartbeatPolicy.kt`、`transport/PresenceHeartbeatService.kt`）。ハートビートが途切れたときの動作（減速、一時停止）を決めるのはサーバーであり、ウォッチではありません。*（ウォッチ側は実装済み。スマートフォンでの中継とサーバーの規則は未実装で、正式な安全上の判断が必要。実機では未確認。）*
+* ✌️ **音声指示の2段階確認、既定ではオフ** — `confirm.enabled = true` にすると、確認を求めトークンを伴う応答がボタンとして表示されます。1回目のタップで待機状態になり、2回目（`confirm.min_gap_ms` より早くなく、`confirm.second_tap_window_s` より遅くない）で `voice_confirm` を1回だけ、再送なしで送ります（`transport/TwoStepConfirmation.kt`）。トークンは画面のメモリ内にだけ、最長 `confirm.max_validity_s` 保持され、保存されません。スマートフォンにセッションとロボットの予約がなければ何も起こりません。*（ウォッチ側は実装済み。スマートフォンとサーバーでの確認の中継は未実装。）*
+* 🕘 **稼働中のロボット数または警報のコンプリケーション** — `complication/RobotsComplicationService.kt` は文字盤に稼働中のロボット数を表示し、警報中は `!`、最後の状態が `complication.stale_after_s` より古いと `?` を表示します。スマートフォンが伝えない数は作りません（状態の `robotsRunning` と `alarmActive`）。*（実装済み。スマートフォンはまだこの2つの項目を送りません。実機では未確認。）*
 * 🌐 **8言語対応UI：** `app/src/main/res/values-xx/strings.xml` が英語・スペイン語・フランス語・ドイツ語・イタリア語・日本語・中国語・ポルトガル語に対応し、時計のシステム言語から自動的に選ばれる。`LocalizedStringsTest` が、各言語ファイルに英語とまったく同じキーと書式指定子があることを確認するため、文字列の欠落や壊れたプレースホルダーは手首に表示される前にビルドで失敗する。*（実装済み）*
 
 ## 🧩 HYDRA-UMC での役割
@@ -182,7 +186,7 @@ update-from-github.bat    # Windows
 
 ## 🧪 テスト
 
-`./gradlew testDebugUnitTest` で自動テスト 113 件を実行します。 ハードウェアも、このマシンの外にあるものも必要ありません。
+`./gradlew testDebugUnitTest` で自動テスト 153 件を実行します。 ハードウェアも、このマシンの外にあるものも必要ありません。
 
 CI は `HYDRA_UMC_CI=1 python tools/ci_validate.py` を実行し、マニフェスト、文書、8 つの README、図を検査します。
 

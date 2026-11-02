@@ -35,4 +35,27 @@
     <string name="security_sw_install_tls">Neue Installationen ohne TLS</string>
     <string name="security_refresh">Serversicherheit</string>
     <string name="security_loading">Sicherheitsstatus wird angefordert…</string>
+    <string name="alert_critical">Kritischer Alarm</string>
+    <string name="alert_warning">Warnung</string>
+    <string name="alert_info">Hinweis</string>
+    <string name="alert_line">%1$s: %2$s</string>
+    <string name="notification_channel_alerts">Meldungen von HYDRA-UMC</string>
+    <string name="notification_channel_presence">Anwesenheit des Bedieners</string>
+    <string name="presence_start">Ich bin in der Zelle (Anwesenheit)</string>
+    <string name="presence_stop">Anwesenheit beenden</string>
+    <string name="presence_notification_title">Anwesenheit aktiv</string>
+    <string name="presence_notification_text">Die Anlage weiß, dass Sie in der Zelle sind.</string>
+    <string name="confirm_first_tap">Befehl bestätigen (zweimal tippen)</string>
+    <string name="confirm_second_tap">Zum Bestätigen erneut tippen</string>
+    <string name="confirm_cancel">Befehl abbrechen</string>
+    <string name="confirm_tap_again">Innerhalb von %1$d s erneut tippen, um zu bestätigen.</string>
+    <string name="confirm_sent">Bestätigung über das gekoppelte Telefon gesendet…</string>
+    <string name="confirm_not_sent">Die Bestätigung konnte nicht gesendet werden. Sprechen Sie den Befehl erneut.</string>
+    <string name="confirm_expired">Die Bestätigung ist abgelaufen. Sprechen Sie den Befehl erneut.</string>
+    <string name="confirm_repeat_order">Auf der Uhr nicht bestätigbar. Sprechen Sie den Befehl erneut.</string>
+    <string name="complication_title">Roboter</string>
+    <string name="complication_unknown">Keine Roboterdaten</string>
+    <string name="complication_outdated">Roboterdaten veraltet</string>
+    <string name="complication_alarm">Alarm aktiv</string>
+    <string name="complication_running">%1$d Roboter in Betrieb</string>
 </resources>

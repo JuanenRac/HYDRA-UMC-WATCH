@@ -18,7 +18,7 @@ GPL-3.0-or-later - see LICENSE
   <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
   <img src="https://img.shields.io/badge/Platform-Wear%20OS-4285F4.svg" alt="Platform">
   <img src="https://img.shields.io/badge/Feature-Voice%20%26%20haptics-blue.svg" alt="Feature">
-  <img src="https://img.shields.io/badge/Tests-113%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-153%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.2.9-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-functional-0F6CBD.svg" alt="Maturity">
 </p>
@@ -35,7 +35,7 @@ GPL-3.0-or-later - see LICENSE
 |---|---|
 | 版本 | `0.2.9` |
 | 成熟度 | 可用 |
-| 测试 | 113 (`./gradlew testDebugUnitTest`) |
+| 测试 | 153 (`./gradlew testDebugUnitTest`) |
 | 技术栈 | Kotlin / Wear OS |
 | 目标 | Wear OS 手表（与手机配对） |
 | 真实硬件 | 尚未：此版本没有在真实硬件上运行的记录 |
@@ -51,7 +51,7 @@ GPL-3.0-or-later - see LICENSE
 | 领域 | 状态 | 在这里的含义 |
 |---|---|---|
 | 软件 | 🟡 | 主要用途可用；上面的诚实性检查列出了仍然缺少的内容 |
-| 测试 | 🟢 | 113 项自动测试，每次变更都会运行 |
+| 测试 | 🟢 | 153 项自动测试，每次变更都会运行 |
 | 真实硬件 | 🔴 | 尚未：此版本没有在真实硬件上运行的记录 |
 | 接口与协议 | 🟡 | 提供的路由或消息已有文档，并用客户端测试过；尚未被所有客户端使用 |
 | 集成 | 🟠 | 其消息和路由已对照 SDK 的共享契约检查；尚未与真实设备一起运行 |
@@ -83,7 +83,11 @@ GPL-3.0-or-later - see LICENSE
 * 🧭 **经 companion 验证的节点选择** —— `WatchRelayTransport` 现在通过真实的 `CapabilityClient` 查询发送（`hydra_umc_phone_companion`，在 HYDRA-UMC-ANDROID-CONTROL 自身的 `res/values/wear.xml` 中声明），而不再是 `connectedNodes.firstOrNull()`——一个未安装 companion 应用的已连接节点绝不会被意外选中；当有多个符合条件的节点时，会优先选择就近（可直接通过蓝牙访问）的节点，而非经云端中转的节点。*（已实现 —— `pickCompanionNode()`）*
 * 🗂️ **最后已知状态缓存** —— `transport/LastKnownStateCache.kt` 会跟踪最后一次中继的状态/告警的真实过时程度，确保旧数据永远不会被当作最新数据显示。*（已实现）*
 * 📥 **中继收件箱** — `transport/RelayInbox.kt`:在 Wear OS 上,手腕一放下屏幕就会被销毁,此时到达的回复没有接收者而丢失。监听服务现在会保留最新的消息(最多 8 条,不超过 10 分钟),屏幕重新创建时显示它们,不朗读也不振动。 *(已实现;未在真实手表上试过)*
-* 🔔 **保留最后状态、环境屏幕与通知** — `transport/LastRelayStore.kt` 在手表上保存最后一条回复或状态及其到达时间；稍后创建的屏幕会按与实时数据相同的规则把它标为“最后已知状态 - 可能已过时”，并且在再次收到手机的消息之前语音按钮保持禁用。没有屏幕时到达的消息还会显示为通知（`transport/RelayNotifier.kt`：回复总是通知，状态仅在不是正常时通知，并且仅在操作员于 Wear OS 4 及更高版本允许通知后，权限只询问一次）。手表处于环境模式时，屏幕只绘制最后状态、是否已过时以及时间，没有按钮。*（已实现；未在真实手表上试过。读取同一保存状态的磁贴和表盘组件尚未制作：它们需要额外的 Wear OS 库和一块可试用的手表。）*
+* 🔔 **保留最后状态、环境屏幕与通知** — `transport/LastRelayStore.kt` 在手表上保存最后一条回复或状态及其到达时间；稍后创建的屏幕会按与实时数据相同的规则把它标为“最后已知状态 - 可能已过时”，并且在再次收到手机的消息之前语音按钮保持禁用。没有屏幕时到达的消息还会显示为通知（`transport/RelayNotifier.kt`：回复总是通知，状态仅在不是正常时通知，并且仅在操作员于 Wear OS 4 及更高版本允许通知后，权限只询问一次）。手表处于环境模式时，屏幕只绘制最后状态、是否已过时以及时间，没有按钮。*（已实现；未在真实手表上试过。读取同一保存状态的磁贴尚未制作：它需要一块可试用的手表。）*
+* 🚨 **手机推送的警报** —— 手机通过 `/hydra-umc/alert/v1` 转发 `alert`；手表校验后按严重程度振动，超过 `alerts.stale_after_s` 后标记为已过时再显示。严重警报还会成为一条直到被打开才消失的通知（`transport/AlertPolicy.kt`、`transport/AlertNotifier.kt`）；警告仅在没有屏幕时通知；提示从不通知。在 `app/src/main/assets/watch.cfg` 中用 `alerts.enabled` 开启。*（已实现，并在普通 JVM 上检查；手机端的发送方和服务器的事件尚未编写；未在真实手表上试过。）*
+* 🫀 **操作员在岗（死人开关），默认关闭** —— 设置 `presence.enabled = true` 后，一个按钮启动前台服务，每 `presence.interval_s` 秒发送一次编号递增的 `presence_heartbeat`；操作员主动结束时再发一次状态为 `left` 的心跳（`transport/PresenceHeartbeatPolicy.kt`、`transport/PresenceHeartbeatService.kt`）。心跳丢失后做什么（减速、暂停）由服务器决定，绝不由手表决定。*（手表一侧已实现；手机上的转发和服务器的规则尚未编写，且需要正式的安全决策；未在真实手表上试过。）*
+* ✌️ **语音指令的两步确认，默认关闭** —— 设置 `confirm.enabled = true` 后，要求确认并带有令牌的回复会显示为按钮：第一次点按进入待确认，第二次（不早于 `confirm.min_gap_ms`，不晚于 `confirm.second_tap_window_s`）只发送一次 `voice_confirm`，不重试（`transport/TwoStepConfirmation.kt`）。令牌只存在于屏幕的内存中，最长 `confirm.max_validity_s`，绝不保存。手机必须有会话和机器人的预约，否则什么都不会发生。*（手表一侧已实现；手机和服务器中的确认转发尚未编写。）*
+* 🕘 **显示运行中机器人或警报的表盘组件** —— `complication/RobotsComplicationService.kt` 在表盘上显示运行中的机器人数量，警报期间显示 `!`，最后状态超过 `complication.stale_after_s` 时显示 `?`；手机没有提供的数字它绝不会编造（状态中的 `robotsRunning` 与 `alarmActive`）。*（已实现；手机尚未发送这两个字段；未在真实手表上试过。）*
 * 🌐 **8 语言界面：** `app/src/main/res/values-xx/strings.xml` 涵盖英语、西班牙语、法语、德语、意大利语、日语、中文和葡萄牙语，并根据手表的系统语言自动选择；`LocalizedStringsTest` 会检查每个语言文件的键和格式占位符与英语完全一致，因此缺失的字符串或损坏的占位符会让构建失败，而不是出现在手腕上。*（已实现）*
 
 ## 🧩 在 HYDRA-UMC 中的角色
@@ -174,7 +178,7 @@ update-from-github.bat    # Windows
 
 ## 🧪 测试
 
-运行 `./gradlew testDebugUnitTest` 会执行 113 个自动测试。 不需要硬件，也不需要这台机器以外的任何东西。
+运行 `./gradlew testDebugUnitTest` 会执行 153 个自动测试。 不需要硬件，也不需要这台机器以外的任何东西。
 
 CI 运行 `HYDRA_UMC_CI=1 python tools/ci_validate.py`，检查清单、文档、八个 README 和图片。
 

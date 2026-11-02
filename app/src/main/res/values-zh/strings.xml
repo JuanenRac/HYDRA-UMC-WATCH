@@ -35,4 +35,27 @@
     <string name="security_sw_install_tls">新安装默认不启用 TLS</string>
     <string name="security_refresh">服务器安全</string>
     <string name="security_loading">正在请求安全状态…</string>
+    <string name="alert_critical">严重警报</string>
+    <string name="alert_warning">警告</string>
+    <string name="alert_info">提示</string>
+    <string name="alert_line">%1$s：%2$s</string>
+    <string name="notification_channel_alerts">HYDRA-UMC 警报</string>
+    <string name="notification_channel_presence">操作员在岗</string>
+    <string name="presence_start">我在工作单元内（在岗）</string>
+    <string name="presence_stop">结束在岗</string>
+    <string name="presence_notification_title">在岗已开启</string>
+    <string name="presence_notification_text">设备已知晓您在工作单元内。</string>
+    <string name="confirm_first_tap">确认指令（点按两次）</string>
+    <string name="confirm_second_tap">再次点按以确认</string>
+    <string name="confirm_cancel">取消指令</string>
+    <string name="confirm_tap_again">请在 %1$d 秒内再次点按以确认。</string>
+    <string name="confirm_sent">已通过配对手机发送确认…</string>
+    <string name="confirm_not_sent">无法发送确认，请重新说出指令。</string>
+    <string name="confirm_expired">确认已过期，请重新说出指令。</string>
+    <string name="confirm_repeat_order">无法在手表上确认，请重新说出指令。</string>
+    <string name="complication_title">机器人</string>
+    <string name="complication_unknown">无机器人数据</string>
+    <string name="complication_outdated">机器人数据已过期</string>
+    <string name="complication_alarm">警报已触发</string>
+    <string name="complication_running">%1$d 台机器人运行中</string>
 </resources>

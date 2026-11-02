@@ -20,6 +20,9 @@ private const val MAX_STATUS_HEADLINE_LENGTH = 80
 private const val MAX_STATUS_DETAIL_LENGTH = 280
 private const val MAX_LOWERED_SWITCHES = 16
 private const val MAX_SECURITY_COUNT = 100_000
+private const val MAX_CONFIRMATION_VALIDITY_SECONDS = 300
+private const val MAX_ROBOTS_RUNNING = 10_000
+private val confirmationTokenPattern = Regex("^[A-Za-z0-9._~+/=-]{16,1024}$")
 private val switchIdPattern = Regex("^[A-Za-z]{1,24}\\.[A-Za-z]{1,32}$")
 
 /**
@@ -38,6 +41,13 @@ enum class WatchStatusLevel {
     WARNING,
     CRITICAL,
     OFFLINE,
+}
+
+/** Whether the operator is in the cell or has ended the presence on purpose. */
+@Serializable
+enum class PresenceState {
+    PRESENT,
+    LEFT,
 }
 
 /**
@@ -96,6 +106,12 @@ sealed class SyncMessage {
         val speak: Boolean = true,
         val requiresConfirmation: Boolean = false,
         val errorCode: String? = null,
+        /**
+         * The one-use token that completes a reply with [requiresConfirmation] (see [VoiceConfirm]). It is held in the memory of
+         * the screen only, for [confirmationValiditySeconds] at most, and never stored, notified or spoken.
+         */
+        val confirmationToken: String? = null,
+        val confirmationValiditySeconds: Int? = null,
     ) : SyncMessage()
 
     /**
@@ -111,6 +127,10 @@ sealed class SyncMessage {
         val level: WatchStatusLevel = WatchStatusLevel.ATTENTION,
         val speak: Boolean = false,
         val errorCode: String? = null,
+        /** How many robots the phone reports as running, or null when it does not say (shown by the complication). */
+        val robotsRunning: Int? = null,
+        /** Whether an alarm is active on the plant, or null when the phone does not say. */
+        val alarmActive: Boolean? = null,
     ) : SyncMessage()
 
     /**
@@ -141,6 +161,33 @@ sealed class SyncMessage {
         val lockedSwitches: Int = 0,
         val activeClients: Int = 0,
         val failedLogins: Int = 0,
+    ) : SyncMessage()
+
+    /**
+     * Watch -> phone: the operator wears the watch and is in the cell. Sent every few seconds while the presence option is on; the
+     * phone passes it on and the server (not this watch) decides what a lost heartbeat means. [state] is LEFT when the operator
+     * ended the presence on purpose, so a deliberate leave is told apart from a loss.
+     */
+    @Serializable
+    @SerialName("presence_heartbeat")
+    data class PresenceHeartbeat(
+        val protocolVersion: Int = CURRENT_PROTOCOL_VERSION,
+        val sequence: Long,
+        val intervalSeconds: Int,
+        val state: PresenceState = PresenceState.PRESENT,
+    ) : SyncMessage()
+
+    /**
+     * Watch -> phone: the operator confirmed, with two deliberate taps on the watch, the order of the reply [confirms]. [requestId] is
+     * new: the answer comes back as an assistant reply with it. The phone sends the confirmation to the server only if it has a session
+     * and the reservation of the robot; the watch cannot make a robot move by itself.
+     */
+    @Serializable
+    @SerialName("voice_confirm")
+    data class VoiceConfirm(
+        val requestId: String,
+        val confirms: String,
+        val confirmationToken: String,
     ) : SyncMessage()
 
     /** Watch -> server: the dedicated emergency button was pressed. */
@@ -198,6 +245,8 @@ fun parseSyncMessage(raw: String): SyncMessage {
             "server_security_status",
             "estop_command",
             "alert",
+            "presence_heartbeat",
+            "voice_confirm",
         )
     ) {
         throw SyncMessageParseException("unknown message type '$type'")
@@ -246,6 +295,12 @@ private fun validateProtocolMessage(message: SyncMessage) {
             if (message.text.isBlank()) {
                 throw SyncMessageParseException("assistant text must contain 1-$MAX_ASSISTANT_TEXT_LENGTH characters")
             }
+            if (message.confirmationToken != null && !confirmationTokenPattern.matches(message.confirmationToken)) {
+                throw SyncMessageParseException("invalid confirmation token")
+            }
+            if (message.confirmationValiditySeconds != null && message.confirmationValiditySeconds !in 1..MAX_CONFIRMATION_VALIDITY_SECONDS) {
+                throw SyncMessageParseException("confirmation validity must be from 1 to $MAX_CONFIRMATION_VALIDITY_SECONDS seconds")
+            }
         }
         is SyncMessage.SystemStatus -> {
             if (message.headline.isBlank() || message.headline.length > MAX_STATUS_HEADLINE_LENGTH) {
@@ -253,6 +308,9 @@ private fun validateProtocolMessage(message: SyncMessage) {
             }
             if (message.detail.length > MAX_STATUS_DETAIL_LENGTH) {
                 throw SyncMessageParseException("status detail must contain at most $MAX_STATUS_DETAIL_LENGTH characters")
+            }
+            if (message.robotsRunning != null && message.robotsRunning !in 0..MAX_ROBOTS_RUNNING) {
+                throw SyncMessageParseException("robots running must be from 0 to $MAX_ROBOTS_RUNNING")
             }
         }
         is SyncMessage.CompanionVersionStatus -> {
@@ -282,6 +340,22 @@ private fun validateProtocolMessage(message: SyncMessage) {
         is SyncMessage.Alert -> {
             if (message.message.isBlank() || message.message.length > MAX_ALERT_MESSAGE_LENGTH) {
                 throw SyncMessageParseException("alert message must contain 1-$MAX_ALERT_MESSAGE_LENGTH characters")
+            }
+        }
+        is SyncMessage.PresenceHeartbeat -> {
+            if (message.protocolVersion != CURRENT_PROTOCOL_VERSION) {
+                throw SyncMessageParseException("unsupported presence protocol version ${message.protocolVersion}")
+            }
+            if (message.sequence < 0 || message.intervalSeconds !in 1..60) {
+                throw SyncMessageParseException("presence needs a sequence from 0 and an interval from 1 to 60 seconds")
+            }
+        }
+        is SyncMessage.VoiceConfirm -> {
+            if (!requestIdPattern.matches(message.requestId) || !requestIdPattern.matches(message.confirms)) {
+                throw SyncMessageParseException("invalid voice confirmation request ID")
+            }
+            if (!confirmationTokenPattern.matches(message.confirmationToken)) {
+                throw SyncMessageParseException("invalid confirmation token")
             }
         }
         SyncMessage.EStopCommand -> Unit
