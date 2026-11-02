@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [0.2.9] - The last reply or status is kept on the watch and a message that arrives with no screen is shown as a notification, with an ambient mode
+
 - **The last reply or status is kept on the watch:** `transport/LastRelayStore.kt` stores it with the instant it arrived; a screen created later shows it already marked as last known and possibly outdated, by the same rule as a live one, and the voice button stays withheld until the phone is heard from again.
 - **A message that arrives with no screen is shown as a notification:** an answer always, a status only when it is not nominal, and only when the operator has allowed notifications (asked once on Wear OS 4 and later); opening the app removes the notification.
 - **Ambient mode:** while the watch is in ambient mode the screen draws only the last state, whether it is outdated and the time, with no buttons.
