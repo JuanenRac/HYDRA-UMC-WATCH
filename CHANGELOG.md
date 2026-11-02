@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [0.3.0] - Push alerts with vibration by severity, an optional presence heartbeat, a two-step confirmation for voice orders and a watch face complication with the robots running
+
 - **Alerts pushed by the phone:** the watch accepts an `alert` on `/hydra-umc/alert/v1` (only while `alerts.enabled` is on), vibrates by severity, shows it marked as outdated once it is older than `alerts.stale_after_s`, and posts a notification: a critical alert stays until opened, a warning only when no screen exists, an info alert never (`transport/AlertPolicy.kt`, `transport/AlertNotifier.kt`). The sender on the phone is still to be written.
 - **Presence of the operator, off by default:** with `presence.enabled = true` a button starts a foreground service that sends a numbered `presence_heartbeat` every `presence.interval_s` seconds and one last with the state `left` when the operator ends it on purpose (`transport/PresenceHeartbeatPolicy.kt`, `transport/PresenceHeartbeatService.kt`). The watch never decides what a lost heartbeat means; that belongs to the server, which has no such rule yet.
 - **Two-step confirmation of a spoken order, off by default:** with `confirm.enabled = true` a reply that asks for confirmation and brings a token is offered as a button; a first tap arms it and a second one inside the window sends a `voice_confirm` once, never retried (`transport/TwoStepConfirmation.kt`). The token lives only in the memory of the screen, is capped by `confirm.max_validity_s` and is removed from everything the watch stores or holds. The relay on the phone and in the server is still to be written.
