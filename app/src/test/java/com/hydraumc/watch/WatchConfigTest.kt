@@ -51,6 +51,13 @@ class WatchConfigTest {
     }
 
     @Test
+    fun `the tile is on by default and can be switched off`() {
+        assertTrue(WatchConfig().tileEnabled)
+        assertTrue(WatchConfig.parse("").tileEnabled)
+        assertEquals(false, WatchConfig.parse("tile.enabled = false").tileEnabled)
+    }
+
+    @Test
     fun `numbers outside their range keep the default`() {
         val c = WatchConfig.parse("presence.interval_s = 0\nconfirm.min_gap_ms = 5\nconfirm.max_validity_s = 9999\nalerts.stale_after_s = abc")
         assertEquals(WatchConfig().presenceIntervalMs, c.presenceIntervalMs)

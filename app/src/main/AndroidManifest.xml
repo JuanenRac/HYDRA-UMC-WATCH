@@ -82,5 +82,17 @@
                 android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
                 android:value="0" />
         </service>
+
+        <!-- Tile: the last state kept on the watch (robots running, alarm, outdated), read only; a tap opens the app. -->
+        <service
+            android:name=".tile.RobotsTileService"
+            android:exported="true"
+            android:label="@string/complication_title"
+            android:icon="@mipmap/ic_launcher"
+            android:permission="com.google.android.wearable.permission.BIND_TILE_PROVIDER">
+            <intent-filter>
+                <action android:name="androidx.wear.tiles.action.BIND_TILE_PROVIDER" />
+            </intent-filter>
+        </service>
     </application>
 </manifest>

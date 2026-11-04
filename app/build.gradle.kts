@@ -143,6 +143,10 @@ dependencies {
     implementation(libs.androidx.wear)
     // The complication with the robots running or the alarm (complication/RobotsComplicationService.kt).
     implementation(libs.androidx.wear.complications.data.source)
+    // The tile with the last state (tile/RobotsTileService.kt).
+    implementation(libs.androidx.wear.tiles)
+    implementation(libs.androidx.wear.protolayout)
+    implementation(libs.androidx.concurrent.futures)
 
     // Real JSON codec for the SERVER<->WATCH sync protocol (see
     // protocol/SyncMessage.kt) - the actual WebSocket transport is future

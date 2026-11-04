@@ -24,6 +24,7 @@ data class WatchConfig(
     val confirmMaxValidityMs: Long = 30_000L,
     val complicationEnabled: Boolean = true,
     val complicationStaleAfterMs: Long = 300_000L,
+    val tileEnabled: Boolean = true,
 ) {
     companion object {
         const val FILE_NAME = "watch.cfg"
@@ -59,6 +60,7 @@ data class WatchConfig(
                 confirmMaxValidityMs = number("confirm.max_validity_s", d.confirmMaxValidityMs, 5L..120L, 1000L),
                 complicationEnabled = flag("complication.enabled", d.complicationEnabled),
                 complicationStaleAfterMs = number("complication.stale_after_s", d.complicationStaleAfterMs, 30L..3600L, 1000L),
+                tileEnabled = flag("tile.enabled", d.tileEnabled),
             )
         }
 

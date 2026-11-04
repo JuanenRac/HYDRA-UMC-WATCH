@@ -40,3 +40,6 @@ watch checks every message below with the same parser as the rest of the protoco
 `complication/RobotsComplicationService.kt` reads the last status kept on the watch and shows `robotsRunning` as a number, `!`
 while `alarmActive` is true and `?` once the status is older than `complication.stale_after_s`. The phone still has to put the two
 optional fields `robotsRunning` (0-10000) and `alarmActive` in the status it sends; until then the complication shows `-`.
+
+`tile/RobotsTileService.kt` is a tile with the same summary and the same rules (read only, a tap opens the app); `tile.enabled = false` in
+`watch.cfg` turns it off.

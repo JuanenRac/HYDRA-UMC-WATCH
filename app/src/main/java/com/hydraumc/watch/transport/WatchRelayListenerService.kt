@@ -10,6 +10,7 @@ import com.google.android.gms.wearable.MessageEvent
 import com.google.android.gms.wearable.WearableListenerService
 import com.hydraumc.watch.WatchConfig
 import com.hydraumc.watch.complication.RobotsComplicationService
+import com.hydraumc.watch.tile.RobotsTileService
 import com.hydraumc.watch.haptics.HapticAlertPlayer
 import com.hydraumc.watch.protocol.SyncMessage
 import com.hydraumc.watch.protocol.parseSyncMessage
@@ -35,7 +36,10 @@ class WatchRelayListenerService : WearableListenerService() {
         }
         // The last reply or status is kept on the watch, so a screen created later, a tile or a complication can show it.
         runCatching { LastRelayStore(SharedPrefsKeyValueStore(this)).save(raw) }
-        if (message0 is SyncMessage.SystemStatus) RobotsComplicationService.requestUpdate(this)
+        if (message0 is SyncMessage.SystemStatus) {
+            RobotsComplicationService.requestUpdate(this)
+            RobotsTileService.requestUpdate(this)
+        }
         // With the screen gone (the wrist was lowered and the activity destroyed) the broadcast below has no receiver:
         // the message is held for the next time the screen is created (see RelayInbox) and shown as a notification.
         val held = RelayInboxHolder.inbox.holdIfNoScreen(raw)
