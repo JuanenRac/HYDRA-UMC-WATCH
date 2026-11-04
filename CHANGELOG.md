@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **Smaller release build with R8:** the release variant now shrinks and obfuscates the code; `app/proguard-rules.pro` keeps the generated serializers of the protocol messages so the phone messages still decode.
+
 ## [0.3.0] - Push alerts with vibration by severity, an optional presence heartbeat, a two-step confirmation for voice orders and a watch face complication with the robots running
 
 - **Alerts pushed by the phone:** the watch accepts an `alert` on `/hydra-umc/alert/v1` (only while `alerts.enabled` is on), vibrates by severity, shows it marked as outdated once it is older than `alerts.stale_after_s`, and posts a notification: a critical alert stays until opened, a warning only when no screen exists, an info alert never (`transport/AlertPolicy.kt`, `transport/AlertNotifier.kt`). The sender on the phone is still to be written.

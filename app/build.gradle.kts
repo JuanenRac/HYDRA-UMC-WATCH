@@ -106,11 +106,13 @@ android {
 
     buildTypes {
         release {
-            // Minify stays off at this andamiaje (scaffolding) stage - the
-            // app has a single screen and no third-party reflection-heavy
-            // libraries yet that would need proguard-rules.pro tuning.
-            // Revisit once the real safety-dashboard screens land.
-            isMinifyEnabled = false
+            // R8 shrinks and obfuscates the release build; the protocol
+            // messages are kept by proguard-rules.pro (kotlinx-serialization).
+            isMinifyEnabled = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
             signingConfig = if (hasPrivateReleaseSigning) {
                 signingConfigs.maybeCreate("hydraUmcRelease").apply {
                     storeFile = file(requireNotNull(releaseStoreFilePath))
