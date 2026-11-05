@@ -70,7 +70,7 @@ Construído como uma aplicação Wear OS independente (Kotlin + Jetpack Compose 
 
 ### Funcionalidades principais:
 * ✅ **Real v0 - padrões hápticos e protocolo de sincronização:** `haptics/HapticPatterns.kt` define uma forma de onda de vibração real e distinta por gravidade de alerta (Crítico/Aviso/Informação); `protocol/SyncMessage.kt` define e (des)serializa as formas reais das mensagens `EStopCommand`/`Alert` para o fluxo de sincronização SERVER<->WATCH abaixo. Ambos são Kotlin simples e testável - não é preciso hardware de relógio, emulador nem um WebSocket aberto para executar ou testar nenhum deles.
-* 🛑 **E-STOP sem fios (planeado)** — botão de emergência dedicado. *(a mensagem `EStopCommand` que enviaria é real e testada; o transporte WebSocket e a ligação do botão físico continuam planeados - precisam do emparelhamento com o HYDRA-UMC-SERVER.)*
+* 🛑 **E-STOP físico: o relógio apenas confirma e avisa (decidido)** — o relógio não tem botão de paragem próprio e nunca para nada por si. Quando o SERVER informa que um E-STOP físico foi premido, o relógio mostra-o como alerta Crítico com a sua própria vibração. A mensagem `EStopCommand` fica como tipo de protocolo que nada envia: a aplicação interpreta-a e ignora-a.
 * 📳 **Alertas hápticos** — padrões de vibração diferenciados para vários tipos de alerta (Crítico, Aviso, Informação), reproduzidos através do serviço real `Vibrator`/`VibratorManager` do Android. *(implementado - `haptics/HapticAlertPlayer.kt`; ainda por verificar num dispositivo Wear OS real, tal como o resto desta aplicação.)*
 * 🎙️ **Voz** — tocar para falar: pedido explícito da permissão `RECORD_AUDIO`, a intenção de reconhecimento de voz do sistema (`RecognizerIntent`) para a transcrição, a transcrição reencaminhada para o HYDRA-UMC-ANDROID-CONTROL como uma mensagem de sincronização `voice_turn` limitada e uma resposta local por `TextToSpeech` no relógio. *(implementado - `MainActivity.kt`; a voz nunca pode acionar diretamente um robô, veja a Arquitetura abaixo e o [docs/VOICE_AI_PROTOCOL.md](docs/VOICE_AI_PROTOCOL.md) para o fluxo completo de mensagens de ponta a ponta e a fronteira de segurança.)*
 * ⌚ **Estado de relance** — um botão **Atualizar estado** reencaminha um pedido de estado limitado para o HYDRA-UMC-ANDROID-CONTROL através da Data Layer emparelhada; o cartão `system_status` devolvido é mostrado com um indicador "último conhecido - pode estar desatualizado" quando fica obsoleto. *(implementado - `MainActivity.kt`/`WatchRelayTransport.requestSystemStatus()`; por pedido através do relé do telemóvel, não um socket de envio direto do relógio para o servidor, e ainda por verificar num dispositivo Wear OS real.)*
@@ -105,7 +105,7 @@ O **HYDRA-UMC-WATCH** é o companheiro Wear OS das aplicações de controlo HYDR
 flowchart LR
     SERVER["HYDRA-UMC-SERVER"] --> WS["WebSocket Sync"]
     WS --> WATCH["HYDRA-UMC-WATCH"]
-    WATCH -- E-STOP Command --> SERVER
+    SERVER -- E-STOP físico premido --> WATCH
     SERVER -- Critical Alert --> WATCH
     WATCH -- Haptic Feedback --> OPERATOR["Plant Operator"]
 ```
@@ -120,17 +120,16 @@ HYDRA-UMC-ANDROID-CONTROL -> HYDRA-UMC-SERVER/Voice UI autenticado, e de
 volta - veja a Arquitetura abaixo e o
 [docs/VOICE_AI_PROTOCOL.md](docs/VOICE_AI_PROTOCOL.md) para esse fluxo real
 de ponta a ponta. O Relógio nunca guarda ele próprio uma credencial do Servidor; um WebSocket
-direto Relógio-Servidor e o botão de E-STOP sem fios continuam a ser trabalho
-futuro, dependente de hardware.*
+direto Relógio-Servidor continua a ser trabalho futuro, dependente de hardware. O relógio nunca para nada por si: apenas confirma ou avisa de um E-STOP físico.*
 
 ### ARQUITETURA E DECISÕES DE DESENHO
 
-* **Porque é uma aplicação Wear OS independente e não uma funcionalidade da aplicação do telemóvel.** Um relógio corre o seu próprio processo independente no seu próprio sistema operativo - não pode ser simplesmente um modo de interface do HYDRA-UMC-ANDROID-CONTROL, precisa do seu próprio manifesto, da sua própria compilação e da sua própria interface (muito mais limitada) para o estado de relance/E-STOP rápido.
+* **Porque é uma aplicação Wear OS independente e não uma funcionalidade da aplicação do telemóvel.** Um relógio corre o seu próprio processo independente no seu próprio sistema operativo - não pode ser simplesmente um modo de interface do HYDRA-UMC-ANDROID-CONTROL, precisa do seu próprio manifesto, da sua própria compilação e da sua própria interface (muito mais limitada) para o estado de relance.
 * **Porque `minSdk 30` (Wear OS 3), inferior ao minSdk da própria aplicação do telemóvel.** Isto visa deliberadamente a geração atual de hardware Wear OS 3+, não dispositivos antigos com Wear OS 2 - ao contrário do HYDRA-UMC-ANDROID-CONTROL, que suporta telemóveis mais antigos, uma aplicação de relógio companheira tem uma base de hardware realista mais estreita para suportar.
 * **Porque o relé emparelhado usa a Data Layer em vez de um socket próprio.** O canal oficial do Wear OS impõe o mesmo nome de pacote e o mesmo certificado de assinatura no Relógio e no telemóvel, e transporta apenas mensagens de protocolo limitadas. O Android Control mantém a sessão do Servidor; isto mantém o Relógio fora dos caminhos diretos de credenciais do Servidor e de controlo de robôs.
 * **Porque a política de religação e a cache do último estado conhecido são módulos puros próprios, e não código dentro do `WatchRelayTransport`.** Ambos são classes Kotlin reais e desacopladas (`RelayRetryPolicy`, `LastKnownStateCache`), testáveis numa JVM simples sem relógio, emulador nem telemóvel emparelhado - o mesmo padrão que `HapticPatterns.kt`/`SyncMessage.kt` já definiram. O próprio `WatchRelayTransport` continua a ser a peça fina, necessariamente Android, que de facto agenda uma repetição ou regista uma mensagem recebida, e não o local onde vive a matemática da política.
 * **Porque um estado em cache desatualizado é assinalado e não escondido.** Retirar por completo um estado antigo deixaria o mostrador do relógio em branco precisamente quando a ligação ao telemóvel é instável - o momento de risco real. Mostrá-lo claramente marcado como "último conhecido - pode estar desatualizado" mantém o operador informado sem deixar que uma leitura com minutos passe por uma em direto.
-* **Como isto se encaixa no resto do ecossistema.** Emparelha com o HYDRA-UMC-ANDROID-CONTROL e o HYDRA-UMC-IOS-CONTROL como um companheiro de pulso de relance - não um substituto de nenhum deles, mas uma superfície de estado rápido/E-STOP rápido.
+* **Como isto se encaixa no resto do ecossistema.** Emparelha com o HYDRA-UMC-ANDROID-CONTROL e o HYDRA-UMC-IOS-CONTROL como um companheiro de pulso de relance - não um substituto de nenhum deles, mas uma superfície de estado rápido.
 
 ### ATUALIZAÇÕES SEM GOOGLE PLAY
 
@@ -258,7 +257,7 @@ HYDRA-UMC-WATCH/
 
 **Fronteira de integração:** a aplicação Android emparelhada mantém o JWT cifrado do Servidor; o Servidor mantém o token do Voice UI. A Data Layer exige o mesmo nome de pacote e o mesmo certificado de assinatura nos dois APKs. A voz nunca pode acionar diretamente um robô; uma resposta relacionada com movimento tem de exigir confirmação, enquanto o E-STOP físico continua independente.
 
-**Ainda por fazer:** validação do emparelhamento, do transporte de rádio, do microfone/altifalante e do estado de ponta a ponta num dispositivo Wear OS real; o E-STOP sem fios e a telemetria em direto do CM5 continuam a ser trabalho separado, dependente de hardware.
+**Ainda por fazer:** validação do emparelhamento, do transporte de rádio, do microfone/altifalante e do estado de ponta a ponta num dispositivo Wear OS real; a telemetria em direto do CM5 continua a ser trabalho separado, dependente de hardware.
 
 ## 🌍 Idiomas
 

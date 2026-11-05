@@ -72,7 +72,7 @@ GPL-3.0-or-later - see LICENSE
 
 ### 关键特性：
 * ✅ **真实 v0 —— 触觉模式与同步协议：** `haptics/HapticPatterns.kt` 为每种告警严重程度（严重/警告/信息）定义了一个真实且各不相同的振动模式；`protocol/SyncMessage.kt` 定义并（反）序列化了下方 SERVER<->WATCH 同步流程中 `EStopCommand`/`Alert` 消息的真实结构。两者都是纯 Kotlin 代码，可测试——运行或测试都不需要手表硬件、模拟器，或者打开的 WebSocket。
-* 🛑 **无线 E-STOP（计划中）** —— 专用紧急按钮。*（它会发送的 `EStopCommand` 消息是真实的并且已测试；WebSocket 传输和物理按钮的接线仍是计划中——需要与 HYDRA-UMC-SERVER 配对。）*
+* 🛑 **物理 E-STOP：手表只负责确认和提醒（已决定）** —— 手表没有自己的停止按钮，也从不自行停止任何设备。当 SERVER 报告物理 E-STOP 已被按下时，手表以带有专属振动的严重警报显示。`EStopCommand` 消息仍只是一个无人发送的协议类型：应用会解析它并忽略它。
 * 📳 **触觉告警** —— 针对不同告警类型（严重、警告、信息）的差异化振动模式，通过 Android 真实的 `Vibrator`/`VibratorManager` 服务播放。*（已实现——`haptics/HapticAlertPlayer.kt`；与本应用其余部分一样，尚未在真实 Wear OS 设备上验证。）*
 * 🎙️ **语音** —— 按住说话：明确请求 `RECORD_AUDIO` 权限、使用系统语音识别 intent（`RecognizerIntent`）进行转录、将转录内容作为受限的 `voice_turn` 同步消息中继给 HYDRA-UMC-ANDROID-CONTROL，并在手表上通过本地 `TextToSpeech` 回复。*（已实现——`MainActivity.kt`；语音绝不能直接操控机器人，见下文架构部分，完整的端到端消息流程和安全边界见 [docs/VOICE_AI_PROTOCOL.md](docs/VOICE_AI_PROTOCOL.md)。）*
 * ⌚ **一目了然的状态：** **刷新状态**按钮通过已配对的 Data Layer 向 HYDRA-UMC-ANDROID-CONTROL 中继一个受限的状态请求；返回的 `system_status` 卡片在过时后会显示"最后已知——可能已过时"的提示。*（已实现——`MainActivity.kt`/`WatchRelayTransport.requestSystemStatus()`；通过手机中继按需拉取，而非手表到服务器的直接推送套接字，且尚未在真实 Wear OS 设备上验证。）*
@@ -107,7 +107,7 @@ GPL-3.0-or-later - see LICENSE
 flowchart LR
     SERVER["HYDRA-UMC-SERVER"] --> WS["WebSocket Sync"]
     WS --> WATCH["HYDRA-UMC-WATCH"]
-    WATCH -- E-STOP Command --> SERVER
+    SERVER -- 物理 E-STOP 已按下 --> WATCH
     SERVER -- Critical Alert --> WATCH
     WATCH -- Haptic Feedback --> OPERATOR["Plant Operator"]
 ```
@@ -120,17 +120,16 @@ flowchart LR
 路径是通过已配对的手机中继：Watch -> Data Layer -> HYDRA-UMC-ANDROID-CONTROL
 -> 已认证的 HYDRA-UMC-SERVER/Voice UI，再返回——参见下方架构部分，以及
 该真实端到端流程的 [docs/VOICE_AI_PROTOCOL.md](docs/VOICE_AI_PROTOCOL.md)。
-手表本身从不持有 Server 凭据；手表到服务器的直接 WebSocket 以及无线
-E-STOP 按钮仍是受硬件限制、有待未来完成的工作。*
+手表本身从不持有 Server 凭据；手表到服务器的直接 WebSocket 仍是受硬件限制的未来工作。手表从不自行停止任何设备，只确认或提示物理 E-STOP。*
 
 ### 架构与设计决策
 
-* **为何这是一款独立的 Wear OS 应用，而非手机应用的一项功能。** 手表运行在自己独立的操作系统进程上——它不能只是 HYDRA-UMC-ANDROID-CONTROL 的一种 UI 模式，它需要自己的清单文件、自己的构建，以及自己的（约束条件严格得多的）UI，用于一目了然的状态显示/快速 E-STOP。
+* **为何这是一款独立的 Wear OS 应用，而非手机应用的一项功能。** 手表运行在自己独立的操作系统进程上——它不能只是 HYDRA-UMC-ANDROID-CONTROL 的一种 UI 模式，它需要自己的清单文件、自己的构建，以及自己的（约束条件严格得多的）UI，用于一目了然的状态显示。
 * **为何 `minSdk 30`（Wear OS 3）低于手机应用自身的 minSdk。** 这是刻意针对当前 Wear OS 3+ 硬件世代，而非旧款 Wear OS 2 设备——与支持较旧手机的 HYDRA-UMC-ANDROID-CONTROL 不同，一款配套手表应用需要支持的现实硬件基础要窄得多。
 * **为何触觉模式与同步协议先于 WebSocket 连接落地。** 定义双方必须一致的振动波形和消息结构，是真正的纯 Kotlin 工作——编写和测试都不需要打开的套接字、已配对的服务器，或者物理手表。真正打开那条连接是下一步。
 * **为何重连策略和最后已知状态缓存是各自独立的纯模块，而非内嵌在 `WatchRelayTransport` 中。** 两者都是真实的、解耦的 Kotlin 类（`RelayRetryPolicy`、`LastKnownStateCache`），可以在普通 JVM 上测试，无需手表、模拟器或已配对的手机——这与 `HapticPatterns.kt`/`SyncMessage.kt` 已经确立的标准相同。`WatchRelayTransport` 本身仍然是那个精简的、必然依赖 Android 的部分，实际负责调度重试或记录接收到的消息，而不是底层策略运算逻辑所在之处。
 * **为何过时的缓存状态会被标记，而不是被隐藏。** 完全隐藏旧状态会导致手表表盘在手机连接不稳定——真正的风险时刻——时恰好一片空白。清晰地标记为"最后已知——可能已过时"能让操作员保持知情，同时不会让几分钟前的读数被误当作实时数据。
-* **这如何融入生态系统的其余部分。** 与 HYDRA-UMC-ANDROID-CONTROL 和 HYDRA-UMC-IOS-CONTROL 配对，作为一目了然的手腕端配套设备——它不是取代二者中的任何一个，而是一个快速状态查看/快速 E-STOP 的界面。
+* **这如何融入生态系统的其余部分。** 与 HYDRA-UMC-ANDROID-CONTROL 和 HYDRA-UMC-IOS-CONTROL 配对，作为一目了然的手腕端配套设备——它不是取代二者中的任何一个，而是一个快速状态查看 的界面。
 
 ### 不依赖 Google Play 的更新方式
 
@@ -268,7 +267,7 @@ HYDRA-UMC-WATCH/
 **集成边界：** 已配对 Android 应用保留加密的 Server JWT；Server 保留 Voice UI 令牌。
 Data Layer 要求两端 APK 使用相同包名和签名证书。语音绝不能直接驱动机器人；涉及运动的回复必须要求确认，物理 E-STOP 保持独立。
 
-**仍待完成：** 在真实 Wear OS 设备上验证配对、无线传输、麦克风/扬声器和端到端状态；无线 E-STOP 与实时 CM5 遥测仍是受硬件限制的独立工作。
+**仍待完成：** 在真实 Wear OS 设备上验证配对、无线传输、麦克风/扬声器和端到端状态；实时 CM5 遥测仍是受硬件限制的独立工作。
 
 ## 🌍 语言
 

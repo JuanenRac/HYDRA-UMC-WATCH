@@ -4,6 +4,7 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The watch never stops anything by itself:** the README, the architecture picture and the roadmap (in the eight languages) no longer announce a wireless E-STOP button. The only place for a stop is the physical button of the cell; the watch confirms it and warns of it when the server reports it, as a Critical alert with its own vibration. The app has no stop control and the `EStopCommand` message is parsed and ignored.
 - **A tile with the last state:** `tile/RobotsTileService.kt` draws the same summary as the complication (robots running, `!` for an alarm, `?` once the state is older than `complication.stale_after_s`, `-` when the phone has not said) from the state kept on the watch, is redrawn when a new status arrives, and a tap only opens the app. `tile.enabled` in `watch.cfg` turns it off. Built by the manual binaries workflow; not tried on a real watch.
 - **Smaller release build with R8:** the release variant now shrinks and obfuscates the code; `app/proguard-rules.pro` keeps the generated serializers of the protocol messages so the phone messages still decode.
 
