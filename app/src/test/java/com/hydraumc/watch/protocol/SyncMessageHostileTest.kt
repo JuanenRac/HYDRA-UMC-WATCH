@@ -134,12 +134,13 @@ class SyncMessageHostileTest {
     }
 
     @Test
-    fun `the companion version has to be the current protocol and a stable x y z`() {
+    fun `the companion version has to be the current protocol and a stable x y z or x y z w`() {
         fun status(protocol: Int, version: String) =
             """{"type":"companion_version_status","protocolVersion":$protocol,"appVersion":"$version","updateAvailable":false}"""
         parseSyncMessage(status(1, "0.0.0"))
         parseSyncMessage(status(1, "10.20.300"))
-        for (version in listOf("", "1.0", "1.0.0.1", "v1.0.0", "1.0.0-beta", "1.0.0+5", "a.b.c", "1.0.0 ", " 1.0.0", "1..0", "1.0.x", "١.٠.٠")) {
+        parseSyncMessage(status(1, "1.0.0.1"))
+        for (version in listOf("", "1.0", "1.0.0.1.2", "v1.0.0", "1.0.0-beta", "1.0.0+5", "a.b.c", "1.0.0 ", " 1.0.0", "1..0", "1.0.x", "١.٠.٠")) {
             rejected(status(1, version))
         }
         for (protocol in listOf(0, 2, -1, 1_000_000)) {

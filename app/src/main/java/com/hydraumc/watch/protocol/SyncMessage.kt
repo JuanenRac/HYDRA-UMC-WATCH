@@ -321,7 +321,7 @@ private fun validateProtocolMessage(message: SyncMessage) {
             }
             // The phone app's own criterion (shared module): 3 or 4 numeric components, no pre-release label.
             // On the wire the version is bare, so a "v" prefix is not accepted here.
-            if (message.appVersion.startsWith("v") || SemanticVersion.parseStable(message.appVersion) == null) {
+            if (message.appVersion != message.appVersion.trim() || message.appVersion.startsWith("v") || SemanticVersion.parseStable(message.appVersion) == null) {
                 throw SyncMessageParseException("invalid companion app version '${message.appVersion}'")
             }
         }
