@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The README says what the tile and the status fields are:** the tile with the last state is listed (it was built but missing from the feature list and said to be unbuilt), and the complication no longer says the phone does not send the number of robots running and the alarm: the phone app sends both with the status it relays. Still not tried on a real watch.
+
 - **The version the phone reports is judged by the same rule as the phone's own update check:** the companion version status accepted only three numbers, so a phone app on a four-component version (`0.8.0.1`) would have been refused. It now uses the shared Kotlin module (`tools/sync_sdk_kotlin.py` keeps the pinned copy identical to the SDK, checked by the validator); a pre-release label or a `v` prefix on the wire is still refused.
 
 ## [0.3.1] - The build test of the repository compiles only on CI or when allowed: for the stacks that compile (rust, go, android, flutter, firmware-c), tools/buildtest.py prints BUILDTEST=SKIPPED with exit status 2 on a plain PC, never a... (and 3 more changes)
