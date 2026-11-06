@@ -23,7 +23,10 @@ remains an explicit operator action through the documented ADB channel.
 ```
 
 - `protocolVersion` is the version of this message shape, currently `1`.
-- `appVersion` is Android Control's installed stable semantic version.
+- `appVersion` is Android Control's installed stable semantic version: three or
+  four numeric components (`0.8.0` or `0.8.0.1`), bare, with no `v` prefix and
+  no pre-release label. The watch judges it with the same shared code as the
+  phone's own update check.
 - `updateAvailable` tells the watch that Android Control found a newer stable
   GitHub Release. It is informational only.
 

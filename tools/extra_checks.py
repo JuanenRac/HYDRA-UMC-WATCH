@@ -17,14 +17,18 @@ from pathlib import Path
 CHECKS = (
     ("make_architecture.py", ["--check"]),
     ("make_structure.py", ["--check", "--readmes"]),
+    ("sync_sdk_kotlin.py", ["--check"]),
 )
+
+
+GUARDS = {"make_architecture.py": "architecture.json", "make_structure.py": "structure.json", "sync_sdk_kotlin.py": "sdk_kotlin_common.lock.json"}
 
 
 def check(root: Path) -> list[str]:
     problems: list[str] = []
     for script, arguments in CHECKS:
         path = root / "tools" / script
-        if not path.is_file() or not (root / "docs" / ("architecture.json" if "architecture" in script else "structure.json")).is_file():
+        if not path.is_file() or not (root / "docs" / GUARDS[script]).is_file():
             continue
         result = subprocess.run([sys.executable, "-I", str(path), *arguments],
                                 cwd=root, text=True, encoding="utf-8", errors="replace", capture_output=True, check=False)

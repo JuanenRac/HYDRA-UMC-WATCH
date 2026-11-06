@@ -5,6 +5,7 @@
 // =============================================================================
 package com.hydraumc.watch.protocol
 
+import com.hydraumc.common.SemanticVersion
 import com.hydraumc.watch.haptics.AlertSeverity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -30,7 +31,6 @@ private val switchIdPattern = Regex("^[A-Za-z]{1,24}\\.[A-Za-z]{1,32}$")
  * it is parsed keeps a deeply nested or huge document from exhausting the stack.
  */
 private const val MAX_RAW_MESSAGE_LENGTH = 8 * 1024
-private val stableVersionPattern = Regex("^\\d+\\.\\d+\\.\\d+$")
 private val requestIdPattern = Regex("^[A-Za-z0-9_-]{1,64}$")
 
 /** Priority displayed as a colour/icon and optionally a haptic pattern. */
@@ -319,7 +319,9 @@ private fun validateProtocolMessage(message: SyncMessage) {
                     "unsupported companion protocol version ${message.protocolVersion}",
                 )
             }
-            if (!stableVersionPattern.matches(message.appVersion)) {
+            // The phone app's own criterion (shared module): 3 or 4 numeric components, no pre-release label.
+            // On the wire the version is bare, so a "v" prefix is not accepted here.
+            if (message.appVersion.startsWith("v") || SemanticVersion.parseStable(message.appVersion) == null) {
                 throw SyncMessageParseException("invalid companion app version '${message.appVersion}'")
             }
         }

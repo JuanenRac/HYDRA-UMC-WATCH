@@ -135,6 +135,26 @@ class SyncMessageTest {
     }
 
     @Test
+    fun `the four component versions of the phone app are accepted`() {
+        val parsed = parseSyncMessage(
+            """{"type":"companion_version_status","protocolVersion":1,"appVersion":"0.8.0.1","updateAvailable":false}""",
+        )
+        assertEquals(SyncMessage.CompanionVersionStatus(1, "0.8.0.1", false), parsed)
+    }
+
+    @Test
+    fun `a bare version with a v prefix is rejected on the wire`() {
+        try {
+            parseSyncMessage(
+                """{"type":"companion_version_status","protocolVersion":1,"appVersion":"v0.2.9","updateAvailable":false}""",
+            )
+            fail("expected SyncMessageParseException")
+        } catch (exc: SyncMessageParseException) {
+            assertTrue(exc.message!!.contains("invalid companion app version"))
+        }
+    }
+
+    @Test
     fun `invalid companion semantic version is rejected`() {
         try {
             parseSyncMessage(
