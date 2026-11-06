@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **Build tooling and libraries brought up to date:** the Android Gradle plugin, Kotlin, the Gradle wrapper, the complication, tile and protolayout libraries, kotlinx-serialization and Robolectric move to their newer stable releases with no change in behaviour. The Compose BOM and `core-ktx` stay on their current versions because the newer ones require compiling against a newer Android SDK.
+
 ## [0.3.2] - The README says what the tile and the status fields are: the tile with the last state is listed (it was built but missing from the feature list and said to be unbuilt), and the complication no longer says the phone does not... (and 1 more changes)
 
 - **The README says what the tile and the status fields are:** the tile with the last state is listed (it was built but missing from the feature list and said to be unbuilt), and the complication no longer says the phone does not send the number of robots running and the alarm: the phone app sends both with the status it relays. Still not tried on a real watch.
