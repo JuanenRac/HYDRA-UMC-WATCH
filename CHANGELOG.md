@@ -4,6 +4,7 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **Instrumented tests on a Wear OS emulator (manual workflow):** `app/src/androidTest` holds five checks that need a real Wear OS system and `wear-instrumented.yml` runs them on a round Wear OS 3 emulator: the application ID shared with the phone app for the Data Layer, that the app declares itself a watch app, that it asks only for the permissions of its list (and none for location, contacts, storage, camera or body sensors) and that its launcher activity is the main activity of the app.
 - **Build tooling and libraries brought up to date:** the Android Gradle plugin, Kotlin, the Gradle wrapper, the complication, tile and protolayout libraries, kotlinx-serialization and Robolectric move to their newer stable releases with no change in behaviour. The Compose BOM and `core-ktx` stay on their current versions because the newer ones require compiling against a newer Android SDK.
 
 ## [0.3.2] - The README says what the tile and the status fields are: the tile with the last state is listed (it was built but missing from the feature list and said to be unbuilt), and the complication no longer says the phone does not... (and 1 more changes)

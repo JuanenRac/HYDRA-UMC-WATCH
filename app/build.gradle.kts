@@ -74,6 +74,7 @@ android {
         // application ID and signing certificate. Android Control owns the
         // paired Server session, so both APKs intentionally use this ID.
         applicationId = "com.hydraumc.control"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // 30 = Wear OS 3 baseline (the platform androidx.wear.compose
         // targets today) - lower than the phone app's minSdk 24 on purpose,
         // this is a standalone watch app, not a companion that has to
