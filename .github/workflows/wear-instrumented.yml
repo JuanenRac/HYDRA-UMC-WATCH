@@ -15,8 +15,6 @@ name: Wear OS instrumented tests (manual)
 
 on:
   workflow_dispatch:
-  push:
-    branches: [tmp-watch-instr]
 
 permissions:
   contents: read
