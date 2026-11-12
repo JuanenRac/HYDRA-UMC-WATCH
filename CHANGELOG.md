@@ -4,6 +4,7 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The words of a relayed message and the preferences store are tested:** `RelayTextAndStoreTest` (8 tests, on Robolectric) checks that a known error code of a reply or a status is told in the own words of the watch (headline and detail), that no code or an unknown one keeps the text of the phone, that a code with a headline and no detail keeps the detail of the phone, the one-line summary, and the preferences store (text with its instant, replacement, removal that leaves other keys, a new store of the same name reads what was kept and another name does not).
 - **Instrumented tests on a Wear OS emulator (manual workflow):** `app/src/androidTest` holds five checks that need a real Wear OS system and `wear-instrumented.yml` runs them on a round Wear OS 3 emulator: the application ID shared with the phone app for the Data Layer, that the app declares itself a watch app, that it asks only for the permissions of its list (and none for location, contacts, storage, camera or body sensors) and that its launcher activity is the main activity of the app.
 - **Build tooling and libraries brought up to date:** the Android Gradle plugin, Kotlin, the Gradle wrapper, the complication, tile and protolayout libraries, kotlinx-serialization and Robolectric move to their newer stable releases with no change in behaviour. The Compose BOM and `core-ktx` stay on their current versions because the newer ones require compiling against a newer Android SDK.
 
