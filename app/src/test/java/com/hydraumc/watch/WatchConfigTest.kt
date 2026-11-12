@@ -55,6 +55,9 @@ class WatchConfigTest {
         assertTrue(WatchConfig().tileEnabled)
         assertTrue(WatchConfig.parse("").tileEnabled)
         assertEquals(false, WatchConfig.parse("tile.enabled = false").tileEnabled)
+        assertTrue(WatchConfig().filterObscuredTouches)
+        assertTrue(WatchConfig.parse("security.filter_obscured_touches = maybe").filterObscuredTouches)
+        assertEquals(false, WatchConfig.parse("security.filter_obscured_touches = false").filterObscuredTouches)
     }
 
     @Test

@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **Touches through an overlay are ignored (on by default):** the screen of the watch drops a touch while another app draws over it. `security.filter_obscured_touches` in `watch.cfg` turns it off. The tile and the presence service are tested on the JVM (`ServicesTest`: presence stays off unless the settings switch it on, the stop action ends it, the tile says unknown, the robots running or the alarm).
+
 - **The line coverage of the unit tests can be measured on demand:** `./gradlew -PhydraUmcCoverage=true testDebugUnitTest createDebugUnitTestCoverageReport` runs the tests with the JaCoCo agent of the Android Gradle plugin (told to include the classes Robolectric loads, or the app shows as never run), and `python tools/kotlin_coverage.py` prints the share of lines run and the files with the most lines no test runs. The manual workflow `android-coverage.yml` does both on a CI runner. No floor is set: a floor comes from a measured value.
 
 - **The notifications are tested:** `AlertNotifierTest` (5 tests) and `RelayNotifierTest` (3 tests) check, with Robolectric, that an alert is posted only as the policy decides, that a critical one stays in the shade when the watch is set so, that the channel is created once with high importance, and that an answer is posted only with no screen open and with the permission.

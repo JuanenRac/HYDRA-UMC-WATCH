@@ -39,6 +39,11 @@ class MainActivityTest {
     }
 
     @Test
+    fun theScreenIgnoresTouchesThroughAnOverlayByDefault() {
+        org.junit.Assert.assertTrue(rule.activity.window.decorView.filterTouchesWhenObscured)
+    }
+
+    @Test
     fun theScreenStartsWithItsTitleAndNoStatus() {
         rule.onNodeWithText("HYDRA-UMC WATCH").assertIsDisplayed()
         rule.onNodeWithText(rule.activity.getString(R.string.status_placeholder)).assertIsDisplayed()

@@ -350,6 +350,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         relayTransport = WatchRelayTransport(applicationContext)
+        window.decorView.filterTouchesWhenObscured = WatchConfig.load(this).filterObscuredTouches
         attachAmbientMode()
         // The notification of a message that arrived while this screen did not exist has done its job.
         NotificationManagerCompat.from(this).cancel(RelayNotifier.NOTIFICATION_ID)
