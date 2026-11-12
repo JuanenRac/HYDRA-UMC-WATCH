@@ -93,6 +93,8 @@ Built as a standalone Wear OS app (Kotlin + Jetpack Compose for Wear), reusing t
 
 **HYDRA-UMC-WATCH** is the Wear OS companion of the HYDRA-UMC controller apps: it shows the last known system status with its age, plays a distinct vibration for each alert severity, and relays a voice request through the paired phone. It holds no server credential and offers no wireless emergency stop.
 
+> **Platform:** where this README says CM5, it means the pilot bench that runs today; the target platform of HYDRA-UMC is an NVIDIA Jetson Orin NX 16 GB, a design that has not been built or tested.
+
 ## 🏛️ Architecture
 
 <p align="center">

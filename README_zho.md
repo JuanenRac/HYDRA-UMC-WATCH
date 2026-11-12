@@ -95,6 +95,8 @@ GPL-3.0-or-later - see LICENSE
 
 **HYDRA-UMC-WATCH** 是 HYDRA-UMC 控制应用的 Wear OS 配套应用：它显示最后已知的系统状态及其时效，为每个警报级别播放不同的振动，并通过配对的手机转发语音请求。它不保存任何服务器凭据，也不提供无线紧急停止。
 
+> **平台：** 本 README 中的 CM5 指的是目前正在运行的试验台；HYDRA-UMC 的目标平台是 NVIDIA Jetson Orin NX 16 GB，这是尚未制造或测试的设计。
+
 ## 🏛️ 架构
 
 <p align="center">
