@@ -31,13 +31,13 @@ import com.hydraumc.watch.transport.SharedPrefsKeyValueStore
  * `tile.enabled = false`. Not tried on a real watch.
  */
 class RobotsTileService : TileService() {
-    override fun onTileRequest(requestParams: RequestBuilders.TileRequest): ListenableFuture<TileBuilders.Tile> =
+    public override fun onTileRequest(requestParams: RequestBuilders.TileRequest): ListenableFuture<TileBuilders.Tile> =
         CallbackToFutureAdapter.getFuture { completer ->
             completer.set(buildTile())
             "robots tile"
         }
 
-    override fun onTileResourcesRequest(requestParams: RequestBuilders.ResourcesRequest): ListenableFuture<ResourceBuilders.Resources> =
+    public override fun onTileResourcesRequest(requestParams: RequestBuilders.ResourcesRequest): ListenableFuture<ResourceBuilders.Resources> =
         CallbackToFutureAdapter.getFuture { completer ->
             completer.set(ResourceBuilders.Resources.Builder().setVersion(RESOURCES_VERSION).build())
             "robots tile resources"
