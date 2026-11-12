@@ -102,10 +102,22 @@ android {
         unitTests {
             // Robolectric needs the merged resources and the manifest to start MainActivity.
             isIncludeAndroidResources = true
+            // Robolectric loads the classes of the app through its own class loader, which the coverage agent does not see unless it is told to
+            // include classes without a source location.
+            all { test ->
+                test.extensions.findByType(org.gradle.testing.jacoco.plugins.JacocoTaskExtension::class.java)?.apply {
+                    isIncludeNoLocationClasses = true
+                    excludes = listOf("jdk.internal.*")
+                }
+            }
         }
     }
 
     buildTypes {
+        debug {
+            // Line coverage of the unit tests, measured only when asked for (-PhydraUmcCoverage=true): the instrumentation slows the tests down.
+            enableUnitTestCoverage = providers.gradleProperty("hydraUmcCoverage").isPresent
+        }
         release {
             // R8 shrinks and obfuscates the release build; the protocol
             // messages are kept by proguard-rules.pro (kotlinx-serialization).
