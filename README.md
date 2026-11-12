@@ -18,7 +18,7 @@ GPL-3.0-or-later - see LICENSE
   <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
   <img src="https://img.shields.io/badge/Platform-Wear%20OS-4285F4.svg" alt="Platform">
   <img src="https://img.shields.io/badge/Feature-Voice%20%26%20haptics-blue.svg" alt="Feature">
-  <img src="https://img.shields.io/badge/Tests-169%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-192%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.3.2-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-functional-0F6CBD.svg" alt="Maturity">
 </p>
@@ -35,7 +35,7 @@ GPL-3.0-or-later - see LICENSE
 |---|---|
 | Version | `0.3.2` |
 | Maturity | Functional |
-| Tests | 169 (`./gradlew testDebugUnitTest`) |
+| Tests | 192 (`./gradlew testDebugUnitTest`) |
 | Stack | Kotlin / Wear OS |
 | Target | A Wear OS watch (paired with the phone) |
 | On real hardware | Not yet: no run on real hardware is recorded for this version |
@@ -51,7 +51,7 @@ Each line is one part of this repository and the light says how far it is today.
 | Area | State | What it means here |
 |---|---|---|
 | Software | 🟡 | Works for its main purpose; the honesty check above lists what is still missing |
-| Tests | 🟢 | 169 automated tests, run on every change |
+| Tests | 🟢 | 192 automated tests, run on every change |
 | Real hardware | 🔴 | Not yet: no run on real hardware is recorded for this version |
 | Interface and protocols | 🟡 | The routes or messages it offers are documented and tested with a client; not every client has used them yet |
 | Integration | 🟠 | Its messages and routes are checked against the shared contracts of the SDK; it has not run together with the real equipment |
@@ -180,7 +180,7 @@ Requires the Android SDK with a JDK that the bundled Gradle wrapper accepts, and
 
 ## 🧪 Testing
 
-169 automated tests run with `./gradlew testDebugUnitTest`. They need no hardware and nothing outside this machine.
+192 automated tests run with `./gradlew testDebugUnitTest`. They need no hardware and nothing outside this machine.
 
 The CI runs `HYDRA_UMC_CI=1 python tools/ci_validate.py`, which checks the manifest, the documents, the eight READMEs and the pictures.
 
