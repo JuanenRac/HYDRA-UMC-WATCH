@@ -2,6 +2,10 @@
 
 All notable changes to this project are documented here.
 
+## [Unreleased]
+
+- **The Wear OS emulator checks run on their own:** the start-up check and the instrumented tests on a round Wear OS emulator now run once a week and on a pull request to main that changes the app or its build files (they were started by hand only), with a Gradle cache and a newer run of the same pull request cancelling the older one. They never run on a push.
+
 ## [0.3.3] - Touches through an overlay ignored, a coverage floor of 69 percent, tests of the notifications and instrumented Wear OS tests
 
 - **README: the platform statement:** a note says that where the README speaks of the CM5 it means the pilot bench that runs today, and that the target platform of HYDRA-UMC, an NVIDIA Jetson Orin NX 16 GB, is a design that has not been built or tested.
