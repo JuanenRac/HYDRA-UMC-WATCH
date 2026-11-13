@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here.
 
-## [Unreleased]
+## [0.3.3] - Touches through an overlay ignored, a coverage floor of 69 percent, tests of the notifications and instrumented Wear OS tests
 
 - **README: the platform statement:** a note says that where the README speaks of the CM5 it means the pilot bench that runs today, and that the target platform of HYDRA-UMC, an NVIDIA Jetson Orin NX 16 GB, is a design that has not been built or tested.
 - **The unit tests have a coverage floor of 69 %:** the manual `Android coverage` workflow measured 69.9 % of the lines (912 of 1305) twice with the same result, `tools/coverage_floor.json` holds that value rounded down, and the workflow now fails when the total falls below it (`tools/kotlin_coverage.py --floor-file`). Tooling only: no behaviour changes.
