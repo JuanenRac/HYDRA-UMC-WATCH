@@ -26,6 +26,7 @@ data class WatchConfig(
     val complicationStaleAfterMs: Long = 300_000L,
     val tileEnabled: Boolean = true,
     val filterObscuredTouches: Boolean = true,
+    val requireReleaseSignature: Boolean = false,
 ) {
     companion object {
         const val FILE_NAME = "watch.cfg"
@@ -63,6 +64,7 @@ data class WatchConfig(
                 complicationStaleAfterMs = number("complication.stale_after_s", d.complicationStaleAfterMs, 30L..3600L, 1000L),
                 tileEnabled = flag("tile.enabled", d.tileEnabled),
                 filterObscuredTouches = flag("security.filter_obscured_touches", d.filterObscuredTouches),
+                requireReleaseSignature = flag("updates.require_release_signature", d.requireReleaseSignature),
             )
         }
 

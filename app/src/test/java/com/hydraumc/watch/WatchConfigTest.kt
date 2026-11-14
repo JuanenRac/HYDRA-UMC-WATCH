@@ -61,6 +61,14 @@ class WatchConfigTest {
     }
 
     @Test
+    fun `the release signature is not required by default and can be switched on`() {
+        assertEquals(false, WatchConfig().requireReleaseSignature)
+        assertEquals(false, WatchConfig.parse("").requireReleaseSignature)
+        assertEquals(false, WatchConfig.parse("updates.require_release_signature = maybe").requireReleaseSignature)
+        assertTrue(WatchConfig.parse("updates.require_release_signature = true").requireReleaseSignature)
+    }
+
+    @Test
     fun `numbers outside their range keep the default`() {
         val c = WatchConfig.parse("presence.interval_s = 0\nconfirm.min_gap_ms = 5\nconfirm.max_validity_s = 9999\nalerts.stale_after_s = abc")
         assertEquals(WatchConfig().presenceIntervalMs, c.presenceIntervalMs)
