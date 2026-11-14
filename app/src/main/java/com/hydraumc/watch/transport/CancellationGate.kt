@@ -3,12 +3,12 @@
 // Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 // GPL-3.0 - see LICENSE
 // =============================================================================
-// WatchRelayTransport.cancelPendingRetries used to call only
+// WatchRelayTransport.cancelPendingRetries cannot rely only on
 // Handler.removeCallbacksAndMessages(null), which cancels a Runnable already
 // sitting in that Handler's own queue but can never touch a Play Services
 // getCapability()/sendMessage() call already dispatched and awaiting its own
-// network/IPC round trip - that listener's own success/failure callback fired
-// regardless, and on a retryable failure would schedule a brand-new retry
+// network/IPC round trip - that listener's own success/failure callback would
+// fire regardless, and on a retryable failure would schedule a brand-new retry
 // AFTER cancellation already ran, as if it had never happened. This is the
 // real generation-token mechanism that closes that gap - pulled out as its
 // own pure class (no Android dependency) so it's directly unit-testable on

@@ -95,10 +95,9 @@ class WatchRelayTransport(
     }
 
     /**
-     * a retry scheduled via [handler] used to have no way to be
-     * cancelled at all - only a max-attempt COUNTER bounded it, so a
-     * pending retry from before the screen closed still fired later
-     * regardless, invoking [onResult] against a caller (MainActivity)
+     * a retry scheduled via [handler] is cancellable; a max-attempt COUNTER
+     * alone would not bound it, so a pending retry from before the screen
+     * closed would still fire later, invoking [onResult] against a caller (MainActivity)
      * that may have already been destroyed/recreated. Call this from the
      * owning component's own lifecycle teardown (MainActivity.onDestroy)
      * to cancel every retry still pending for THIS transport instance -
@@ -112,7 +111,7 @@ class WatchRelayTransport(
      * queue; it cannot touch a Play Services `getCapability()`/
      * `sendMessage()` call already dispatched and awaiting its own
      * network/IPC round trip. That listener's own success/failure callback
-     * used to run regardless, completely bypassing this cancellation - and
+     * would run regardless, completely bypassing this cancellation - and
      * on a retryable failure, [sendWithRetry] would then call
      * [Handler.postDelayed] AGAIN, scheduling a brand-new retry AFTER this
      * method already ran, exactly as if cancellation had never happened.
