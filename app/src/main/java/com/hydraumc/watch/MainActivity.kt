@@ -509,7 +509,7 @@ class MainActivity : ComponentActivity() {
         unregisterReceiver(relayReceiver)
         staleCheckHandler.removeCallbacks(staleCheckRunnable)
         // a deferred retry (sendVoiceTurn/requestSystemStatus
-        // scheduled itself again on a delay) used to keep firing after
+        // scheduled itself again on a delay) would keep firing after
         // this screen was gone, with only an attempt counter - never a
         // real lifecycle - bounding it.
         relayTransport.cancelPendingRetries()
