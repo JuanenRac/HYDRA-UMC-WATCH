@@ -23,6 +23,9 @@ private const val MAX_LOWERED_SWITCHES = 16
 private const val MAX_SECURITY_COUNT = 100_000
 private const val MAX_CONFIRMATION_VALIDITY_SECONDS = 300
 private const val MAX_ROBOTS_RUNNING = 10_000
+
+/** The phases of a flash cycle of a board, named as the server writes them. */
+val CANOTA_PHASES = listOf("connecting", "entering_bootloader", "erasing_fram", "transferring", "verifying", "rebooting", "done", "error")
 private val confirmationTokenPattern = Regex("^[A-Za-z0-9._~+/=-]{16,1024}$")
 private val switchIdPattern = Regex("^[A-Za-z]{1,24}\\.[A-Za-z]{1,32}$")
 
@@ -164,6 +167,19 @@ sealed class SyncMessage {
     ) : SyncMessage()
 
     /**
+     * Phone -> watch: the live progress of a flash cycle of a board (the phone read it from the server, which sends it only to administrators).
+     * It is read on the wrist and nothing in it can start or stop a flash. [phase] is one of [CANOTA_PHASES]; [percent] is 0 to 100, or null when
+     * the phone has no number. It is not kept: it is shown only while the screen is open.
+     */
+    @Serializable
+    @SerialName("canota_progress_status")
+    data class CanOtaProgressStatus(
+        val protocolVersion: Int,
+        val phase: String,
+        val percent: Int? = null,
+    ) : SyncMessage()
+
+    /**
      * Watch -> phone: the operator wears the watch and is in the cell. Sent every few seconds while the presence option is on; the
      * phone passes it on and the server (not this watch) decides what a lost heartbeat means. [state] is LEFT when the operator
      * ended the presence on purpose, so a deliberate leave is told apart from a loss.
@@ -243,6 +259,7 @@ fun parseSyncMessage(raw: String): SyncMessage {
             "system_status",
             "companion_version_status",
             "server_security_status",
+            "canota_progress_status",
             "estop_command",
             "alert",
             "presence_heartbeat",
@@ -337,6 +354,17 @@ private fun validateProtocolMessage(message: SyncMessage) {
             }
             if (listOf(message.lockedSwitches, message.activeClients, message.failedLogins).any { it !in 0..MAX_SECURITY_COUNT }) {
                 throw SyncMessageParseException("security status counts must be from 0 to $MAX_SECURITY_COUNT")
+            }
+        }
+        is SyncMessage.CanOtaProgressStatus -> {
+            if (message.protocolVersion != CURRENT_PROTOCOL_VERSION) {
+                throw SyncMessageParseException("unsupported flash progress protocol version ${message.protocolVersion}")
+            }
+            if (message.phase !in CANOTA_PHASES) {
+                throw SyncMessageParseException("flash progress has a phase this watch does not know")
+            }
+            if (message.percent != null && message.percent !in 0..100) {
+                throw SyncMessageParseException("flash progress percent must be from 0 to 100")
             }
         }
         is SyncMessage.Alert -> {

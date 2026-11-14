@@ -58,4 +58,14 @@
     <string name="complication_outdated">Données de robot périmées</string>
     <string name="complication_alarm">Alarme active</string>
     <string name="complication_running">%1$d robots en marche</string>
+    <string name="canota_line">Flash CAN : %1$s</string>
+    <string name="canota_line_percent">Flash CAN : %1$s, %2$d %%</string>
+    <string name="canota_phase_connecting">Connexion à la carte</string>
+    <string name="canota_phase_entering_bootloader">Entrée dans le bootloader</string>
+    <string name="canota_phase_erasing_fram">Effacement de la FRAM</string>
+    <string name="canota_phase_transferring">Envoi de l\'image</string>
+    <string name="canota_phase_verifying">Vérification de l\'image</string>
+    <string name="canota_phase_rebooting">Redémarrage de la carte</string>
+    <string name="canota_phase_done">Flash terminé</string>
+    <string name="canota_phase_error">Échec du flash</string>
 </resources>

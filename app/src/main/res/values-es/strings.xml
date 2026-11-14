@@ -58,4 +58,14 @@
     <string name="complication_outdated">Datos de robots caducados</string>
     <string name="complication_alarm">Alarma activa</string>
     <string name="complication_running">%1$d robots en marcha</string>
+    <string name="canota_line">Flasheo CAN: %1$s</string>
+    <string name="canota_line_percent">Flasheo CAN: %1$s, %2$d %%</string>
+    <string name="canota_phase_connecting">Conectando con la placa</string>
+    <string name="canota_phase_entering_bootloader">Entrando en el bootloader</string>
+    <string name="canota_phase_erasing_fram">Borrando la FRAM</string>
+    <string name="canota_phase_transferring">Enviando la imagen</string>
+    <string name="canota_phase_verifying">Verificando la imagen</string>
+    <string name="canota_phase_rebooting">Reiniciando la placa</string>
+    <string name="canota_phase_done">Flasheo terminado</string>
+    <string name="canota_phase_error">El flasheo ha fallado</string>
 </resources>

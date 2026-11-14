@@ -58,4 +58,14 @@
     <string name="complication_outdated">Robot data outdated</string>
     <string name="complication_alarm">Alarm active</string>
     <string name="complication_running">%1$d robots running</string>
+    <string name="canota_line">CAN flash: %1$s</string>
+    <string name="canota_line_percent">CAN flash: %1$s, %2$d %%</string>
+    <string name="canota_phase_connecting">Connecting to the board</string>
+    <string name="canota_phase_entering_bootloader">Entering the bootloader</string>
+    <string name="canota_phase_erasing_fram">Erasing the FRAM</string>
+    <string name="canota_phase_transferring">Sending the image</string>
+    <string name="canota_phase_verifying">Verifying the image</string>
+    <string name="canota_phase_rebooting">Restarting the board</string>
+    <string name="canota_phase_done">Flash finished</string>
+    <string name="canota_phase_error">Flash failed</string>
 </resources>

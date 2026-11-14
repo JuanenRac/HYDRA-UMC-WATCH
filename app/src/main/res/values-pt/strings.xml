@@ -58,4 +58,14 @@
     <string name="complication_outdated">Dados de robôs desatualizados</string>
     <string name="complication_alarm">Alarme ativo</string>
     <string name="complication_running">%1$d robôs em funcionamento</string>
+    <string name="canota_line">Flash CAN: %1$s</string>
+    <string name="canota_line_percent">Flash CAN: %1$s, %2$d %%</string>
+    <string name="canota_phase_connecting">A ligar à placa</string>
+    <string name="canota_phase_entering_bootloader">A entrar no bootloader</string>
+    <string name="canota_phase_erasing_fram">A apagar a FRAM</string>
+    <string name="canota_phase_transferring">A enviar a imagem</string>
+    <string name="canota_phase_verifying">A verificar a imagem</string>
+    <string name="canota_phase_rebooting">A reiniciar a placa</string>
+    <string name="canota_phase_done">Flash concluído</string>
+    <string name="canota_phase_error">O flash falhou</string>
 </resources>

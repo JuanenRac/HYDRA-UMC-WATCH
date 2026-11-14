@@ -25,6 +25,8 @@ object WatchRelayPaths {
     const val SERVER_SECURITY = "/hydra-umc/server-security/v1"
     /** Watch -> phone: asks for the read-only security status of the server (the answer comes on [SERVER_SECURITY]). */
     const val SERVER_SECURITY_REQUEST = "/hydra-umc/server-security-request/v1"
+    /** Phone -> watch: the live progress of a flash cycle of a board, shown while the screen is open. */
+    const val CANOTA_PROGRESS = "/hydra-umc/canota-progress/v1"
     /** Phone -> watch: an alert to surface and vibrate on the wrist. */
     const val ALERT = "/hydra-umc/alert/v1"
     /** Watch -> phone: the heartbeat of the presence of the operator. */
