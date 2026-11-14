@@ -34,6 +34,17 @@ class WatchRelayListenerService : WearableListenerService() {
             handleAlert(message0, raw)
             return
         }
+        if (message0 is SyncMessage.CanOtaProgressStatus) {
+            // live progress only: it is not kept (it would replace the last reply or status), not held for a later screen and not notified
+            if (RelayInboxHolder.inbox.screenAttached) {
+                sendBroadcast(
+                    Intent(ACTION_WATCH_RELAY_MESSAGE)
+                        .setPackage(packageName)
+                        .putExtra(EXTRA_WATCH_RELAY_MESSAGE, raw),
+                )
+            }
+            return
+        }
         // The last reply or status is kept on the watch, so a screen created later, a tile or a complication can show it.
         runCatching { LastRelayStore(SharedPrefsKeyValueStore(this)).save(raw) }
         if (message0 is SyncMessage.SystemStatus) {

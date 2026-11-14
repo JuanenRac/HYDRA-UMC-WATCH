@@ -46,6 +46,8 @@ import com.hydraumc.watch.haptics.AlertSeverity
 import com.hydraumc.watch.haptics.HapticAlertPlayer
 import com.hydraumc.watch.protocol.SyncMessage
 import com.hydraumc.watch.protocol.hapticSeverityFor
+import com.hydraumc.watch.protocol.canOtaFinished
+import com.hydraumc.watch.protocol.canOtaPhaseStringRes
 import com.hydraumc.watch.protocol.parseSyncMessage
 import com.hydraumc.watch.protocol.securitySwitchStringRes
 import com.hydraumc.watch.transport.ACTION_WATCH_RELAY_MESSAGE
@@ -72,12 +74,18 @@ import java.util.Locale
 private const val RELAY_STATE_STALE_AFTER_MS = 5 * 60_000L
 private const val STALE_CHECK_PERIOD_MS = 5_000L
 
+/** How long the line of a flash cycle that ended stays on the screen, in milliseconds. */
+private const val CANOTA_LINE_SHOWN_AFTER_END_MS = 120_000L
+
 class MainActivity : ComponentActivity() {
     private var latestVoiceTranscript by mutableStateOf<String?>(null)
     private var voiceStatus by mutableStateOf<String?>(null)
     private var systemStatus by mutableStateOf<String?>(null)
     private var systemStatusStale by mutableStateOf(false)
     private var securityStatus by mutableStateOf<String?>(null)
+    /** The line of the flash cycle the phone reports (phase and percent); null when there is none or it ended a while ago. */
+    private var canOtaLine by mutableStateOf<String?>(null)
+    private val canOtaClear = Runnable { canOtaLine = null }
     private var companionAvailable by mutableStateOf(false)
     // Low-power screen of the watch (the wrist is down): only the last state is drawn, in a quiet way.
     private var ambient by mutableStateOf(false)
@@ -232,6 +240,13 @@ class MainActivity : ComponentActivity() {
                     // a held alert is shown, but it is not news any more: no vibration (the service played it when it arrived)
                     if (!held && !alertOutdated) hapticAlertPlayer.play(message.severity)
                 }
+                is SyncMessage.CanOtaProgressStatus -> {
+                    // read only and silent: a line on the screen, no speech, no vibration; held messages never reach here (the service does not hold it)
+                    val phaseText = canOtaPhaseStringRes(message.phase)?.let { getString(it) } ?: message.phase
+                    canOtaLine = message.percent?.let { getString(R.string.canota_line_percent, phaseText, it) } ?: getString(R.string.canota_line, phaseText)
+                    window.decorView.removeCallbacks(canOtaClear)
+                    if (canOtaFinished(message.phase)) window.decorView.postDelayed(canOtaClear, CANOTA_LINE_SHOWN_AFTER_END_MS)
+                }
                 is SyncMessage.ServerSecurityStatus -> {
                     // read only: it is shown, never acted on, and it does not speak or vibrate (it is a glance, not an alert)
                     securityStatus = securityStatusText(message)
@@ -378,6 +393,7 @@ class MainActivity : ComponentActivity() {
                 systemStatus = systemStatus,
                 systemStatusStale = systemStatusStale,
                 securityStatus = securityStatus,
+                canOtaLine = canOtaLine,
                 companionAvailable = companionAvailable,
                 ambient = ambient,
                 alertText = alertText,
@@ -516,6 +532,7 @@ fun HydraWatchApp(
     systemStatus: String? = null,
     systemStatusStale: Boolean = false,
     securityStatus: String? = null,
+    canOtaLine: String? = null,
     companionAvailable: Boolean = true,
     ambient: Boolean = false,
     alertText: String? = null,
@@ -586,6 +603,12 @@ fun HydraWatchApp(
                             style = MaterialTheme.typography.caption2,
                             textAlign = TextAlign.Center,
                         )
+                    }
+                }
+                canOtaLine?.let { text ->
+                    item {
+                        // The flash cycle of a board the phone reports: read only
+                        Text(text = text, style = MaterialTheme.typography.caption1, textAlign = TextAlign.Center)
                     }
                 }
                 securityStatus?.let { text ->

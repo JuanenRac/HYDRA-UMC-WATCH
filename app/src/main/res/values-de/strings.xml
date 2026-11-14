@@ -58,4 +58,14 @@
     <string name="complication_outdated">Roboterdaten veraltet</string>
     <string name="complication_alarm">Alarm aktiv</string>
     <string name="complication_running">%1$d Roboter in Betrieb</string>
+    <string name="canota_line">CAN-Flash: %1$s</string>
+    <string name="canota_line_percent">CAN-Flash: %1$s, %2$d %%</string>
+    <string name="canota_phase_connecting">Verbindung zur Platine</string>
+    <string name="canota_phase_entering_bootloader">Wechsel in den Bootloader</string>
+    <string name="canota_phase_erasing_fram">FRAM wird gelöscht</string>
+    <string name="canota_phase_transferring">Image wird gesendet</string>
+    <string name="canota_phase_verifying">Image wird geprüft</string>
+    <string name="canota_phase_rebooting">Platine wird neu gestartet</string>
+    <string name="canota_phase_done">Flash abgeschlossen</string>
+    <string name="canota_phase_error">Flash fehlgeschlagen</string>
 </resources>

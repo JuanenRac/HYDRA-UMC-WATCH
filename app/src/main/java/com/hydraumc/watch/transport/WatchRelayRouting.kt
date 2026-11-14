@@ -31,10 +31,10 @@ object WatchRelayRouting {
      * routing other message types to these same two paths.
      */
     fun decide(path: String, rawBytes: ByteArray, alertsEnabled: Boolean = true): String? {
-        if (path !in setOf(WatchRelayPaths.ASSISTANT_REPLY, WatchRelayPaths.SYSTEM_STATUS, WatchRelayPaths.SERVER_SECURITY, WatchRelayPaths.ALERT)) return null
+        if (path !in setOf(WatchRelayPaths.ASSISTANT_REPLY, WatchRelayPaths.SYSTEM_STATUS, WatchRelayPaths.SERVER_SECURITY, WatchRelayPaths.ALERT, WatchRelayPaths.CANOTA_PROGRESS)) return null
         val raw = rawBytes.decodeToString()
         val message = runCatching { parseSyncMessage(raw) }.getOrNull() ?: return null
-        if (message !is SyncMessage.AssistantReply && message !is SyncMessage.SystemStatus && message !is SyncMessage.ServerSecurityStatus && message !is SyncMessage.Alert) return null
+        if (message !is SyncMessage.AssistantReply && message !is SyncMessage.SystemStatus && message !is SyncMessage.ServerSecurityStatus && message !is SyncMessage.Alert && message !is SyncMessage.CanOtaProgressStatus) return null
         // alerts pushed by the phone are taken only while the option is on
         if (message is SyncMessage.Alert && !alertsEnabled) return null
         // each kind travels on its own path only: a security status is not accepted on the path of the assistant, nor the other way round
@@ -42,6 +42,7 @@ object WatchRelayRouting {
             is SyncMessage.AssistantReply -> WatchRelayPaths.ASSISTANT_REPLY
             is SyncMessage.SystemStatus -> WatchRelayPaths.SYSTEM_STATUS
             is SyncMessage.Alert -> WatchRelayPaths.ALERT
+            is SyncMessage.CanOtaProgressStatus -> WatchRelayPaths.CANOTA_PROGRESS
             else -> WatchRelayPaths.SERVER_SECURITY
         }
         if (path != expected) return null

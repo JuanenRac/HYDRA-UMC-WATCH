@@ -58,4 +58,14 @@
     <string name="complication_outdated">Dati sui robot obsoleti</string>
     <string name="complication_alarm">Allarme attivo</string>
     <string name="complication_running">%1$d robot in funzione</string>
+    <string name="canota_line">Flash CAN: %1$s</string>
+    <string name="canota_line_percent">Flash CAN: %1$s, %2$d %%</string>
+    <string name="canota_phase_connecting">Connessione alla scheda</string>
+    <string name="canota_phase_entering_bootloader">Ingresso nel bootloader</string>
+    <string name="canota_phase_erasing_fram">Cancellazione della FRAM</string>
+    <string name="canota_phase_transferring">Invio dell\'immagine</string>
+    <string name="canota_phase_verifying">Verifica dell\'immagine</string>
+    <string name="canota_phase_rebooting">Riavvio della scheda</string>
+    <string name="canota_phase_done">Flash completato</string>
+    <string name="canota_phase_error">Flash non riuscito</string>
 </resources>

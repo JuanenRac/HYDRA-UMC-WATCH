@@ -4,6 +4,7 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **A line on the screen with the phase and the percent of a flash cycle of a board:** the phone reads `canota_progress` from the server (it sends it only to administrators) and pushes it on `/hydra-umc/canota-progress/v1` as a new read-only message, `canota_progress_status` (version 1, a phase of the cycle and a percent from 0 to 100 or none). The watch shows one line in its own language, for example "Sending the image, 40 %", without sound or vibration, and clears it two minutes after the cycle ends. It is shown only while the screen is open: it is not kept (it would replace the last reply or status), not held for a later screen and not notified. A phase this watch does not know, another version and a percent outside 0 to 100 are refused, and the message is accepted on its own path only. The rules are in the shared contract file with five refused vectors, and the texts are in the eight languages.
 - **The Wear OS emulator checks run on their own:** the start-up check and the instrumented tests on a round Wear OS emulator now run once a week and on a pull request to main that changes the app or its build files (they were started by hand only), with a Gradle cache and a newer run of the same pull request cancelling the older one. They never run on a push.
 
 ## [0.3.3] - Touches through an overlay ignored, a coverage floor of 69 percent, tests of the notifications and instrumented Wear OS tests
