@@ -10,7 +10,7 @@ import android.content.Context
 /**
  * The settings of the watch app, read from `assets/watch.cfg` (key = value, `#` starts a comment). Every number is kept
  * inside its range and a missing or invalid line keeps the default, so a broken file can never switch a safety option
- * on: the options that touch safety (presence, confirmation) are off by default. Pure Kotlin apart from [load].
+ * on: the options that touch safety (presence, confirmation) are off by default; the read-only line about a new release is on by default (it asks for no permission and downloads nothing). Pure Kotlin apart from [load].
  */
 data class WatchConfig(
     val alertsEnabled: Boolean = true,
@@ -27,7 +27,7 @@ data class WatchConfig(
     val tileEnabled: Boolean = true,
     val filterObscuredTouches: Boolean = true,
     val requireReleaseSignature: Boolean = false,
-    val releaseNoticeEnabled: Boolean = false,
+    val releaseNoticeEnabled: Boolean = true,
 ) {
     companion object {
         const val FILE_NAME = "watch.cfg"
