@@ -30,14 +30,14 @@ object WatchRelayRouting {
      * to the rest of the app, even if a future protocol version starts
      * routing other message types to these same two paths.
      */
-    fun decide(path: String, rawBytes: ByteArray, alertsEnabled: Boolean = true, releaseNoticeEnabled: Boolean = false): String? {
+    fun decide(path: String, rawBytes: ByteArray, alertsEnabled: Boolean = true, releaseNoticeEnabled: Boolean = true): String? {
         if (path !in setOf(WatchRelayPaths.ASSISTANT_REPLY, WatchRelayPaths.SYSTEM_STATUS, WatchRelayPaths.SERVER_SECURITY, WatchRelayPaths.ALERT, WatchRelayPaths.CANOTA_PROGRESS, WatchRelayPaths.RELEASE_NOTICE)) return null
         val raw = rawBytes.decodeToString()
         val message = runCatching { parseSyncMessage(raw) }.getOrNull() ?: return null
         if (message !is SyncMessage.AssistantReply && message !is SyncMessage.SystemStatus && message !is SyncMessage.ServerSecurityStatus && message !is SyncMessage.Alert && message !is SyncMessage.CanOtaProgressStatus && message !is SyncMessage.ReleaseNotice) return null
         // alerts pushed by the phone are taken only while the option is on
         if (message is SyncMessage.Alert && !alertsEnabled) return null
-        // a notice of a new release is taken only while the operator asked for it (off by default)
+        // a notice of a new release is taken only while the operator not switched off (on by default)
         if (message is SyncMessage.ReleaseNotice && !releaseNoticeEnabled) return null
         // each kind travels on its own path only: a security status is not accepted on the path of the assistant, nor the other way round
         val expected = when (message) {

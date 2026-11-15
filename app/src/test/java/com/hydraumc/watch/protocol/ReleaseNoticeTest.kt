@@ -60,13 +60,13 @@ class ReleaseNoticeTest {
     }
 
     @Test
-    fun `it is taken only while the option is on, which is off by default`() {
+    fun `it is taken while the option is on, which is on by default, and refused when it is switched off`() {
         val bytes = raw("0.5.2").encodeToByteArray()
-        assertNull("off by default", WatchRelayRouting.decide(WatchRelayPaths.RELEASE_NOTICE, bytes))
+        assertNotNull("on by default", WatchRelayRouting.decide(WatchRelayPaths.RELEASE_NOTICE, bytes))
         assertNull(WatchRelayRouting.decide(WatchRelayPaths.RELEASE_NOTICE, bytes, releaseNoticeEnabled = false))
         assertNotNull(WatchRelayRouting.decide(WatchRelayPaths.RELEASE_NOTICE, bytes, releaseNoticeEnabled = true))
-        // the alerts option does not switch it on
-        assertNull(WatchRelayRouting.decide(WatchRelayPaths.RELEASE_NOTICE, bytes, alertsEnabled = true))
+        // the alerts option does not switch it off
+        assertNull(WatchRelayRouting.decide(WatchRelayPaths.RELEASE_NOTICE, bytes, alertsEnabled = true, releaseNoticeEnabled = false))
     }
 
     @Test
@@ -104,11 +104,11 @@ class ReleaseNoticeTest {
     }
 
     @Test
-    fun `the notice option is off in the file that ships and a broken value keeps it off`() {
-        assertFalse(WatchConfig().releaseNoticeEnabled)
-        assertFalse(WatchConfig.parse(File("src/main/assets/watch.cfg").readText(Charsets.UTF_8)).releaseNoticeEnabled)
-        assertFalse(WatchConfig.parse("updates.notice_enabled = maybe").releaseNoticeEnabled)
-        assertFalse(WatchConfig.parse("").releaseNoticeEnabled)
-        assertTrue(WatchConfig.parse("updates.notice_enabled = true").releaseNoticeEnabled)
+    fun `the notice option is on in the file that ships and a false value switches it off`() {
+        assertTrue(WatchConfig().releaseNoticeEnabled)
+        assertTrue(WatchConfig.parse(File("src/main/assets/watch.cfg").readText(Charsets.UTF_8)).releaseNoticeEnabled)
+        assertTrue(WatchConfig.parse("updates.notice_enabled = maybe").releaseNoticeEnabled)
+        assertTrue(WatchConfig.parse("").releaseNoticeEnabled)
+        assertFalse(WatchConfig.parse("updates.notice_enabled = false").releaseNoticeEnabled)
     }
 }
