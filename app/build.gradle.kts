@@ -66,8 +66,8 @@ val appVersionName = "$appVersionMajor.$appVersionMinor.$appVersionPatch" +
 
 android {
     namespace = "com.hydraumc.watch"
-    // 36 required by androidx.core 1.18.0 - same pin as HYDRA-UMC-ANDROID-CONTROL.
-    compileSdk = 36
+    // 37 required by the Compose 1.12 libraries (BOM 2026.09); compiling against a newer API level does not change targetSdk.
+    compileSdk = 37
 
     defaultConfig {
         // Data Layer accepts messages only between packages with an identical
