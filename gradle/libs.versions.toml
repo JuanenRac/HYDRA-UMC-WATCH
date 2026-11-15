@@ -1,9 +1,9 @@
 [versions]
-agp = "9.5.0"
+agp = "9.5.1"
 kotlin = "2.4.21"
-coreKtx = "1.18.0"
+coreKtx = "1.19.1"
 activityCompose = "1.10.1"
-composeBom = "2024.09.00"
+composeBom = "2026.09.00"
 # Wear Compose is versioned independently from the phone Compose BOM above -
 # 1.6.2 is the latest stable release (1.7.0 is still in alpha/beta as of
 # this writing, see gradle/libs.versions.toml's own comment convention).
