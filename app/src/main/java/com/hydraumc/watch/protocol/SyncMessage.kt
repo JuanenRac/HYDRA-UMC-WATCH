@@ -26,6 +26,8 @@ private const val MAX_ROBOTS_RUNNING = 10_000
 
 /** The phases of a flash cycle of a board, named as the server writes them. */
 val CANOTA_PHASES = listOf("connecting", "entering_bootloader", "erasing_fram", "transferring", "verifying", "rebooting", "done", "error")
+/** What a version number of a release looks like: two to four groups of digits (0.5.2, 0.8.0.1). */
+private val releaseVersionPattern = Regex("^[0-9]{1,4}(\\.[0-9]{1,4}){1,3}$")
 private val confirmationTokenPattern = Regex("^[A-Za-z0-9._~+/=-]{16,1024}$")
 private val switchIdPattern = Regex("^[A-Za-z]{1,24}\\.[A-Za-z]{1,32}$")
 
@@ -180,6 +182,17 @@ sealed class SyncMessage {
     ) : SyncMessage()
 
     /**
+     * Phone -> watch: a newer release of the apps exists (the phone read the release feed and decided; the watch has no network access). It is shown
+     * as a line and nothing in it can download or install anything. [version] is the number of the release, two to four groups of digits.
+     */
+    @Serializable
+    @SerialName("release_notice")
+    data class ReleaseNotice(
+        val protocolVersion: Int,
+        val version: String,
+    ) : SyncMessage()
+
+    /**
      * Watch -> phone: the operator wears the watch and is in the cell. Sent every few seconds while the presence option is on; the
      * phone passes it on and the server (not this watch) decides what a lost heartbeat means. [state] is LEFT when the operator
      * ended the presence on purpose, so a deliberate leave is told apart from a loss.
@@ -260,6 +273,7 @@ fun parseSyncMessage(raw: String): SyncMessage {
             "companion_version_status",
             "server_security_status",
             "canota_progress_status",
+            "release_notice",
             "estop_command",
             "alert",
             "presence_heartbeat",
@@ -365,6 +379,14 @@ private fun validateProtocolMessage(message: SyncMessage) {
             }
             if (message.percent != null && message.percent !in 0..100) {
                 throw SyncMessageParseException("flash progress percent must be from 0 to 100")
+            }
+        }
+        is SyncMessage.ReleaseNotice -> {
+            if (message.protocolVersion != CURRENT_PROTOCOL_VERSION) {
+                throw SyncMessageParseException("unsupported release notice protocol version ${message.protocolVersion}")
+            }
+            if (!releaseVersionPattern.matches(message.version)) {
+                throw SyncMessageParseException("release notice version must be two to four groups of digits")
             }
         }
         is SyncMessage.Alert -> {

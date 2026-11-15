@@ -26,12 +26,24 @@ class WatchRelayListenerService : WearableListenerService() {
         // by-necessity Android glue that hands it real MessageEvent bytes
         // and broadcasts whatever it decides to keep.
         val config = WatchConfig.load(this)
-        val decided = WatchRelayRouting.decide(event.path, event.data, alertsEnabled = config.alertsEnabled) ?: return
+        val decided = WatchRelayRouting.decide(event.path, event.data, alertsEnabled = config.alertsEnabled, releaseNoticeEnabled = config.releaseNoticeEnabled) ?: return
         // The one-use confirmation token lives only in the broadcast to a live screen: what is stored or held has none.
         val raw = WatchRelayRouting.withoutConfirmationToken(decided)
         val message0 = runCatching { parseSyncMessage(raw) }.getOrNull()
         if (message0 is SyncMessage.Alert) {
             handleAlert(message0, raw)
+            return
+        }
+        if (message0 is SyncMessage.ReleaseNotice) {
+            // kept apart from the last reply or status: it is a line for the next time the screen opens, silent, never a notification
+            runCatching { ReleaseNoticeStore(SharedPrefsKeyValueStore(this, ReleaseNoticeStore.STORE_NAME)).save(message0.version) }
+            if (RelayInboxHolder.inbox.screenAttached) {
+                sendBroadcast(
+                    Intent(ACTION_WATCH_RELAY_MESSAGE)
+                        .setPackage(packageName)
+                        .putExtra(EXTRA_WATCH_RELAY_MESSAGE, raw),
+                )
+            }
             return
         }
         if (message0 is SyncMessage.CanOtaProgressStatus) {

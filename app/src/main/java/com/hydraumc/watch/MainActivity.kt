@@ -60,6 +60,7 @@ import com.hydraumc.watch.transport.TwoStepConfirmation
 import com.hydraumc.watch.transport.CriticalActionGate
 import com.hydraumc.watch.transport.LastKnownStateCache
 import com.hydraumc.watch.transport.LastRelayStore
+import com.hydraumc.watch.transport.ReleaseNoticeStore
 import com.hydraumc.watch.transport.RelayNotifier
 import com.hydraumc.watch.transport.SharedPrefsKeyValueStore
 import com.hydraumc.watch.transport.PendingVoiceRequest
@@ -86,6 +87,8 @@ class MainActivity : ComponentActivity() {
     /** The line of the flash cycle the phone reports (phase and percent); null when there is none or it ended a while ago. */
     private var canOtaLine by mutableStateOf<String?>(null)
     private val canOtaClear = Runnable { canOtaLine = null }
+    /** The line of a new release the phone told about (only while updates.notice_enabled is on); read only, it never downloads or installs. */
+    private var releaseNoticeLine by mutableStateOf<String?>(null)
     private var companionAvailable by mutableStateOf(false)
     // Low-power screen of the watch (the wrist is down): only the last state is drawn, in a quiet way.
     private var ambient by mutableStateOf(false)
@@ -247,6 +250,10 @@ class MainActivity : ComponentActivity() {
                     window.decorView.removeCallbacks(canOtaClear)
                     if (canOtaFinished(message.phase)) window.decorView.postDelayed(canOtaClear, CANOTA_LINE_SHOWN_AFTER_END_MS)
                 }
+                is SyncMessage.ReleaseNotice -> {
+                    // read only and silent: one line, no speech, no vibration, no notification
+                    releaseNoticeLine = getString(R.string.release_notice_line, message.version)
+                }
                 is SyncMessage.ServerSecurityStatus -> {
                     // read only: it is shown, never acted on, and it does not speak or vibrate (it is a glance, not an alert)
                     securityStatus = securityStatusText(message)
@@ -373,6 +380,7 @@ class MainActivity : ComponentActivity() {
         presenceOn = PresenceHeartbeatService.running
         askForNotificationsOnce()
         restoreLastKnownState()
+        restoreReleaseNotice()
         // From here on the screen receives the broadcasts itself; what arrived while it did not exist is shown now.
         RelayInboxHolder.inbox.screenAttached = true
         ContextCompat.registerReceiver(
@@ -394,6 +402,7 @@ class MainActivity : ComponentActivity() {
                 systemStatusStale = systemStatusStale,
                 securityStatus = securityStatus,
                 canOtaLine = canOtaLine,
+                releaseNoticeLine = releaseNoticeLine,
                 companionAvailable = companionAvailable,
                 ambient = ambient,
                 alertText = alertText,
@@ -411,6 +420,13 @@ class MainActivity : ComponentActivity() {
                 onTestHaptic = { hapticAlertPlayer.play(AlertSeverity.INFO) },
             )
         }
+    }
+
+    /** Shows the newest release notice kept on the watch, only while the option is on (a notice kept before it was switched off is not shown). */
+    private fun restoreReleaseNotice() {
+        if (!WatchConfig.load(this).releaseNoticeEnabled) return
+        val version = runCatching { ReleaseNoticeStore(SharedPrefsKeyValueStore(applicationContext, ReleaseNoticeStore.STORE_NAME)).load() }.getOrNull() ?: return
+        releaseNoticeLine = getString(R.string.release_notice_line, version)
     }
 
     /** Shows the last reply or status kept on the watch, marked as outdated by the same rule as a live one. */
@@ -533,6 +549,7 @@ fun HydraWatchApp(
     systemStatusStale: Boolean = false,
     securityStatus: String? = null,
     canOtaLine: String? = null,
+    releaseNoticeLine: String? = null,
     companionAvailable: Boolean = true,
     ambient: Boolean = false,
     alertText: String? = null,
@@ -608,6 +625,12 @@ fun HydraWatchApp(
                 canOtaLine?.let { text ->
                     item {
                         // The flash cycle of a board the phone reports: read only
+                        Text(text = text, style = MaterialTheme.typography.caption1, textAlign = TextAlign.Center)
+                    }
+                }
+                releaseNoticeLine?.let { text ->
+                    item {
+                        // A newer release the phone found: read only
                         Text(text = text, style = MaterialTheme.typography.caption1, textAlign = TextAlign.Center)
                     }
                 }

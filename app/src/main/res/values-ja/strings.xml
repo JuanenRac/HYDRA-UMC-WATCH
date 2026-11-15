@@ -170,4 +170,5 @@
     <string name="common_up_to_date">最新です</string>
     <string name="common_system_default">システムの既定値</string>
     <string name="common_select_a_robot">ロボットを選択してください</string>
+    <string name="release_notice_line">新しいバージョンがあります: %1$s</string>
 </resources>
