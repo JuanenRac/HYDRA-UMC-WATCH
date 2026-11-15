@@ -4,6 +4,9 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+
+## [0.3.4]
+
 - **The app compiles against Android API level 37:** the newer Compose libraries need it to build; the behaviour on the watch (`targetSdk 35`, `minSdk 30`) does not change.
 - **A line on the screen when the phone knows of a newer release, off by default:** the watch is a relay of the phone and does not look at the release feed itself, so the phone looks at it (the rules that decide what is a newer, trusted release stay in the phone app) and sends a read-only message, `release_notice` (version 1, the number of the release as two to four groups of digits), on `/hydra-umc/release-notice/v1`. The watch takes it only when `updates.notice_enabled = true` in `watch.cfg` (the shipped value is `false`; the alerts option does not switch it on) and shows one line in its own language, for example "New version available: 0.5.2", without sound, vibration or notification. The number is kept apart from the last reply or status for three days and an older number never replaces a newer one, so the line is there the next time the screen opens. Nothing is downloaded or installed from the watch. Another protocol version, a text instead of a number, one group, five groups and a number with anything after it are refused, and the message is accepted on its own path only. The rules are in the shared contract file with two valid and six refused vectors, and the line is in the eight languages.
 - **The common words of the apps come from the SDK:** the eight `strings.xml` files carry the `common_<id>` lines that `tools/i18n_common.py render android` writes (100 words in all, written once in HYDRA-UMC-SDK), and the strings of the app that said exactly the same word point at them (`@string/common_<id>`), so the word cannot be written differently here and in the other apps. `tools/extra_checks.py` checks that the lines are the ones of the SDK when the SDK is at hand; the strings that differ in form or in meaning (capitals, a longer wording) stay as they are.
@@ -12,6 +15,8 @@ All notable changes to this project are documented here.
 
 - **A line on the screen with the phase and the percent of a flash cycle of a board:** the phone reads `canota_progress` from the server (it sends it only to administrators) and pushes it on `/hydra-umc/canota-progress/v1` as a new read-only message, `canota_progress_status` (version 1, a phase of the cycle and a percent from 0 to 100 or none). The watch shows one line in its own language, for example "Sending the image, 40 %", without sound or vibration, and clears it two minutes after the cycle ends. It is shown only while the screen is open: it is not kept (it would replace the last reply or status), not held for a later screen and not notified. A phase this watch does not know, another version and a percent outside 0 to 100 are refused, and the message is accepted on its own path only. The rules are in the shared contract file with five refused vectors, and the texts are in the eight languages.
 - **The Wear OS emulator checks run on their own:** the start-up check and the instrumented tests on a round Wear OS emulator now run once a week and on a pull request to main that changes the app or its build files (they were started by hand only), with a Gradle cache and a newer run of the same pull request cancelling the older one. They never run on a push.
+
+- Build version synchronized with `hydra-umc.project.json` and the repository-native version source.
 
 ## [0.3.3] - Touches through an overlay ignored, a coverage floor of 69 percent, tests of the notifications and instrumented Wear OS tests
 
