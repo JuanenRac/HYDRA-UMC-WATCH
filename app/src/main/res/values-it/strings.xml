@@ -170,4 +170,5 @@
     <string name="common_up_to_date">Aggiornato</string>
     <string name="common_system_default">Predefinito di sistema</string>
     <string name="common_select_a_robot">Seleziona un robot</string>
+    <string name="release_notice_line">Nuova versione disponibile: %1$s</string>
 </resources>

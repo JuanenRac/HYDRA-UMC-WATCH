@@ -27,6 +27,7 @@ data class WatchConfig(
     val tileEnabled: Boolean = true,
     val filterObscuredTouches: Boolean = true,
     val requireReleaseSignature: Boolean = false,
+    val releaseNoticeEnabled: Boolean = false,
 ) {
     companion object {
         const val FILE_NAME = "watch.cfg"
@@ -65,6 +66,7 @@ data class WatchConfig(
                 tileEnabled = flag("tile.enabled", d.tileEnabled),
                 filterObscuredTouches = flag("security.filter_obscured_touches", d.filterObscuredTouches),
                 requireReleaseSignature = flag("updates.require_release_signature", d.requireReleaseSignature),
+                releaseNoticeEnabled = flag("updates.notice_enabled", d.releaseNoticeEnabled),
             )
         }
 
