@@ -170,5 +170,6 @@
     <string name="common_up_to_date">Up to date</string>
     <string name="common_system_default">System default</string>
     <string name="common_select_a_robot">Select a robot</string>
+    <string name="stop_restored_line">Server stopped after a restart: an administrator must release it</string>
     <string name="release_notice_line">New version available: %1$s</string>
 </resources>

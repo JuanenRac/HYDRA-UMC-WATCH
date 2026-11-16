@@ -46,8 +46,8 @@ class WatchRelayListenerService : WearableListenerService() {
             }
             return
         }
-        if (message0 is SyncMessage.CanOtaProgressStatus) {
-            // live progress only: it is not kept (it would replace the last reply or status), not held for a later screen and not notified
+        if (message0 is SyncMessage.CanOtaProgressStatus || message0 is SyncMessage.StopRestoredStatus) {
+            // live state only (flash progress, stop restored after a restart): it is not kept (it would replace the last reply or status), not held for a later screen and not notified
             if (RelayInboxHolder.inbox.screenAttached) {
                 sendBroadcast(
                     Intent(ACTION_WATCH_RELAY_MESSAGE)

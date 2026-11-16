@@ -87,6 +87,8 @@ class MainActivity : ComponentActivity() {
     /** The line of the flash cycle the phone reports (phase and percent); null when there is none or it ended a while ago. */
     private var canOtaLine by mutableStateOf<String?>(null)
     private val canOtaClear = Runnable { canOtaLine = null }
+    /** The line that the server is stopped only because it restarted; null when the phone says it is not (or has not said). */
+    private var stopRestoredLine by mutableStateOf<String?>(null)
     /** The line of a new release the phone told about (only while updates.notice_enabled is on); read only, it never downloads or installs. */
     private var releaseNoticeLine by mutableStateOf<String?>(null)
     private var companionAvailable by mutableStateOf(false)
@@ -250,6 +252,10 @@ class MainActivity : ComponentActivity() {
                     window.decorView.removeCallbacks(canOtaClear)
                     if (canOtaFinished(message.phase)) window.decorView.postDelayed(canOtaClear, CANOTA_LINE_SHOWN_AFTER_END_MS)
                 }
+                is SyncMessage.StopRestoredStatus -> {
+                    // read only and silent: one line while the phone says the stop was restored after a restart; false clears it
+                    stopRestoredLine = if (message.restored) getString(R.string.stop_restored_line) else null
+                }
                 is SyncMessage.ReleaseNotice -> {
                     // read only and silent: one line, no speech, no vibration, no notification
                     releaseNoticeLine = getString(R.string.release_notice_line, message.version)
@@ -402,6 +408,7 @@ class MainActivity : ComponentActivity() {
                 systemStatusStale = systemStatusStale,
                 securityStatus = securityStatus,
                 canOtaLine = canOtaLine,
+                stopRestoredLine = stopRestoredLine,
                 releaseNoticeLine = releaseNoticeLine,
                 companionAvailable = companionAvailable,
                 ambient = ambient,
@@ -549,6 +556,7 @@ fun HydraWatchApp(
     systemStatusStale: Boolean = false,
     securityStatus: String? = null,
     canOtaLine: String? = null,
+    stopRestoredLine: String? = null,
     releaseNoticeLine: String? = null,
     companionAvailable: Boolean = true,
     ambient: Boolean = false,
@@ -625,6 +633,12 @@ fun HydraWatchApp(
                 canOtaLine?.let { text ->
                     item {
                         // The flash cycle of a board the phone reports: read only
+                        Text(text = text, style = MaterialTheme.typography.caption1, textAlign = TextAlign.Center)
+                    }
+                }
+                stopRestoredLine?.let { text ->
+                    item {
+                        // The server stays stopped after a restart until an administrator releases it: read only
                         Text(text = text, style = MaterialTheme.typography.caption1, textAlign = TextAlign.Center)
                     }
                 }

@@ -170,5 +170,6 @@
     <string name="common_up_to_date">À jour</string>
     <string name="common_system_default">Par défaut du système</string>
     <string name="common_select_a_robot">Sélectionnez un robot</string>
+    <string name="stop_restored_line">Serveur arrêté après un redémarrage : un administrateur doit le libérer</string>
     <string name="release_notice_line">Nouvelle version disponible : %1$s</string>
 </resources>

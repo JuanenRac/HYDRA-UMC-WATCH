@@ -27,6 +27,8 @@ object WatchRelayPaths {
     const val SERVER_SECURITY_REQUEST = "/hydra-umc/server-security-request/v1"
     /** Phone -> watch: the live progress of a flash cycle of a board, shown while the screen is open. */
     const val CANOTA_PROGRESS = "/hydra-umc/canota-progress/v1"
+    /** Phone -> watch: whether the server is stopped only because it restarted, shown while the screen is open. */
+    const val STOP_RESTORED = "/hydra-umc/stop-restored/v1"
     /** Phone -> watch: a newer release exists (the phone decided; the watch only shows it). */
     const val RELEASE_NOTICE = "/hydra-umc/release-notice/v1"
     /** Phone -> watch: an alert to surface and vibrate on the wrist. */
