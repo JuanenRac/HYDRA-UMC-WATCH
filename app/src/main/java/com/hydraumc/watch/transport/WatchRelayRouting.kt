@@ -31,10 +31,10 @@ object WatchRelayRouting {
      * routing other message types to these same two paths.
      */
     fun decide(path: String, rawBytes: ByteArray, alertsEnabled: Boolean = true, releaseNoticeEnabled: Boolean = true): String? {
-        if (path !in setOf(WatchRelayPaths.ASSISTANT_REPLY, WatchRelayPaths.SYSTEM_STATUS, WatchRelayPaths.SERVER_SECURITY, WatchRelayPaths.ALERT, WatchRelayPaths.CANOTA_PROGRESS, WatchRelayPaths.RELEASE_NOTICE)) return null
+        if (path !in setOf(WatchRelayPaths.ASSISTANT_REPLY, WatchRelayPaths.SYSTEM_STATUS, WatchRelayPaths.SERVER_SECURITY, WatchRelayPaths.ALERT, WatchRelayPaths.CANOTA_PROGRESS, WatchRelayPaths.STOP_RESTORED, WatchRelayPaths.RELEASE_NOTICE)) return null
         val raw = rawBytes.decodeToString()
         val message = runCatching { parseSyncMessage(raw) }.getOrNull() ?: return null
-        if (message !is SyncMessage.AssistantReply && message !is SyncMessage.SystemStatus && message !is SyncMessage.ServerSecurityStatus && message !is SyncMessage.Alert && message !is SyncMessage.CanOtaProgressStatus && message !is SyncMessage.ReleaseNotice) return null
+        if (message !is SyncMessage.AssistantReply && message !is SyncMessage.SystemStatus && message !is SyncMessage.ServerSecurityStatus && message !is SyncMessage.Alert && message !is SyncMessage.CanOtaProgressStatus && message !is SyncMessage.StopRestoredStatus && message !is SyncMessage.ReleaseNotice) return null
         // alerts pushed by the phone are taken only while the option is on
         if (message is SyncMessage.Alert && !alertsEnabled) return null
         // a notice of a new release is taken only while the operator not switched off (on by default)
@@ -45,6 +45,7 @@ object WatchRelayRouting {
             is SyncMessage.SystemStatus -> WatchRelayPaths.SYSTEM_STATUS
             is SyncMessage.Alert -> WatchRelayPaths.ALERT
             is SyncMessage.CanOtaProgressStatus -> WatchRelayPaths.CANOTA_PROGRESS
+            is SyncMessage.StopRestoredStatus -> WatchRelayPaths.STOP_RESTORED
             is SyncMessage.ReleaseNotice -> WatchRelayPaths.RELEASE_NOTICE
             else -> WatchRelayPaths.SERVER_SECURITY
         }

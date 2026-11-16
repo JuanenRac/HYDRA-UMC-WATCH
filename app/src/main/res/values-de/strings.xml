@@ -170,5 +170,6 @@
     <string name="common_up_to_date">Aktuell</string>
     <string name="common_system_default">Systemstandard</string>
     <string name="common_select_a_robot">Roboter auswählen</string>
+    <string name="stop_restored_line">Server nach Neustart angehalten: ein Administrator muss ihn freigeben</string>
     <string name="release_notice_line">Neue Version verfügbar: %1$s</string>
 </resources>

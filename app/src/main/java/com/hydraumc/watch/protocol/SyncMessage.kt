@@ -182,6 +182,17 @@ sealed class SyncMessage {
     ) : SyncMessage()
 
     /**
+     * Phone -> watch: whether the server is stopped only because it restarted while stopped (the phone read it from the server). It is a line on the
+     * screen and nothing in it can release the stop; [restored] false clears the line. It is not kept: it is shown only while the screen is open.
+     */
+    @Serializable
+    @SerialName("stop_restored_status")
+    data class StopRestoredStatus(
+        val protocolVersion: Int,
+        val restored: Boolean,
+    ) : SyncMessage()
+
+    /**
      * Phone -> watch: a newer release of the apps exists (the phone read the release feed and decided; the watch has no network access). It is shown
      * as a line and nothing in it can download or install anything. [version] is the number of the release, two to four groups of digits.
      */
@@ -273,6 +284,7 @@ fun parseSyncMessage(raw: String): SyncMessage {
             "companion_version_status",
             "server_security_status",
             "canota_progress_status",
+            "stop_restored_status",
             "release_notice",
             "estop_command",
             "alert",
@@ -379,6 +391,11 @@ private fun validateProtocolMessage(message: SyncMessage) {
             }
             if (message.percent != null && message.percent !in 0..100) {
                 throw SyncMessageParseException("flash progress percent must be from 0 to 100")
+            }
+        }
+        is SyncMessage.StopRestoredStatus -> {
+            if (message.protocolVersion != CURRENT_PROTOCOL_VERSION) {
+                throw SyncMessageParseException("unsupported stop notice protocol version ${message.protocolVersion}")
             }
         }
         is SyncMessage.ReleaseNotice -> {
