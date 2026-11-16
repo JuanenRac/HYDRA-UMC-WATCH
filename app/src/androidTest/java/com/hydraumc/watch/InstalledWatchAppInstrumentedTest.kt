@@ -47,7 +47,6 @@ class InstalledWatchAppInstrumentedTest {
     @Test
     fun theAppAsksOnlyForThePermissionsItNeeds() {
         val allowed = setOf(
-            "android.permission.INTERNET",
             "android.permission.RECORD_AUDIO",
             "android.permission.VIBRATE",
             "android.permission.WAKE_LOCK",
