@@ -4,6 +4,7 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The watch app no longer asks for the Internet permission and keeps no backup:** it has no connection of its own (everything goes through the paired phone), so the permission is removed from the manifest and from the list the installed-app test allows, and `allowBackup` is off so the last relayed answer and the release notice do not enter a backup.
 - **The line about a newer release is on by default now:** `updates.notice_enabled` in `watch.cfg` and the built-in default of `WatchConfig` (`releaseNoticeEnabled`) change from off to on, and so does the default of the relay routing. The phone app sends the notice by default, but the watch only took it when its own switch was on too, so with the shipped defaults the line never reached the screen. It stays a switch: `updates.notice_enabled = false` turns it off. The watch is still only a relay of the phone: no new permission, nothing is downloaded or installed, and the line is shown without sound, vibration or notification. The tests that fixed the old default now fix the new one.
 
 
