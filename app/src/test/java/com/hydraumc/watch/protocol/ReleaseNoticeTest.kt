@@ -88,6 +88,11 @@ class ReleaseNoticeTest {
         assertEquals("0.5.2", store.load())
         assertFalse("an older version does not replace a newer one", store.save("0.5.1"))
         assertEquals("0.5.2", store.load())
+        clock += 6_000L
+        assertFalse("the same version does not renew the instant", store.save("0.5.2"))
+        clock += 4_000L
+        assertNull("so the notice still expires three days after it first arrived", store.load())
+        assertTrue(store.save("0.5.2"))
         assertTrue(store.save("0.8.0.1"))
         assertEquals("0.8.0.1", store.load())
         clock += 10_000L

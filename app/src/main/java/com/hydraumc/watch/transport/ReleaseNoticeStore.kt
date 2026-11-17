@@ -19,10 +19,10 @@ class ReleaseNoticeStore(
         require(maxAgeMs > 0) { "maxAgeMs must be positive" }
     }
 
-    /** Remembers [version] unless a newer one is already kept. Returns whether it was kept. */
+    /** Remembers [version] unless a newer or the same one is already kept (the same version does not renew the instant, so the notice still expires). Returns whether it was kept. */
     fun save(version: String): Boolean {
         val kept = load()
-        if (kept != null && compare(version, kept) < 0) return false
+        if (kept != null && compare(version, kept) <= 0) return false
         store.put(KEY, version, now())
         return true
     }

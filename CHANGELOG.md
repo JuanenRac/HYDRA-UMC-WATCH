@@ -4,6 +4,7 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The notice of a newer version is not renewed by the same version:** a notice for the version already kept no longer rewrites its arrival instant, so it expires three days after it first arrived instead of being kept alive by every repeat.
 - **A line on the screen when the server is stopped only because it restarted:** the phone tells whether the stop the server kept across a restart is still waiting for an administrator (a new read-only message, `stop_restored_status`, version 1, on `/hydra-umc/stop-restored/v1`). The watch shows one line in its own language, without sound or vibration, and clears it when the phone says the stop is released or the connection closed. It is shown only while the screen is open: it is not kept, not held for a later screen and not notified. Another version and a flag that is not true or false are refused, and the message is accepted on its own path only. The rules are in the shared contract file with four refused vectors, and the texts are in the eight languages.
 
 - **The note on the release-signature switch is now accurate:** `updates.require_release_signature` in `watch.cfg` is read and tested, but the watch downloads and installs nothing (it has no Internet permission), so the switch has no effect yet; `watch.cfg` now says so instead of describing a refusal that never happens. The checker it will use is unchanged.
