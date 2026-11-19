@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [0.3.5]
+
 - **The notice of a newer version is not renewed by the same version:** a notice for the version already kept no longer rewrites its arrival instant, so it expires three days after it first arrived instead of being kept alive by every repeat.
 - **A line on the screen when the server is stopped only because it restarted:** the phone tells whether the stop the server kept across a restart is still waiting for an administrator (a new read-only message, `stop_restored_status`, version 1, on `/hydra-umc/stop-restored/v1`). The watch shows one line in its own language, without sound or vibration, and clears it when the phone says the stop is released or the connection closed. It is shown only while the screen is open: it is not kept, not held for a later screen and not notified. Another version and a flag that is not true or false are refused, and the message is accepted on its own path only. The rules are in the shared contract file with four refused vectors, and the texts are in the eight languages.
 
@@ -11,6 +13,7 @@ All notable changes to this project are documented here.
 - **The watch app no longer asks for the Internet permission and keeps no backup:** it has no connection of its own (everything goes through the paired phone), so the permission is removed from the manifest and from the list the installed-app test allows, and `allowBackup` is off so the last relayed answer and the release notice do not enter a backup.
 - **The line about a newer release is on by default now:** `updates.notice_enabled` in `watch.cfg` and the built-in default of `WatchConfig` (`releaseNoticeEnabled`) change from off to on, and so does the default of the relay routing. The phone app sends the notice by default, but the watch only took it when its own switch was on too, so with the shipped defaults the line never reached the screen. It stays a switch: `updates.notice_enabled = false` turns it off. The watch is still only a relay of the phone: no new permission, nothing is downloaded or installed, and the line is shown without sound, vibration or notification. The tests that fixed the old default now fix the new one.
 
+- Build version synchronized with `hydra-umc.project.json` and the repository-native version source.
 
 ## [0.3.4]
 
