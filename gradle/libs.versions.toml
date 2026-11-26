@@ -1,5 +1,5 @@
 [versions]
-agp = "9.5.1"
+agp = "9.5.2"
 kotlin = "2.4.21"
 coreKtx = "1.19.1"
 activityCompose = "1.10.1"
@@ -21,9 +21,9 @@ espressoCore = "3.7.0"
 # Real JSON codec for the SERVER<->WATCH sync protocol (protocol/SyncMessage.kt) -
 # an independent pin: kotlinx-serialization has its own version, unrelated to
 # the Kotlin compiler version above.
-kotlinxSerializationJson = "1.12.0"
+kotlinxSerializationJson = "1.13.0"
 playServicesWearable = "20.0.1"
-robolectric = "4.17"
+robolectric = "4.18"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
