@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The README says that the presence heartbeat is passed on:** the relay of the phone and the rule of the server exist, both optional and off by default.
+
 ## [0.3.5]
 
 - **The notice of a newer version is not renewed by the same version:** a notice for the version already kept no longer rewrites its arrival instant, so it expires three days after it first arrived instead of being kept alive by every repeat.
